@@ -1,0 +1,14 @@
+syntax = "proto3";
+package Test;
+
+message Simple {
+	int32 f = 1;
+}
+
+message MapTest {
+	map<string,int32> f = 1;
+}
+
+message ArrayTest {
+	repeated int32 f = 1;
+}

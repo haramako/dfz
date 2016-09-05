@@ -118,7 +118,9 @@ public class ResourceCache: MonoSingleton<ResourceCache> {
 	}
 
 	public static string ExtOfType(Type type){
-		if (type == typeof(Sprite)) {
+		if (type.IsSubclassOf (typeof(ScriptableObject))) {
+			return ".asset";
+		}else if (type == typeof(Sprite)) {
 			return ".png";
 		}else if (type == typeof(Texture2D)) {
 			return ".png";

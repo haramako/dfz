@@ -1,0 +1,748 @@
+syntax = "proto3";
+/**
+ * ドラゴンファング マスターデータ定義
+ */
+package Master;
+
+enum Property {
+	NONE = 0;
+	FIRE = 1;
+	WATER = 2;
+	TREE = 3;
+	LIGHT = 4;
+	DARK = 5;
+}
+
+message PbxHeader {
+	map<int32,int32> int_index = 1;
+	map<string,int32> string_index = 2;
+}
+
+message PresentCommand {
+	message StackItem {
+		int32 id = 1;
+		int32 num = 2;
+	}
+
+	message Fang {
+		int32 card_id = 1;
+		int32 level = 2;
+		int32 num = 3;
+	}
+
+	message Armament {
+		int32 arm_id = 1;
+		int32 level = 2;
+		int32 fixed_hp = 3;
+		int32 fixed_attack = 4;
+		int32 fixed_defense = 5;
+		int32 soul_id0 = 6;
+		int32 soul_level0 = 7;
+		int32 slot_num = 8;
+		int32 num = 9;
+	}
+
+	int32 emerald = 1;
+	int32 gold = 2;
+	int32 scale = 3;
+	repeated StackItem stack_items = 4;
+	repeated Fang cards = 5;
+	repeated Armament arms = 6;
+}
+
+// ファング情報
+message FangTemplate {
+
+	message StackItemBonus {
+		int32 dummy = 1;
+	}
+
+	int32 id = 1;
+	string name = 2;
+	int32 rarity = 3;
+	int32 growth_type = 4;
+	int32 enemy_no = 5;
+	string property = 6; // TODO
+	int32 brave_guage = 7;
+	int32 base_hp = 8;
+	int32 base_attack = 9;
+	int32 base_defense = 10;
+	int32 max_level = 11;
+	int32 max_hp = 12;
+	int32 max_attack = 13;
+	int32 max_defense = 14;
+	int32 burst_hp_rate = 15;
+	int32 skill_id = 16;
+	int32 pskill_id = 17;
+	int32 pvp_skill_id = 18;
+	int32 pvp_soul_id = 19;
+	int32 gold = 20;
+	int32 plus_exp = 21;
+	string serif = 22;
+	int32 cost = 23;
+	int32 burst_cost = 24;
+	bool unuse = 25;
+	repeated string limit_break_type = 26;
+	int32 limit_break_item = 27;
+	int32 default_plus_hp = 28;
+	int32 default_plus_attack = 29;
+	int32 default_plus_defense = 30;
+	string special_text = 31;
+	int32 plus_skill_exp = 32;
+	int32 plus_skill_rarity = 33;
+	bool no_plus_skill_property_bonus = 34;
+	repeated string attribute = 35;
+	map<string,float> stack_item_bonus = 36;
+	map<string,float> drop_stack_item_bonus = 37;
+	string open_at = 38;
+	string special_label = 39;
+	int32 plus_luck = 40;
+
+	int32 weapon_ability_id = 41;
+	int32 shield_ability_id = 42;
+	int32 point = 43;
+
+	string pvp_attribute0 = 44;
+	string pvp_attribute1 = 45;
+	string pvp_attribute2 = 46;
+	string pvp_attribute3 = 47;
+	string pvp_attribute4 = 48;
+	repeated string auto_type = 49;
+}
+
+message ActionSkill {
+	int32 id = 1;
+	string name = 2;
+	string param = 3;
+	string burst_param = 4;
+	int32 base_turn = 5;
+	int32 level_max = 6;
+	int32 skill_level_rate = 7;
+	int32 skill_level_rate2 = 8;
+	string desc = 9;
+	string burst_desc = 10;
+	string desc2 = 11;
+	string burst_desc2 = 12;
+	string memo1 = 13;
+	string memo2 = 14;
+}
+
+message PassiveSkill {
+	int32 id = 1;
+	string name = 2;
+	bool is_json = 3;
+	string type = 4;
+	string param = 5;
+	int32 pow = 6;
+	string burst_param = 7;
+	int32 burst_pow = 8;
+	int32 pvp_soul_no = 9;
+	string desc = 10;
+	string burst_desc = 11;
+	string desc2 = 12;
+	string burst_desc2 = 13;
+	string memo1 = 14;
+	string memo2 = 15;
+}
+
+message PvpSkill {
+	int32 id = 1;
+	string name = 2;
+	string param = 3;
+	int32 charge = 4;
+	int32 charge_turn = 5;
+	string skill_type_icon = 6;
+	string skill_type = 7;
+	string give_target = 8;
+	int32 give_amount = 9;
+	string desc = 10;
+	string desc2 = 11;
+	string memo1 = 12;
+}
+
+message PvpSoul {
+	int32 id = 1;
+	string name = 2;
+	string param = 3;
+	string target = 4;
+	int32 prob = 5;
+	bool is_jewel = 6;
+	string desc = 7;
+	string desc2 = 8;
+	string game_desc = 9;
+}
+
+message PvpAttribute {
+	string id = 1;
+	string name = 2;
+	string desc = 3;
+	string image = 4;
+}
+
+message HomeLevel {
+	int32 level = 1;
+	int32 exp = 2;
+	int32 stamina_max = 3;
+	int32 cost_max = 4;
+	int32 image_base = 5;
+	int32 image_object = 6;
+}
+
+message MonsterLevel {
+	int32 level = 1;
+	int32 exp = 2;
+	int32 dummy = 3; /// サイズ0のデータがあると問題があるため、その対策に入れただけのフィールド
+}
+
+message FangDrop {
+	int32 id = 1;
+	string enemy_id0 = 2;
+	int32 level0 = 3;
+	int32 rate0 = 4;
+	string enemy_id1 = 5;
+	int32 level1 = 6;
+	int32 rate1 = 7;
+	string enemy_id2 = 8;
+	int32 level2 = 9;
+	int32 rate2 = 10;
+	string enemy_id3 = 11;
+	int32 level3 = 12;
+	int32 rate3 = 13;
+	string enemy_id4 = 14;
+	int32 level4 = 15;
+	int32 rate4 = 16;
+}
+
+message LimitBreakType {
+	string id = 1;
+	string name = 2;
+	repeated int32 hp = 3;
+	repeated int32 attack = 4;
+	repeated int32 defense = 5;
+	repeated int32 items0 = 6;
+	repeated int32 items1 = 7;
+	repeated int32 items2 = 8;
+	repeated int32 items3 = 9;
+	repeated int32 items4 = 10;
+	repeated int32 items5 = 11;
+}
+
+message StackItemTemplate {
+	int32 id = 1;
+	string type = 2;
+	string special = 3;
+	int32 param = 4;
+	string name = 5;
+	string desc = 6;
+	int32 order = 7;
+}
+
+message ExchangeShop {
+	int32 id = 1;
+	int32 season = 2;
+	string name = 3;
+	int32 stack_item_id = 4;
+	string desc = 5;
+	string option = 6; 
+}
+
+message ExchangeItem {
+	int32 id = 1;
+	int32 exchange_shop_id = 2;
+	string name = 3;
+	string image = 4;
+	string action = 5;
+	int32 price = 6;
+	int32 limit =  7;
+}
+
+message EmeraldShopItem {
+	string id = 1;
+	string name = 2;
+	string desc = 3;
+	int32 stack_item_id = 4;
+	int32 order = 5;
+	int32 price = 6;
+	int32 require_home_level = 7;
+	string action = 8;
+}
+
+message PackItem {
+	string id = 1;
+	string product_id = 2;
+	string name = 3;
+	string image = 4;
+	int32 price = 5;
+}
+
+message PresentTemplate {
+	string id = 1;
+	string name = 2;
+	string message = 3;
+	string action = 4;
+}
+
+
+message PvpLeague {
+	int32 id = 1;
+	string name = 2;
+}
+
+message PvpGrade {
+	int32 id = 1;
+	string name = 2;
+	int32 plate = 3;
+	int32 promote_point = 4;
+	int32 depromote_point = 5;
+	PresentCommand reward = 6;
+	string reward_desc = 7;
+	int32 matching_up = 8;
+	int32 coin_win = 9;
+	int32 coin_lose = 10;
+}
+
+message PvpUnificationRule {
+	int32 id = 1;
+	string name = 2;
+	string cond = 3;
+	int32 pvp_soul_no = 4;
+	string effect = 5;
+	int32 override_id = 6;
+	bool anywhere = 7;
+}
+
+message QuestTemplate {
+	int32 id = 1;
+	string kind = 2;
+	string title = 3;
+	string desc = 4;
+	string cond_stat = 5;
+	int32 cond_num = 6;
+	int32 require_id = 7;
+	int32 effect = 8;
+	string override_url = 9;
+	bool jump_anytime = 10;
+	PresentCommand reward = 11;
+}
+
+message UserStatTemplate {
+	int32 id = 1;
+	string name = 2;
+	string desc = 3;
+	string url = 4;
+}
+
+message LoginSheet {
+	string id = 1;
+	string name = 2;
+	int32 order = 3;
+	string disabled_at = 4;
+}
+
+message LoginBonus {
+	int32 id = 1;
+	string sheet_id = 2;
+	string message_ = 3;
+	PresentCommand action = 4;
+}
+
+message SpecialCutinOption {
+	string id = 1;
+	string title = 2;
+	string message = 3;
+	string move_to = 4;
+	int32 pose = 5;
+	string next_url = 6;
+	string option_str = 7;
+}
+
+message SoundList {
+	string name = 1;
+	string filename = 2;
+	string volume_type = 3;
+	int32 volume = 4;
+	int32 pitch = 5;
+	bool preload = 6;
+	bool loop = 7;
+	string destroy_type = 8;
+	string overlap_type = 9;
+	bool preload_scene_title = 10;
+	bool preload_scene_home = 11;
+	bool preload_scene_game = 12;
+	bool preload_scene_result = 13;
+	bool preload_scene_pvp = 14;
+}
+
+message Enemy {
+	int32 id = 1;
+	string name = 2;
+	int32 card_id = 3;
+	string race_type = 4;
+	string attribute = 5;
+	string driver_param = 6;
+	int32 hit_point = 7;
+	int32 agility = 8;
+	int32 attack_rate = 9;
+	int32 attack_dice = 10;
+	int32 attack_count = 11;
+	int32 attack_adjust = 12;
+	string attack_sound_name = 13;
+	int32 critical_damage_rate = 14;
+	string enchant_attack_name = 15;
+	int32 enchant_attack_status_rate = 16;
+	string enchant_attack_command = 17;
+	string enchant_attack_sound_name = 18;
+	string skill_attack_name = 19;
+	int32 skill_attack_rate = 20;
+	string skill_attack_command = 21;
+	string skill_attack_sound_name = 22;
+	int32 defense_dice = 23;
+	int32 defense_count = 24;
+	int32 defense_adjust = 25;
+	string defense_sound_name = 26;
+	string enchant_defense_name = 27;
+	int32 enchant_defense_status_rate = 28;
+	string enchant_defense_command = 29;
+	string enchant_defense_sound_name = 30;
+	int32 critical_lots_count = 31;
+	int32 critical_hit_rate = 32;
+	int32 experience = 33;
+	string dead_sound_name = 34;
+	string drop_item255 = 35;
+	string drop_fang255 = 36;
+	string drop_gold = 37;
+	int32 sleep_rate = 38;
+	int32 deepsleep_rate = 39;
+	int32 move_wait_counter = 40;
+	int32 move_additonal_tactical_point = 41;
+	int32 attack_additional_tactical_point = 42;
+	int32 prefab_id = 43;
+	string property = 44;
+	string extra_data = 45;
+	int32 have_item_no = 46;
+}
+
+message Item {
+	int32 id = 1;
+	int32 sort_id = 2;
+	string item_code = 3;
+	string mapchip = 4;
+	string name = 5;
+	string type = 6;
+	string fitting_type = 7;
+	string attribute = 8;
+	string param = 9;
+	int32 attack_adjust = 10;
+	int32 defense_adjust = 11;
+	int32 cirtical_hit_rate = 12;
+	int32 durability = 13;
+	int32 merge_count = 14;
+	int32 rarity = 15;
+	int32 price = 16;
+	string sound_name = 17;
+	bool is_pickup = 18;
+	bool is_swing = 19;
+	bool is_use = 20;
+	bool is_drop = 21;
+	bool is_exclusive = 22;
+	string extra_type = 23;
+	string description = 24;
+	int32 stack_item_id = 25;
+	int32 stack_item_num = 26;
+	int32 dummy_item_name_no = 27;
+	bool is_in_ex_item = 28;
+	bool is_shot = 29;
+}
+
+message ItemName {
+	int32 id = 1;
+	string name = 2;
+}
+
+message ItemNameDict {
+	message List {
+		repeated ItemName list= 1;
+	}
+	map<string,List> dict = 1;
+}
+
+message Trap {
+	int32 id = 1;
+	string trap_code = 3;
+	string name = 2;
+	string driver_name = 4;
+	string driver_parameter = 5;
+	int32 probability = 6;
+	string soundName = 7;
+	// string memo = 8;
+}
+
+message StringData {
+	string id = 1;
+	string text = 2;
+}
+
+message SoloDuel {
+	int32 stage_id = 1;
+	int32 enemy_no = 2;
+	int32 level = 3;
+	int32 fang_id = 4;
+	int32 hp = 5;
+	int32 attack = 6;
+	int32 defense = 7;
+	int32 exp = 8;
+}
+
+message RoomInfo {
+	string id = 1;
+	int32 width = 2;
+	int32 height = 3;
+	int32 attribute = 4;
+	int32 direction = 5;
+}
+
+message EnemyAnim {
+	int32 id = 1;
+	int32 attack_distance_id = 2;
+	int32 attack_anim_id = 3;
+	int32 special_distance_id = 4;
+	int32 special_anim_id = 5;
+	float duration = 6;
+	int32 height_offset = 7;
+}
+
+message EnemyAnimDistance {
+	int32 id = 1;
+	repeated int32 table = 2;
+}
+
+message EnemyAnimSprite {
+	int32 id = 1;
+	repeated string table = 2;
+}
+
+message ArmamentTemplate {
+	int32 id = 1;
+	string name = 2;
+	int32 rarity = 3;
+	string kind = 4;
+	string property = 5;
+	int32 max_level = 6;
+	int32 base_hp = 7;
+	int32 base_attack = 8;
+	int32 base_defense = 9;
+	string soul_pattern = 10;
+	int32 open_slot_rate = 11;
+	int32 point = 12;
+	int32 gold = 13;
+	int32 status_distribute = 14;
+	int32 image_id = 15;
+	string hit_effect = 16;
+}
+
+message AbilityTemplate {
+
+	enum Special {
+		NONE_TYPE = 0; // C++用コード生成のワーニング対策のためユニークな名前にしている
+		// 攻撃
+		ATTACK_UP = 1;     /// 攻撃属性(5属性／5種族) 割合
+		ON_ATTACK = 2;     /// 攻撃した時(状態異常)
+		ON_KILLED = 3;     /// 攻撃して倒した時(回復)
+		ATTACK_UP_ABS = 4; /// 攻撃属性(5属性／5種族) 即値
+		// 防御
+		DEFENSE_UP = 11;      /// 防御属性(5属性／5種族) 割合
+		GUARD = 12;           /// 攻撃される時
+		PROTECT = 13;         /// 攻撃された時(状態異常)
+		ON_DAMAGE = 14;       /// 攻撃されてダメージを受けた時(回復)
+		DEFENSE_UP_ABS = 15; /// 防御属性(5属性／5種族) 即値
+	}
+
+	enum Param {
+		NONE_TARGET = 0; // C++用コード生成のワーニング対策のためユニークな名前にしている
+		// 5属性
+		FIRE = 1;
+		WATER = 2;
+		TREE = 3;
+		LIGHT = 4;
+		DARK = 5;
+		// 5種族
+		DEMON = 6;
+		GOD = 7;
+		DEMIHUMAN = 8;
+		DRAGON = 9;
+		SPIRIT = 10;
+		// 回復
+		HEAL = 11;
+		BURST = 12;
+		CHARGE_SKILLL = 13;
+		// 状態異常
+		SLEEP = 14;
+		CONFUSE = 15;
+		BLIND = 16;
+		BIND = 17;
+		POISON = 18;
+		ACID = 19;
+		SLOW = 20;
+		SLEEP_PARALYSIS = 21;
+		ALL = 22;
+	}
+
+	int32 id = 1;
+	string name = 2;
+	int32 rarity = 3;
+	string type = 4;
+	float base_num = 7;
+	float max_num = 8;
+	int32 max_level = 9;
+	string desc = 10;
+	string desc2 = 11;
+	Special special = 12;
+	Param param = 13;
+	string log_text_id = 14;
+	int32 turn = 15;
+	string json = 16;
+	string kind = 17;
+}
+
+// アニメーションデータ
+message MapAnimation {
+	message Anim {
+		repeated int32 items = 1;
+	}
+	string id = 1;
+	map<int32,Anim> animation = 2;
+	map<int32,Anim> eventAnimation = 3;
+}
+
+// Mapデータのインデックス
+message MapIndex {
+	int32 stage_id = 1;
+	repeated string filename = 2;
+}
+
+message AreaData {
+	int32 id = 1;
+	string name = 2;
+	int32 max_dungeon = 3;
+	int32 start_dungeon_id = 4;
+	string property = 5;
+	string kind = 6;
+	int32 stack_item_id = 7;
+	int32 unlock_stack_item_id = 8;
+	int32 unlock_stack_item_num = 9;
+	int32 require_stack_item_id = 10;
+	int32 unlock_time = 11;
+	int32 unlock_home_level = 12;
+	int32 exchange_id = 13;
+	string info_url = 14;
+	int32 banner_height = 15;
+	int32 season = 16;
+}
+
+message DungeonData {
+	int32 id = 1;
+	string description = 2;
+	int32 next_dungeon_id = 3;
+	int32 max_stage = 4;
+	int32 start_stage_id = 5;
+	string property = 6;
+	int32 stamina = 7;
+	int32 exp = 8;
+	int32 gold_rate = 9;
+	int32 step_rate = 10;
+	int32 burst_rate = 11;
+	int32 max_gold = 12;
+	int32 max_exp = 13;
+	int32 difficulty = 14;
+	int32 recommend_level = 15;
+	int32 pvp_unification_type = 16;
+	string mission = 17;
+	bool no_continue = 18;
+	string stair = 19;
+	int32 satiety = 20;
+	int32 max_satiety = 21;
+	string button_name = 22;
+
+	/*
+	int32 box_treasure_id;
+	int32 bag_treasure_id;
+	int32 escape_box_treasure_id;
+	int32 solo_duel_treasure_id;
+	string pvp_type;
+	*/
+}
+
+message StageData {
+	int32 id = 1;
+	int32 dungeon_id = 2;
+	int32 floor_no = 3;
+	int32 enemy_set_id = 4;
+	int32 item_set_id = 5;
+	int32 trap_set_id = 6;
+	int32 goal_set_id = 7;
+	int32 goal_count = 8;
+	int32 mask_type = 9;
+	string next_stage_param = 10;
+	string stage_title = 11;
+	string driver_name = 12;
+	string driver_param = 13;
+	string fixed_room_group_id = 14;
+	string random_room_group_id = 15;
+	string seeds = 16;
+	string base_name = 17;
+	string mapchip_name = 18;
+	string animation_name = 19;
+	string texture_name = 20;
+	string bgm_name = 21;
+	string step_sound_name = 22;
+}
+
+message RoomData {
+	int32 group_id = 1;
+	string tmx_file_name = 2;
+	int32 enemy_lots_count = 3;
+	int32 item_lots_count = 4;
+	int32 trap_lots_count = 5;
+	int32 width = 6;
+	int32 height = 7;
+	string event_command = 8;
+	int32 direction = 9;
+	int32 attribute = 10;
+}
+
+/// ゴールセットデータ
+message GoalSetData {
+	int32 id = 1;
+	repeated string params = 2; /// 各要素(A-Jの１０個まであり得る)
+}
+
+/// セットデータの１要素.
+message StageSetItem {
+	/**
+	 * IDと付加要素を含めた文字列.
+	 * エネミーセットの場合は、"ID" or "ID:倍率"のいずれか形式,
+	 * アイテムセットの場合は、"ID" or "ID,3" or "ID,3~5" のいずれか形式
+	 */
+	string id = 1;
+	int32 num = 2; /// 出現確率
+}
+
+/// エネミー、アイテム、トラップのセットデータ.
+message StageSetList {
+	int32 total = 1; /// 出現確率の分母
+	repeated StageSetItem items = 2; /// 各要素
+}
+
+/**
+ * エネミー、アイテム、トラップのセットデータ.
+ *
+ * 一つのステージにだいたい対応する.
+ *
+ * それぞれの*_setsがA~Jまでの最大１０個のセットデータを格納する。（ない場合は、１０個以下の場合がある）
+ */
+message StageSetData {
+	int32 id = 1;
+	repeated StageSetList enemy_sets = 2; /// エネミーセット(A=0 .. J=9)
+	repeated StageSetList item_sets = 3; /// アイテムセット(A=0 .. J=9)
+	repeated StageSetList trap_sets = 4; /// トラップセット(A=0 .. J=9)
+}

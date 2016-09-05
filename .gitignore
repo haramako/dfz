@@ -57,7 +57,7 @@ Old-AssetBundles
 NewAssetBundles
 NewAssetTextures
 iOS_Xcode7
-/client/AssetBundles
+/Client/AssetBundles
 
 #3DS Build
 /*.cci

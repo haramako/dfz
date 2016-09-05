@@ -6,6 +6,8 @@ using System.Linq;
 using Master;
 using Ionic.Zlib;
 
+#if false
+
 public class PbxFile {
 
 	public string Filename { get; private set; }
@@ -26,9 +28,9 @@ public class PbxFile {
 			var headerSize = r.ReadByte ();
 			r.ReadBytes (headerSize); // 読み飛ばすだけ
 			var indexSize = r.ReadInt32();
-			var pbx = Master.PbxHeader.CreateBuilder ().MergeFrom (new PbFile.LimitedInputStream (file, indexSize)).Build ();
-			intIndex = pbx.IntIndexList.ToDictionary (i => i.Key, i => i.Value);
-			stringIndex = pbx.StringIndexList.ToDictionary (i => i.Key, i => i.Value);
+			var pbx = Master.PbxHeader.ParseFrom (new PbFile.LimitedInputStream (file, indexSize));
+			intIndex = pbx.IntIndex.ToDictionary (i => i.Key, i => i.Value);
+			stringIndex = pbx.StringIndex.ToDictionary (i => i.Key, i => i.Value);
 			dataOrigin = 1 + 1 + headerSize + 4 + indexSize; // magic(1byte) + headerSize(1byte) + header + indexSize(4byte) + index
 		}
 	}
@@ -65,3 +67,4 @@ public class PbxFile {
 	}
 
 }
+#endif

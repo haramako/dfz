@@ -5,44 +5,6 @@ using System.Collections.Generic;
 namespace Rogue
 {
 
-	public class CellKind {
-		public int Id;
-		public int Sprite;
-		public bool Walkable;
-		public bool Flyable;
-		public CellKind(int id, int sprite, bool walkable, bool flyable){
-			Id = id;
-			Sprite = sprite;
-			Walkable = walkable;
-			Flyable = flyable;
-		}
-
-		static CellKind[] list = new CellKind[]{ 
-			new CellKind(0,-1,false, false), 
-			new CellKind(1,0, true, true ),
-			new CellKind(2,39, false, false ),
-			new CellKind(3,21,true,true),
-		};
-
-		public static CellKind Find(int id){
-			return list[id];
-		}
-
-		static CellKind(){
-			list = new CellKind[100];
-			for (int i = 0; i < list.Length; i++) {
-				if (i == 0) {
-					list [i] = new CellKind (i, -1, false, false);
-				} else if ( i<20 ){
-					list [i] = new CellKind (i, i, true, true);
-				}else{
-					list [i] = new CellKind (i, i, false, false);
-				}
-			}
-		}
-
-	}
-
 	public enum CellStatusType {
 		None,
 		Fire,
@@ -69,9 +31,22 @@ namespace Rogue
 	}
 	
 	public class Floor {
-		public CellKind Kind;
+		public int Val;
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
+
+		public bool Walkable {
+			get {
+				return (Val == 1);
+			}
+		}
+
+		public bool Flyable {
+			get {
+				return (Val == 1);
+			}
+		}
+
 	}
 
 	public class Map
@@ -88,10 +63,10 @@ namespace Rogue
 		{
 			Width = width;
 			Height = height;
-			NullFloor = new Floor(){ Kind= CellKind.Find(0) };
+			NullFloor = new Floor (){ Val = 0 };
 			Data = new Floor[Width * Height];
 			for (int i = 0; i < Width * Height; i++) {
-				Data [i] = new Floor (){ Kind = CellKind.Find (1) };
+				Data [i] = new Floor (){ Val = 0 };
 			}
 			PathFinder = new PathFinder (Width, Height);
 		}
@@ -115,7 +90,7 @@ namespace Rogue
 			var sb = new StringBuilder ();
 			for (int y = 0; y < Height; y++) {
 				for (int x = 0; x < Width; x++) {
-					sb.AppendFormat ("{0},", GetCell(x, y).Kind.Id);
+					sb.AppendFormat ("{0},", GetCell(x, y).Val);
 				}
 				sb.AppendLine ();
 			}
@@ -176,26 +151,26 @@ namespace Rogue
 		}
 
 		public bool FloorIsWalkable(Point p){
-			return GetCell (p).Kind.Walkable;
+			return GetCell (p).Walkable;
 		}
 
 		public bool FloorIsFlyable(Point p){
-			return GetCell (p).Kind.Flyable;
+			return GetCell (p).Flyable;
 		}
 
 		public bool FloorIsWalkableNow(Point p) { 
 			var cell = GetCell (p);
-			return cell.Kind.Walkable && cell.Character == null;
+			return cell.Walkable && cell.Character == null;
 		}
 
 		public bool FloorIsFlyableNow(Point p) { 
 			var cell = GetCell (p);
-			return cell.Kind.Flyable && cell.Character == null;
+			return cell.Flyable && cell.Character == null;
 		}
 
 		public bool FloorIsRoom(Point p) { 
 			var cell = GetCell (p);
-			return cell.Kind.Walkable && cell.Character == null;
+			return cell.Walkable && cell.Character == null;
 		}
 
 		/// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Master;
 
 namespace Rogue
 {
@@ -43,7 +44,7 @@ namespace Rogue
 		
 		public Game ()
 		{
-			Map = new Map (20, 20);
+			Map = new Map (32, 32);
 			State = GameState.TurnStart;
 			TurnNum = 0;
 
@@ -104,25 +105,24 @@ namespace Rogue
             }
 		}
 
-        public void Init()
+        public void Init(Stage stage)
         {
-            var atlas = new int[] { 1, 2, 3, 168, 174, 210, 211 };
-            for ( int i=0; i<20; i++)
-            {
-                Point pos;
-                while (true)
-                {
-                    pos = new Point(UnityEngine.Random.Range(8, 20), UnityEngine.Random.Range(8, 20));
-                    if (Map[pos].Character == null) break;
-                }
-                var c = new Character();
-                c.Id = i;
-                c.AtlasId = atlas[UnityEngine.Random.Range(0, atlas.Length - 1)];
-                if (Map[pos].Character == null)
-                {
-                    Map.AddCharacter(c, pos);
-                }
-            }
+			Map = new Map (stage.Width, stage.Height);
+			for (int x = 0; x < stage.Width; x++) {
+				for (int y = 0; y < stage.Height; y++) {
+					Map [x, y].Val = stage.Tiles [x + y * stage.Width];
+				}
+			}
+
+			var atlas = new int[] { 1, 2, 3, 168, 174, 210, 211 };
+			int i = 0;
+			foreach (var sc in stage.Characters) {
+				var c = new Character();
+				c.Id = i++;
+				c.AtlasId = atlas[UnityEngine.Random.Range(0, atlas.Length - 1)];
+				Map.AddCharacter(c, new Point(sc.X,	sc.Y));
+			}
+				
         }
 
 		public void DoTurnStart(){
@@ -166,11 +166,7 @@ namespace Rogue
 					if( ch != null ){
 						sb.AppendFormat ("{0} ", ch.Name[0]);
 					}else{
-						if (Map [x, y].Kind.Id == 0) {
-							sb.AppendFormat (". ", Map [x, y].Kind.Id);
-						} else {
-							sb.AppendFormat ("{0} ", Map [x, y].Kind.Id);
-						}
+						sb.AppendFormat ("{0} ", Map [x, y].Val);
 					}
 				}
 				sb.AppendLine ();

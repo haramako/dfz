@@ -35,11 +35,11 @@ public class CfsManager : MonoBehaviour {
 		Cfs = cfs;
 	}
 
-	public void DownloadIndex(){
-		StartCoroutine (downloadIndexCoroutine());
+	public void DownloadIndex(Action callback){
+		StartCoroutine (downloadIndexCoroutine(callback));
 	}
 
-	IEnumerator downloadIndexCoroutine(){
+	IEnumerator downloadIndexCoroutine(Action callback){
 		Logger.Log ("Cfs", "Cfs: start download index");
 		if (State != CfsState.None) {
 			throw new InvalidOperationException ("Invalid state " + State);
@@ -66,13 +66,15 @@ public class CfsManager : MonoBehaviour {
 		}
 		Cfs.WriteBucket (hash, www.bytes);
 		State = CfsState.DownloadedIndex;
+
+		callback ();
 	}
 
 	/// <summary>
 	/// ファイルをダウンロードする
 	/// </summary>
 	/// <param name="files">Files.</param>
-	public void Download( IEnumerable<string> files){
+	public void Download( IEnumerable<string> files, Action callback = null){
 		Logger.Log ("Cfs", "start downloading ");
 
 		float start = Time.time;
@@ -103,6 +105,9 @@ public class CfsManager : MonoBehaviour {
 		queue_.Add( new DownloadInfo(){ 
 			Callback = (info)=>{
 				Logger.Log ("Cfs", string.Format("download finished {3:0.0} sec, all={0}, cached={1}, downloaded={2}", all, cached, downloaded, Time.time-start));
+				if( callback != null ){
+					callback();
+				}
 			}
 		});
 	}

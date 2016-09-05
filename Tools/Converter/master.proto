@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+/**
+ * マスターデータ定義
+ */
+package Master;
+
+message PbxHeader {
+	map<int32,int32> int_index = 1;
+	map<string,int32> string_index = 2;
+}
+
+message CharacterTemplate {
+	int32 id = 1;
+	string name = 2;
+	int32 image = 3;
+	int32 hp = 4;
+	int32 attack = 5;
+	int32 defense = 6;
+}
+
+message StageCharacter {
+	int32 x = 1;
+	int32 y = 2;
+	string name = 3;
+	int32 character_id = 4;
+	int32 level = 5;
+}
+
+message Stage {
+	int32 id = 1;
+	int32 width = 2;
+	int32 height = 3;
+	string name = 4;
+	string field_name = 5;
+	repeated int32 tiles = 6;
+	repeated StageCharacter characters = 7;
+}

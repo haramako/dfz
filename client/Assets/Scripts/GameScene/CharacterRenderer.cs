@@ -14,9 +14,14 @@ public enum CharacterRendererPose {
 	Special,
 }
 
+[ExecuteInEditMode]
 public class CharacterRenderer : MonoBehaviour {
 
-	public string AtlasName;
+	[SerializeField]
+	public int DirInt { get { return (int)Dir; } set { Dir = (Direction)value; } }
+
+	public SpriteSet SpriteSet;
+	//public string AtlasName;
 	public Direction Dir;
 
 	public CharacterRendererState State;
@@ -30,15 +35,20 @@ public class CharacterRenderer : MonoBehaviour {
 
 	void Awake(){
 		var spriteObj = new GameObject ();
+		spriteObj.hideFlags = HideFlags.HideAndDontSave;
 		sprite = spriteObj.AddComponent<SpriteRenderer> ();
 		spriteObj.AddComponent<SimpleBillboard> ();
 		spriteObj.transform.SetParent (this.transform, false);
 		spriteObj.transform.localPosition = BasePos;
 		sprite.sortingLayerID = SortingLayer.NameToID ("Character");
-		if (AtlasName != null) redraw ();
+		redraw ();
 	}
 
 	void Update(){
+		if (SpriteSet == null) {
+			return;
+		}
+
         var anim = Mathf.FloorToInt(Time.time * 4) % 2 + 1;
         var imgNum = RotateTable [(int)Dir.Rotate(5)];
 		string spriteName = "";
@@ -59,8 +69,7 @@ public class CharacterRenderer : MonoBehaviour {
 			throw new System.Exception ("Invalid pose " + Pose);
 		}
 
-		var spr = ResourceCache.LoadSync<Sprite> (AtlasName + "$" + spriteName);
-		sprite.sprite = spr;
+		sprite.sprite = SpriteSet.Find(spriteName);
 		sprite.flipX = FlipTable [(int)Dir.Rotate(5)];
 
 		switch( State ){
@@ -74,6 +83,9 @@ public class CharacterRenderer : MonoBehaviour {
 	}
 
 	void redraw(){
+		if (SpriteSet == null) {
+			return;
+		}
 		var layer = LayerMask.NameToLayer("MapObject");
 		sprite.gameObject.layer = layer;
 	}

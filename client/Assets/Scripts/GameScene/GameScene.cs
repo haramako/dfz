@@ -19,6 +19,7 @@ public class GameScene : MonoBehaviour {
 
 	public Terrain Terrain;
 	public MeshRenderer TerrainGridMesh;
+	public TerrainGrid TerrainGridNormal;
     public TerrainGrid TerrainGridActive;
 	public GameObject CameraTarget;
 	public Camera MainCamera;
@@ -39,15 +40,23 @@ public class GameScene : MonoBehaviour {
     Mode mode;
 
 	void Start(){
+		var stage = G.Stages [0];
+		var sm = new int[stage.Width,stage.Height];
+		for( int i=0; i< stage.Tiles.Count; i++){
+			sm[i%stage.Width,i/stage.Width] = (stage.Tiles[i] == 1)?1:0;
+		}
 
         mode = Mode.None;
+		TerrainGridNormal.StatMap = sm;
+		TerrainGridActive.gameObject.SetActive (true);
+		TerrainGridActive.StatMap = new int[stage.Width, stage.Height];
         TerrainGridActive.SetActiveGrids(new Point[0]);
         FocusToPoint = CameraTarget.transform.localPosition;
         CameraDistanceTo = -20f;
 		ActionButtons.SetActive (false);
 
         Game = new Game();
-        Game.Init();
+		Game.Init(stage);
         RedrawAll();
 
         Game.StartThread();
@@ -164,8 +173,14 @@ public class GameScene : MonoBehaviour {
 		
 	// 高さを取得する
 	public float GetTerrainHeight(Vector3 pos){
-		var data = Terrain.terrainData;
-		return data.GetInterpolatedHeight (pos.x / data.size.x, pos.z / data.size.z);
+		pos.y = 1000;
+		var ray = new Ray (pos, Vector3.down);
+		RaycastHit hit;
+		if (Physics.Raycast (ray, out hit)) {
+			return hit.point.y;
+		} else {
+			return 0;
+		}
 	}
 
 	// スクリーン座標から、マス目の位置を取得する
@@ -210,7 +225,9 @@ public class GameScene : MonoBehaviour {
         {
             cr = Instantiate(CharacterBase);
             cr.name = ch.Name + ":" + ch.Id;
-            cr.AtlasName = string.Format("Enemy{0:0000}", ch.AtlasId);
+			ResourceCache.Load<SpriteSet> (string.Format ("Enemy{0:0000}", ch.AtlasId)).Done (ss => {
+				cr.SpriteSet = ss;
+			});
             Characters[ch.Id] = cr;
         }
         return cr;
