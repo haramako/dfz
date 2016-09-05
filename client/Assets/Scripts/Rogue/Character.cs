@@ -68,7 +68,7 @@ namespace Rogue
 		}
 
 		public bool IsAttackableTo(Character target){
-			return target != null && game.Map.StepFlyable() (Position, target.Position) <= 1;
+			return target != null && game.Map.StepFlyable(20) (Position, target.Position) <= 1;
 		}
 
 		public override string ToString(){

@@ -56,7 +56,8 @@ public class GameScene : MonoBehaviour {
 		ActionButtons.SetActive (false);
 
         Game = new Game();
-		Game.Init(stage);
+		TerrainGridNormal.Refresh ();
+		Game.Init(stage, TerrainGridNormal.HeightMap);
         RedrawAll();
 
         Game.StartThread();
@@ -129,7 +130,7 @@ public class GameScene : MonoBehaviour {
 						Debug.Log ("from" + curCharacter.Position + " to " + hit);
 						Point[] path = null;
 						Game.Map.TemporaryOpen (curCharacter.Position, () => {
-							path = Game.Map.PathFinder.FindPath (curPosition, hit, 6, Game.Map.StepWalkableNow ()).ToArray ();
+							path = Game.Map.PathFinder.FindPath (curPosition, hit, 6, Game.Map.StepWalkableNow (20)).ToArray ();
 						});
 						if (path != null) {
 							curPosition = hit;
@@ -281,7 +282,7 @@ public class GameScene : MonoBehaviour {
         var cr = GetCharacterRenderer(ch);
         Point[] range = null;
         Game.Map.TemporaryOpen(ch.Position, () => { 
-			range = Game.Map.PathFinder.FindMoveRange(ch.Position, 3, Game.Map.StepWalkableNow()).ToArray(); 
+			range = Game.Map.PathFinder.FindMoveRange(ch.Position, 3, Game.Map.StepWalkableNow(20)).ToArray(); 
 			List<Point> atks = new List<Point>();
 			foreach (var pos in range) {
 				foreach( var dir in DirectionUtil.All4 ){
@@ -377,7 +378,7 @@ public class GameScene : MonoBehaviour {
 		FocusTo(cr.transform.position);
 
 		Game.Map.TemporaryOpen (curCharacter.Position, () => {
-			curPath = Game.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 3, Game.Map.StepWalkableNow ()).ToArray ();
+			curPath = Game.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 3, Game.Map.StepWalkableNow (20)).ToArray ();
 		});
 	}
 

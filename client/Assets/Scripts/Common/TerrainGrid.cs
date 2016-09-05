@@ -11,6 +11,7 @@ public class TerrainGrid : MonoBehaviour {
 	public float GridSize = 1;
 
 	public int[,] StatMap;
+	public float[,] HeightMap { get { return heightMap; } }
 
 	MeshFilter meshFilter;
 	float[,] heightMap;

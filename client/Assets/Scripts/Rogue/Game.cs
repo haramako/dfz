@@ -44,10 +44,8 @@ namespace Rogue
 		
 		public Game ()
 		{
-			Map = new Map (32, 32);
 			State = GameState.TurnStart;
 			TurnNum = 0;
-
 		}
 
         public void StartThread()
@@ -105,12 +103,13 @@ namespace Rogue
             }
 		}
 
-        public void Init(Stage stage)
+		public void Init(Stage stage, float[,] heightMap)
         {
 			Map = new Map (stage.Width, stage.Height);
 			for (int x = 0; x < stage.Width; x++) {
 				for (int y = 0; y < stage.Height; y++) {
 					Map [x, y].Val = stage.Tiles [x + y * stage.Width];
+					Map [x, y].Height = (int)(heightMap [x, y] * 10);
 				}
 			}
 

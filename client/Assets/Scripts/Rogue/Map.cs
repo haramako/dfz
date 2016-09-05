@@ -32,6 +32,7 @@ namespace Rogue
 	
 	public class Floor {
 		public int Val;
+		public int Height; // 高さ * 10
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
 
@@ -180,15 +181,21 @@ namespace Rogue
 		/// <returns>合成された PathFinder.Stepable デリゲート</returns>
 		/// <param name="predicate">移動可能かどうかを示す、Floor***able系の関数</param>
 		/// <param name="slantAnywhere">ナナメの場合に壁にじゃまされない場合はtrue</param>
-		public PathFinder.Stepable MakeWalkableFunc(Predicate<Point> predicate, bool slantAnywhere = false) {
+		public PathFinder.Stepable MakeWalkableFunc(Predicate<Point> predicate, int allowHeight = 10) {
 			return (from,to)=>{
-				if( !slantAnywhere ){
-					if( from.X != to.X && from.Y != to.Y ){
-                        return 9999;
-						// if( !FloorIsFlyable(new Point(from.X, to.Y)) || !FloorIsFlyable(new Point(to.X, from.Y))) return 9999;
+				if( predicate(to) ){
+					// 移動可能
+					if( this[to].Height <= this[from].Height + allowHeight ){
+						// 高さOK
+						return 1;
+					}else{
+						// 高さNG
+						return 9999;
 					}
+				}else{
+					// 移動不可
+					return 9999;
 				}
-				return predicate(to)?1:9999;
 			};
 		}
 
@@ -207,13 +214,10 @@ namespace Rogue
         }
 
         // 隣接する２マスの経路が、移動可能かどうかを表すdelegateを返す( 挙動は、対応するFloor***able()関数を参照 )
-        public PathFinder.Stepable StepWalkable() { return MakeWalkableFunc(FloorIsWalkable); }
-		public PathFinder.Stepable StepFlyable() { return MakeWalkableFunc(FloorIsFlyable); }
-		public PathFinder.Stepable StepWalkableNow() { return MakeWalkableFunc(FloorIsWalkableNow); }
-		public PathFinder.Stepable StepFlyableNow()  { return MakeWalkableFunc(FloorIsFlyableNow); }
-		// 投擲が通過可能かどうか(ナナメ方向の邪魔判定が違う)
-		public PathFinder.Stepable StepThrowable() { return MakeWalkableFunc(FloorIsFlyable, true ); }
-		public PathFinder.Stepable StepThrowableNow() { return MakeWalkableFunc(FloorIsFlyableNow, true ); }
+		public PathFinder.Stepable StepWalkable(int allowHeight) { return MakeWalkableFunc(FloorIsWalkable, allowHeight); }
+		public PathFinder.Stepable StepFlyable(int allowHeight) { return MakeWalkableFunc(FloorIsFlyable, allowHeight); }
+		public PathFinder.Stepable StepWalkableNow(int allowHeight) { return MakeWalkableFunc(FloorIsWalkableNow, allowHeight); }
+		public PathFinder.Stepable StepFlyableNow(int allowHeight)  { return MakeWalkableFunc(FloorIsFlyableNow, allowHeight); }
 	}
 	
 }
