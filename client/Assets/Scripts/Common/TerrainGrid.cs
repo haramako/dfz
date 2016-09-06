@@ -118,7 +118,7 @@ public class TerrainGrid : MonoBehaviour {
         }
 	}
 
-    public void SetActiveGrids(Rogue.Point[] points_)
+    public void SetActiveGrids(Game.Point[] points_)
     {
 		for (int x = 0; x < StatMap.GetLength (0); x++) {
 			for (int y = 0; y < StatMap.GetLength (1); y++) {

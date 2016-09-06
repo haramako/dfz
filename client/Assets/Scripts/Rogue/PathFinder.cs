@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Rogue {
+namespace Game {
 
 	/// <summary>
 	/// 経路選択エンジン
@@ -59,7 +59,7 @@ namespace Rogue {
 			while( stackPos > 0 ){
 				Point cur = stack[--stackPos];
 				int curRest = rest[cur.Y*Width+cur.X];
-				foreach( Direction dir in DirectionUtil.All ){
+				foreach( Direction dir in DirectionUtil.All4 ){
 					Point dirPos = dir.ToPos ();
 					Point moveTo = new Point(cur.X + dirPos.X, cur.Y + dirPos.Y);
 					var cost = isWalkable (cur, moveTo);

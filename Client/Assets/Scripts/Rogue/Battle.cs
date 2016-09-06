@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using Master;
 
-namespace Rogue
+namespace Game
 {
 	public class GameOverException : Exception {}
 
@@ -27,9 +27,9 @@ namespace Rogue
         }
     }
 
-    public class Game
+    public class Battle
 	{
-        public static Game Instance;
+        public static Battle Instance;
 
 		public Map Map { get; private set; }
 		public GameState State { get; private set; }
@@ -42,7 +42,7 @@ namespace Rogue
 			UnityEngine.Debug.Log (obj);
 		}
 		
-		public Game ()
+		public Battle ()
 		{
 			State = GameState.TurnStart;
 			TurnNum = 0;
@@ -116,7 +116,7 @@ namespace Rogue
 			var atlas = new int[] { 1, 2, 3, 168, 174, 210, 211 };
 			int i = 0;
 			foreach (var sc in stage.Characters) {
-				var c = new Character();
+				var c = Character.CreateInstance();
 				c.Id = i++;
 				c.AtlasId = atlas[UnityEngine.Random.Range(0, atlas.Length - 1)];
 				Map.AddCharacter(c, new Point(sc.X,	sc.Y));

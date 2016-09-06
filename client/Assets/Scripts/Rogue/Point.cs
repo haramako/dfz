@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rogue
+namespace Game
 {
     /// <summary>
     /// 点を表すクラス.

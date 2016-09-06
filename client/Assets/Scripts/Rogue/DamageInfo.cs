@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Rogue {
+namespace Game {
 	public class DamageInfo {
 	}
 }

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+/**
+ * ゲーム内データ
+ */
+package Game;
+
+import "master.proto";
+
+enum CharacterType {
+	Player = 0;
+	Enemy = 1;
+}
+
+message Character {
+	int32 id = 1;
+	
+	int32 hp = 2;
+	int32 x = 13;
+	int32 y = 14;
+	int32 saved_dir = 15; 
+
+	CharacterType type = 18;
+	string name = 16;
+	int32 team = 17;
+	int32 atlas_id = 19;
+	int32 attack = 3;
+	int32 defense = 4;
+	int32 max_hp = 12;
+	int32 move = 5;
+	int32 jump_height = 6;
+	int32 attribute = 7;
+	int32 race = 8;
+	Master.Skill attack_skill = 9;
+	repeated Master.Skill skills = 10;
+	repeated Master.Ability abilities = 11;
+}
+

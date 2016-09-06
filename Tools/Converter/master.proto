@@ -10,6 +10,19 @@ message PbxHeader {
 	map<string,int32> string_index = 2;
 }
 
+//===========================================
+// キャラクター
+//===========================================
+
+message Skill {
+	int32 type = 1;
+	int32 power = 2;
+}
+
+message Ability {
+	int32 type = 1;
+}
+
 message CharacterTemplate {
 	int32 id = 1;
 	string name = 2;
@@ -18,6 +31,10 @@ message CharacterTemplate {
 	int32 attack = 5;
 	int32 defense = 6;
 }
+
+//===========================================
+// ステージ
+//===========================================
 
 message StageCharacter {
 	int32 x = 1;
@@ -36,3 +53,5 @@ message Stage {
 	repeated int32 tiles = 6;
 	repeated StageCharacter characters = 7;
 }
+
+

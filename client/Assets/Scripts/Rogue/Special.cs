@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System.Reflection;
 
-namespace Rogue {
+namespace Game {
 
 	/// <summary>
 	/// 杖、薬・スキル・敵の能力等の特殊能力を処理するクラス

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Rogue;
+using Game;
 #if false
 
 namespace Rogue.AStar {

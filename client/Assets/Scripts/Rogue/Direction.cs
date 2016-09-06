@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Rogue {
+namespace Game {
 
 	public enum Direction {
 		None,

@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 
-namespace Rogue
+namespace Game
 {
 
 	public enum CellStatusType {
@@ -38,13 +38,13 @@ namespace Rogue
 
 		public bool Walkable {
 			get {
-				return (Val == 1);
+				return (Val != 0 && Val != 2 );
 			}
 		}
 
 		public bool Flyable {
 			get {
-				return (Val == 1);
+				return (Val != 0 && Val != 2);
 			}
 		}
 

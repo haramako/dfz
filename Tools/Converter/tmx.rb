@@ -32,7 +32,7 @@ class Tmx
     map.each_element('objectgroup') do |group|
       group.each_element('object') do |obj|
         x = obj.a['x'].to_i / 32
-        y = @height - 1 - obj.a['y'].to_i / 32
+        y = @height - obj.a['y'].to_i / 32
         name = obj.a['name']
         @objects << Obj.new(x, y, name)
       end

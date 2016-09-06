@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RSG;
-using Rogue;
+using Game;
 using UnityEngine.UI;
 
 public class GameScene : MonoBehaviour {
@@ -35,7 +35,7 @@ public class GameScene : MonoBehaviour {
 
     public new Dictionary<int, CharacterRenderer> Characters = new Dictionary<int, CharacterRenderer>();
 
-    public Game Game { get; private set; }
+    public Battle Battle { get; private set; }
 
     Mode mode;
 
@@ -43,7 +43,7 @@ public class GameScene : MonoBehaviour {
 		var stage = G.Stages [0];
 		var sm = new int[stage.Width,stage.Height];
 		for( int i=0; i< stage.Tiles.Count; i++){
-			sm[i%stage.Width,i/stage.Width] = (stage.Tiles[i] == 1)?1:0;
+			sm[i%stage.Width,i/stage.Width] = (stage.Tiles[i] == 0 || stage.Tiles[i] == 2 )?0:1;
 		}
 
         mode = Mode.None;
@@ -55,12 +55,12 @@ public class GameScene : MonoBehaviour {
         CameraDistanceTo = -20f;
 		ActionButtons.SetActive (false);
 
-        Game = new Game();
+        Battle = new Battle();
 		TerrainGridNormal.Refresh ();
-		Game.Init(stage, TerrainGridNormal.HeightMap);
+		Battle.Init(stage, TerrainGridNormal.HeightMap);
         RedrawAll();
 
-        Game.StartThread();
+        Battle.StartThread();
     }
 
     void Update(){
@@ -77,8 +77,8 @@ public class GameScene : MonoBehaviour {
 
         if (mode == Mode.None)
         {
-            Rogue.Message mes;
-            if (Game.SendQueue.TryDequeue(out mes))
+			Game.Message mes;
+            if (Battle.SendQueue.TryDequeue(out mes))
             {
                 this.SendMessage(mes.Type, mes);
             }
@@ -87,7 +87,7 @@ public class GameScene : MonoBehaviour {
 
     void Send(string command, params object[] param)
     {
-        Game.RecvQueue.Enqueue(new Message(command, param));
+        Battle.RecvQueue.Enqueue(new Message(command, param));
     }
 
 	void MoveCameraTo(Vector3 pos){
@@ -117,7 +117,7 @@ public class GameScene : MonoBehaviour {
         if (ev.button != PointerEventData.InputButton.Left) return;
         if (ev.dragging == true) return;
 
-		Rogue.Point hit;
+		Game.Point hit;
 		if (LaycastByScreenPosInt (ev.position, out hit)) {
             Debug.Log(hit);
             switch (mode)
@@ -129,8 +129,8 @@ public class GameScene : MonoBehaviour {
 					} else if (curRange.Any (p => (p == hit))) {
 						Debug.Log ("from" + curCharacter.Position + " to " + hit);
 						Point[] path = null;
-						Game.Map.TemporaryOpen (curCharacter.Position, () => {
-							path = Game.Map.PathFinder.FindPath (curPosition, hit, 6, Game.Map.StepWalkableNow (20)).ToArray ();
+						Battle.Map.TemporaryOpen (curCharacter.Position, () => {
+							path = Battle.Map.PathFinder.FindPath (curPosition, hit, 6, Battle.Map.StepWalkableNow (20)).ToArray ();
 						});
 						if (path != null) {
 							curPosition = hit;
@@ -213,7 +213,7 @@ public class GameScene : MonoBehaviour {
 
     public void RedrawAll()
     {
-        foreach( var ch in Game.Map.Characters)
+        foreach( var ch in Battle.Map.Characters)
         {
             UpdateCharacter(ch);
         }
@@ -281,13 +281,13 @@ public class GameScene : MonoBehaviour {
         var ch = (Character)mes.Param[0];
         var cr = GetCharacterRenderer(ch);
         Point[] range = null;
-        Game.Map.TemporaryOpen(ch.Position, () => { 
-			range = Game.Map.PathFinder.FindMoveRange(ch.Position, 3, Game.Map.StepWalkableNow(20)).ToArray(); 
+        Battle.Map.TemporaryOpen(ch.Position, () => { 
+			range = Battle.Map.PathFinder.FindMoveRange(ch.Position, 3, Battle.Map.StepWalkableNow(20)).ToArray(); 
 			List<Point> atks = new List<Point>();
 			foreach (var pos in range) {
 				foreach( var dir in DirectionUtil.All4 ){
 					var p2 = pos + dir.ToPos();
-					if( Game.Map[p2].Character != null ){
+					if( Battle.Map[p2].Character != null ){
 						atks.Add(p2);
 					}
 				}
@@ -305,7 +305,7 @@ public class GameScene : MonoBehaviour {
 		AttackMarkBase.ReleaseAll ();
 		foreach (var pos in curAttackRange) {
 			var attackMark = AttackMarkBase.Create ();
-			var cr2 = GetCharacterRenderer (Game.Map [pos].Character);
+			var cr2 = GetCharacterRenderer (Battle.Map [pos].Character);
 			attackMark.transform.SetParent (null, false);
 			attackMark.transform.position = cr2.transform.position + new Vector3(-0.5f,1f,-0.5f);
 		}
@@ -377,8 +377,8 @@ public class GameScene : MonoBehaviour {
 
 		FocusTo(cr.transform.position);
 
-		Game.Map.TemporaryOpen (curCharacter.Position, () => {
-			curPath = Game.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 3, Game.Map.StepWalkableNow (20)).ToArray ();
+		Battle.Map.TemporaryOpen (curCharacter.Position, () => {
+			curPath = Battle.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 3, Battle.Map.StepWalkableNow (20)).ToArray ();
 		});
 	}
 

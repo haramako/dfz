@@ -279,6 +279,160 @@ namespace Master {
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class Skill : pb.Message {
+    private Skill() { }
+    public static Skill CreateInstance() { var obj = new Skill(); obj.Finish(); return obj; }
+    public static Skill CreateEmpty() { return new Skill(); }
+    private static readonly Skill defaultInstance = new Skill();
+    public static Skill DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int Type;
+
+    public int Power;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (Type != 0) {
+        output.WriteInt32(1, Type);
+      }
+      if (Power != 0) {
+        output.WriteInt32(2, Power);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (Type != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, Type);
+      }
+      if (Power != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, Power);
+      }
+      return size;
+    }
+    public static Skill ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Skill ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Skill ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.Type);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.Power);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class Ability : pb.Message {
+    private Ability() { }
+    public static Ability CreateInstance() { var obj = new Ability(); obj.Finish(); return obj; }
+    public static Ability CreateEmpty() { return new Ability(); }
+    private static readonly Ability defaultInstance = new Ability();
+    public static Ability DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int Type;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (Type != 0) {
+        output.WriteInt32(1, Type);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (Type != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, Type);
+      }
+      return size;
+    }
+    public static Ability ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Ability ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Ability ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.Type);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class CharacterTemplate : pb.Message {
     private CharacterTemplate() { }
     public static CharacterTemplate CreateInstance() { var obj = new CharacterTemplate(); obj.Finish(); return obj; }

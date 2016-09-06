@@ -8,6 +8,13 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     map :int_index, :int32, :int32, 1
     map :string_index, :string, :int32, 2
   end
+  add_message "Master.Skill" do
+    optional :type, :int32, 1
+    optional :power, :int32, 2
+  end
+  add_message "Master.Ability" do
+    optional :type, :int32, 1
+  end
   add_message "Master.CharacterTemplate" do
     optional :id, :int32, 1
     optional :name, :string, 2
@@ -36,6 +43,8 @@ end
 
 module Master
   PbxHeader = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.PbxHeader").msgclass
+  Skill = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.Skill").msgclass
+  Ability = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.Ability").msgclass
   CharacterTemplate = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.CharacterTemplate").msgclass
   StageCharacter = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.StageCharacter").msgclass
   Stage = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.Stage").msgclass
