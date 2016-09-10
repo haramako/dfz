@@ -58,5 +58,13 @@ namespace Game {
 				return (Direction)(r+1);
 			}
 		}
+
+		public static UnityEngine.Quaternion ToWorldQuaternion(this Direction dir){
+			if (dir == Direction.None) {
+				return UnityEngine.Quaternion.identity;
+			}else{
+				return UnityEngine.Quaternion.AngleAxis(225 - (int)dir * 45, UnityEngine.Vector3.up);
+			}
+		}
 	}
 }

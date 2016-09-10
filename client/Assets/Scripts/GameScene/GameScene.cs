@@ -10,6 +10,11 @@ using UnityEngine.UI;
 
 public class GameScene : MonoBehaviour {
 
+	public enum CameraMode {
+		None,
+		Normal,
+	}
+
     public enum Mode
     {
         None,
@@ -23,7 +28,7 @@ public class GameScene : MonoBehaviour {
     public TerrainGrid TerrainGridActive;
 	public GameObject CameraTarget;
 	public Camera MainCamera;
-	public CharacterRenderer CharacterBase;
+	public CharacterContainer CharacterBase;
 
 	public GameObject ActionButtons;
 	public PoolBehavior ActionButtonBase;
@@ -32,8 +37,9 @@ public class GameScene : MonoBehaviour {
     Vector3 FocusToPoint; // カメラが向かうべきポイント
     float CameraDistanceTo; // カメラの距離
     int CurZoom = 1;
+	CameraMode cameraMode = CameraMode.None;
 
-    public new Dictionary<int, CharacterRenderer> Characters = new Dictionary<int, CharacterRenderer>();
+    public new Dictionary<int, CharacterContainer> Characters = new Dictionary<int, CharacterContainer>();
 
     public Battle Battle { get; private set; }
 
@@ -70,10 +76,15 @@ public class GameScene : MonoBehaviour {
         curPos = Vector3.Lerp(FocusToPoint, curPos, Mathf.Pow(0.05f, Time.deltaTime));
         CameraTarget.transform.localPosition = curPos;
 
-        var curDistance = MainCamera.transform.localPosition;
-        curDistance.z = Mathf.Lerp(CameraDistanceTo, curDistance.z, Mathf.Pow(0.1f, Time.deltaTime));
-        MainCamera.transform.localPosition = curDistance;
-
+		switch (cameraMode) {
+		case CameraMode.Normal:
+			var curDistance = MainCamera.transform.localPosition;
+			curDistance.z = Mathf.Lerp (CameraDistanceTo, curDistance.z, Mathf.Pow (0.1f, Time.deltaTime));
+			MainCamera.transform.localPosition = curDistance;
+			break;
+		default:
+			break;
+		}
 
         if (mode == Mode.None)
         {
@@ -139,7 +150,7 @@ public class GameScene : MonoBehaviour {
 					}else if( curAttackRange.Any(p=>(p==hit))){
 						if ((hit - curPosition).GridLength () <= 1) {
 							var cr = GetCharacterRenderer (curCharacter);
-							cr.State = CharacterRendererState.None;
+							cr.Chara.State = CharacterRendererState.None;
 							Send("AMove", curPath, "Attack", hit);
 							mode = Mode.None;
 							CloseAction();
@@ -219,19 +230,19 @@ public class GameScene : MonoBehaviour {
         }
     }
 
-    public CharacterRenderer GetCharacterRenderer(Character ch)
+    public CharacterContainer GetCharacterRenderer(Character ch)
     {
-        CharacterRenderer cr;
-        if (!Characters.TryGetValue(ch.Id, out cr))
+        CharacterContainer cc;
+        if (!Characters.TryGetValue(ch.Id, out cc))
         {
-            cr = Instantiate(CharacterBase);
-            cr.name = ch.Name + ":" + ch.Id;
+            cc = Instantiate(CharacterBase);
+            cc.name = ch.Name + ":" + ch.Id;
 			ResourceCache.Load<SpriteSet> (string.Format ("Enemy{0:0000}", ch.AtlasId)).Done (ss => {
-				cr.SpriteSet = ss;
+				cc.Chara.SpriteSet = ss;
 			});
-            Characters[ch.Id] = cr;
+            Characters[ch.Id] = cc;
         }
-        return cr;
+        return cc;
     }
 
     public void UpdateCharacter(Character ch)
@@ -266,6 +277,7 @@ public class GameScene : MonoBehaviour {
 		OnActionButtonClick (id);
 	}
 
+
     //===================================================================
     // メッセージハンドラ
     //===================================================================
@@ -295,7 +307,7 @@ public class GameScene : MonoBehaviour {
 			curAttackRange = atks.Distinct().ToArray();
 		});
 
-		cr.State = CharacterRendererState.Active;
+		cr.Chara.State = CharacterRendererState.Active;
         mode = Mode.QMove;
         curCharacter = ch;
 		curPosition = ch.Position;
@@ -318,7 +330,7 @@ public class GameScene : MonoBehaviour {
 				FocusTo(cr.transform.position);
 				break;
 			case "move":
-				cr.State = CharacterRendererState.None;
+				cr.Chara.State = CharacterRendererState.None;
 				Send("AMove", curPath);
 				mode = Mode.None;
 				CloseAction();
@@ -369,7 +381,7 @@ public class GameScene : MonoBehaviour {
 			var pos3 = new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f);
 			pos3.y = GetTerrainHeight(pos3);
 			cr.transform.localPosition = pos3;
-			cr.Dir = dir;
+			cr.transform.localRotation = dir.ToWorldQuaternion ();
 
 			if (finish) break;
 			yield return null;
@@ -411,7 +423,7 @@ public class GameScene : MonoBehaviour {
             var pos3 = new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f);
             pos3.y = GetTerrainHeight(pos3);
             cr.transform.localPosition = pos3;
-            cr.Dir = dir;
+			cr.transform.localRotation = dir.ToWorldQuaternion();
 
             if (finish) break;
             yield return null;
@@ -432,16 +444,22 @@ public class GameScene : MonoBehaviour {
 		var cr = GetCharacterRenderer(ch);
 		var targetCr = GetCharacterRenderer (target);
 
-		cr.Dir = dir;
-		cr.Pose = CharacterRendererPose.Attack;
-		targetCr.Pose = CharacterRendererPose.Damage;
+		cr.transform.localRotation = dir.ToWorldQuaternion ();
+
+		yield return new WaitForSeconds(0.2f);
+
+		cr.Animate ("EnemyAttack01");
+		yield return new WaitForSeconds(1.0f);
+
+		targetCr.transform.localRotation = dir.Rotate(4).ToWorldQuaternion ();
+		targetCr.Animate ("EnemyDamage01");
 
 		FocusTo(cr.transform.position);
 
 		yield return new WaitForSeconds(1.0f);
 
-		cr.Pose = CharacterRendererPose.Move;
-		targetCr.Pose = CharacterRendererPose.Move;
+		cr.Chara.Pose = CharacterRendererPose.Move;
+		targetCr.Chara.Pose = CharacterRendererPose.Move;
 
 		RedrawAll();
 		Send(null);
