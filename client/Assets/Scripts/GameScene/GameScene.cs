@@ -99,7 +99,7 @@ public class GameScene : MonoBehaviour {
 		switch (cameraMode) {
 		case CameraMode.Normal:
 			var curDistance = MainCamera.transform.localPosition;
-			curDistance.z = Mathf.Lerp (CameraDistanceTo, curDistance.z, Mathf.Pow (0.1f, Time.deltaTime));
+			curDistance.z = Mathf.Lerp (-Mathf.Abs(CameraDistanceTo), curDistance.z, Mathf.Pow (0.1f, Time.deltaTime));
 			MainCamera.transform.localPosition = curDistance;
 			break;
 		default:
@@ -114,6 +114,16 @@ public class GameScene : MonoBehaviour {
                 this.SendMessage(mes.Type, mes);
             }
         }
+
+		if (Input.GetKeyDown (KeyCode.S)) {
+			this.OnActionButtonClick ("skill");
+		}
+
+		if (Input.GetKey (KeyCode.F)) {
+			Time.timeScale = 10.0f;
+		} else {
+			Time.timeScale = 1.0f;
+		}
 	}
 
     void Send(string command, params object[] param)
@@ -161,7 +171,7 @@ public class GameScene : MonoBehaviour {
 						Debug.Log ("from" + curCharacter.Position + " to " + hit);
 						Point[] path = null;
 						Battle.Map.TemporaryOpen (curCharacter.Position, () => {
-							path = Battle.Map.PathFinder.FindPath (curPosition, hit, 6, Battle.Map.StepWalkableNow (20)).ToArray ();
+							path = Battle.Map.PathFinder.FindPath (curPosition, hit, 6, Battle.Map.StepWalkableNow (10)).ToArray ();
 						});
 						if (path != null) {
 							curPosition = hit;
@@ -202,6 +212,12 @@ public class GameScene : MonoBehaviour {
             FocusToPoint = ray.GetPoint(enter);
         }
     }
+
+	public Vector3 PointToVector(Point p){
+		var v = new Vector3 (p.X + 0.5f, 0, p.Y + 0.5f);
+		v.y = GetTerrainHeight (v);
+		return v;
+	}
 		
 	// 高さを取得する
 	public float GetTerrainHeight(Vector3 pos){
@@ -273,6 +289,9 @@ public class GameScene : MonoBehaviour {
         var pos = new Vector3(ch.Position.X + 0.5f, 0, ch.Position.Y + 0.5f);
         pos.y = GetTerrainHeight(pos);
         cr.transform.localPosition = pos;
+		if (ch.AtlasId == 285 ) {
+			cr.transform.localScale = new Vector3 (2.5f, 2.5f, 2.5f);
+		}
     }
 
 	Action<string> OnActionButtonClick;
@@ -338,7 +357,7 @@ public class GameScene : MonoBehaviour {
         var cr = GetCharacterRenderer(ch);
         Point[] range = null;
         Battle.Map.TemporaryOpen(ch.Position, () => { 
-			range = Battle.Map.PathFinder.FindMoveRange(ch.Position, 3, Battle.Map.StepWalkableNow(20)).ToArray(); 
+			range = Battle.Map.PathFinder.FindMoveRange(ch.Position, 5, Battle.Map.StepWalkableNow(10)).ToArray(); 
 			List<Point> atks = new List<Point>();
 			foreach (var pos in range) {
 				foreach( var dir in DirectionUtil.All4 ){
@@ -382,10 +401,11 @@ public class GameScene : MonoBehaviour {
 			case "attack":
 				break;
 			case "skill":
-				SetFade(true);
-				var cutin = Instantiate(SkillCutinBase);
-				cutin.SetActive(true);
-				cr.Chara.Unfade = true;
+				cr.Chara.State = CharacterRendererState.None;
+				var dir = (curPath[curPath.Length-1] - curPath[curPath.Length-2]).ToDir();
+				Send("AMove", curPath, "Skill", dir);
+				mode = Mode.None;
+				CloseAction();
 				break;
 			default:
 				throw new Exception("invalid action" + act);
@@ -438,7 +458,7 @@ public class GameScene : MonoBehaviour {
 		FocusTo(cr.transform.position);
 
 		Battle.Map.TemporaryOpen (curCharacter.Position, () => {
-			curPath = Battle.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 3, Battle.Map.StepWalkableNow (20)).ToArray ();
+			curPath = Battle.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 5, Battle.Map.StepWalkableNow (10)).ToArray ();
 		});
 	}
 
@@ -492,9 +512,20 @@ public class GameScene : MonoBehaviour {
         }
         FocusTo(cr.transform.position);
 
+		Debug.Log (ch.Dir);
+		cr.transform.localRotation = ch.Dir.ToWorldQuaternion ();
+
         RedrawAll();
         Send(null);
     }
+
+	public void RedrawChar(Message mes){
+		var ch = (Character)mes.Param[0];
+		var cr = GetCharacterRenderer(ch);
+		UpdateCharacter (ch);
+		cr.transform.localRotation = ch.Dir.ToWorldQuaternion ();
+		Send (null);
+	}
 
 	IEnumerator Attack(Message mes)
 	{
@@ -508,6 +539,7 @@ public class GameScene : MonoBehaviour {
 
 		cr.transform.localRotation = dir.ToWorldQuaternion ();
 
+		CameraDistanceTo = 15f;
 		yield return new WaitForSeconds(0.2f);
 
 		cr.Animate ("EnemyAttack01");
@@ -520,6 +552,8 @@ public class GameScene : MonoBehaviour {
 
 		yield return new WaitForSeconds(1.0f);
 
+		CameraDistanceTo = 20f;
+
 		cr.Chara.Pose = CharacterRendererPose.Move;
 		targetCr.Chara.Pose = CharacterRendererPose.Move;
 
@@ -527,4 +561,58 @@ public class GameScene : MonoBehaviour {
 		Send(null);
 	}
 
+	public GameObject SkFire;
+	IEnumerator Skill(Message mes)
+	{
+		var ch = (Character)mes.Param[0];
+		var targets = (Character[])mes.Param [1];
+		var dir = (Direction)mes.Param [2];
+		var path = (Point[])mes.Param [3];
+
+		var cr = GetCharacterRenderer(ch);
+		SetFade (true);
+		var cutin = Instantiate(SkillCutinBase);
+		cutin.SetActive(true);
+		cr.Chara.Unfade = true;
+		//var targetCr = GetCharacterRenderer (target);
+
+		cr.transform.localRotation = dir.ToWorldQuaternion ();
+
+		yield return new WaitForSeconds(4.0f);
+
+		var skillPos = PointToVector (path [path.Length / 2]);
+		FocusTo (skillPos);
+
+		cr.Animate ("EnemyAttack01");
+		yield return new WaitForSeconds(1.0f);
+
+		foreach (var pos in path) {
+			var obj = Instantiate (SkFire);
+			obj.SetActive (true);
+			obj.transform.position = PointToVector (pos);
+			yield return new WaitForSeconds (0.35f);
+		}
+
+		//targetCr.transform.localRotation = dir.Rotate(4).ToWorldQuaternion ();
+		//targetCr.Animate ("EnemyDamage01");
+
+		FocusTo(cr.transform.position);
+
+		yield return new WaitForSeconds(1.0f);
+
+		cr.Chara.Pose = CharacterRendererPose.Move;
+		//targetCr.Chara.Pose = CharacterRendererPose.Move;
+
+		cr.Chara.Unfade = false;
+		SetFade (false);
+
+		RedrawAll();
+		Send(null);
+	}
+
+	public void KillDragon(){
+		var d = GameObject.Find ("Dragon");
+		d.SetActive (false);
+		Send (null);
+	}
 }

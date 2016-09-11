@@ -11,7 +11,7 @@ class REXML::Element
 end
 
 class Tmx
-  class Obj < Struct.new(:x, :y, :name); end
+  class Obj < Struct.new(:x, :y, :name, :char, :speed); end
   
   attr_reader :width, :height, :layers, :tiles
   
@@ -34,7 +34,19 @@ class Tmx
         x = obj.a['x'].to_i / 32
         y = @height - obj.a['y'].to_i / 32
         name = obj.a['name']
-        @objects << Obj.new(x, y, name)
+        char = nil
+        speed = nil
+        props = obj.elements['properties']
+        if props
+          props.each_element('property') do |prop|
+            if prop.a['name'] == 'Char'
+              char = prop.a['value'].to_i
+            elsif prop.a['name'] == 'Speed'
+              char = prop.a['speed'].to_i
+            end
+          end
+        end
+        @objects << Obj.new(x, y, name, char || 0, speed || 100)
       end
     end
     
@@ -46,6 +58,7 @@ class Tmx
 
   def dump_pb
     characters = @objects.map do |obj|
+      p obj.to_h
       Master::StageCharacter.new(obj.to_h)
     end
     pb = Master::Stage.new(id: 0, width: @width, height: @height,

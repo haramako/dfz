@@ -24,7 +24,7 @@ namespace Game
 				return (Direction)SavedDir; 
 			}
 			set { 
-				SavedDir = (int)Dir; 
+				SavedDir = (int)value; 
 			}
 		}
 

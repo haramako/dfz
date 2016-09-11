@@ -40,7 +40,9 @@ message StageCharacter {
 	int32 x = 1;
 	int32 y = 2;
 	string name = 3;
+	int32 char = 6;
 	int32 character_id = 4;
+	int32 speed = 7;
 	int32 level = 5;
 }
 

@@ -27,7 +27,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :x, :int32, 1
     optional :y, :int32, 2
     optional :name, :string, 3
+    optional :char, :int32, 6
     optional :character_id, :int32, 4
+    optional :speed, :int32, 7
     optional :level, :int32, 5
   end
   add_message "Master.Stage" do

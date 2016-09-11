@@ -579,7 +579,11 @@ namespace Master {
 
     public string Name = "";
 
+    public int Char;
+
     public int CharacterId;
+
+    public int Speed;
 
     public int Level;
 
@@ -603,6 +607,12 @@ namespace Master {
       if (Level != 0) {
         output.WriteInt32(5, Level);
       }
+      if (Char != 0) {
+        output.WriteInt32(6, Char);
+      }
+      if (Speed != 0) {
+        output.WriteInt32(7, Speed);
+      }
     }
 
     public override int SerializedSize {
@@ -622,8 +632,14 @@ namespace Master {
       if (Name != "") {
         size += pb::CodedOutputStream.ComputeStringSize(3, Name);
       }
+      if (Char != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(6, Char);
+      }
       if (CharacterId != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(4, CharacterId);
+      }
+      if (Speed != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(7, Speed);
       }
       if (Level != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(5, Level);
@@ -670,6 +686,14 @@ namespace Master {
           }
           case 40: {
             input.ReadInt32(ref this.Level);
+            break;
+          }
+          case 48: {
+            input.ReadInt32(ref this.Char);
+            break;
+          }
+          case 56: {
+            input.ReadInt32(ref this.Speed);
             break;
           }
         }

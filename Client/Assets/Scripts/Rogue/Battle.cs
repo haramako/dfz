@@ -78,18 +78,31 @@ namespace Game
 
 		public void CutScene(){
 			var scs = stage_.Characters.ToDictionary (sc => sc.Name);
-			var names = new string[]{ "P1", "P2", "P3", "P4", "E2", "E5", "E7", "E8" };
+			var names = new string[]{ "P1", "P2", "P3", "P4", "E1", "E2", "E5", "E7", "E8", "E9", "E10" };
 			foreach (var nm in names) {
 				var ch = FindCharacter (nm);
 				ch.Active = false;
 			}
 			foreach( var nm in names ){
-				var p1 = scs ["From:"+nm];
-				var fromPoint = new Point (p1.X, p1.Y);
-				var ch = FindCharacter (nm);
-				var path = Map.PathFinder.FindPath (fromPoint, ch.Position, 20, Map.StepAnywhere());
-				ch.Active = true;
-				Send ("Walk", ch, path.ToArray(), true);
+				if (nm == "E1") {
+					var ch = FindCharacter (nm);
+					Send ("KillDragon");
+					ch.Active = true;
+					ch.Dir = Direction.West;
+					Send ("RedrawChar",ch);
+				} else {
+					var p1 = scs ["From:" + nm];
+					var fromPoint = new Point (p1.X, p1.Y);
+					var ch = FindCharacter (nm);
+					var path = Map.PathFinder.FindPath (fromPoint, ch.Position, 20, Map.StepAnywhere ());
+					ch.Active = true;
+					if (nm.StartsWith ("E")) {
+						ch.Dir = Direction.West;
+					} else {
+						ch.Dir = Direction.East;
+					}
+					Send ("Walk", ch, path.ToArray (), true);
+				}
 			}
 		}
 
@@ -143,7 +156,6 @@ namespace Game
 				}
 			}
 
-			var atlas = new int[] { 1, 2, 3, 168, 174, 210, 211 };
 			int i = 0;
 			foreach (var sc in stage.Characters) {
 				if (!(sc.Name.StartsWith ("E") || sc.Name.StartsWith ("P"))) {
@@ -152,7 +164,8 @@ namespace Game
 				var c = Character.CreateInstance();
 				c.Id = i++;
 				c.Name = sc.Name;
-				c.AtlasId = atlas[UnityEngine.Random.Range(0, atlas.Length - 1)];
+				c.AtlasId = sc.Char;
+				c.Speed = sc.Speed;
 				if (sc.Name.StartsWith ("E")) {
 					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
 				} else {
@@ -181,6 +194,10 @@ namespace Game
 						var targetPos = (Point)res.Param [2];
 						var target = Map [targetPos].Character;
 						SendRecv (null, "Attack", ch, target, (target.Position - ch.Position).ToDir (), 99);
+					}else if (subcommand == "Skill") {
+						var dir = (Direction)res.Param [2];
+						var path2 = Map.PathFinder.FindStraight (ch.Position, dir, 5, true, Map.StepAnywhere()).ToArray();
+						SendRecv (null, "Skill", ch, null, dir, path2);
 					}
 				}
             }
