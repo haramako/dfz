@@ -479,6 +479,8 @@ public class GameScene : MonoBehaviour {
 			yield return new WaitForSeconds (0.3f);
 		}
 			
+		cr.Animate ("EnemyWalk01");
+
         while (true)
         {
             bool finish = false;
@@ -514,6 +516,8 @@ public class GameScene : MonoBehaviour {
 
 		Debug.Log (ch.Dir);
 		cr.transform.localRotation = ch.Dir.ToWorldQuaternion ();
+
+		cr.Stay ();
 
         RedrawAll();
         Send(null);

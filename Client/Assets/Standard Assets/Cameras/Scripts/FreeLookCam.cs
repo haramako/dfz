@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
-using UnityStandardAssets.CrossPlatformInput;
+//using UnityStandardAssets.CrossPlatformInput;
 
+#if false
 namespace UnityStandardAssets.Cameras
 {
     public class FreeLookCam : PivotBasedCameraRig
@@ -113,3 +114,5 @@ namespace UnityStandardAssets.Cameras
         }
     }
 }
+
+#endif

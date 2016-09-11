@@ -1,50 +1,36 @@
-using System;
 using UnityEngine;
 
-namespace UnityStandardAssets.CrossPlatformInput
+namespace UnitySampleAssets.CrossPlatformInput
 {
-    public class ButtonHandler : MonoBehaviour
-    {
-
-        public string Name;
-
-        void OnEnable()
-        {
-
-        }
-
-        public void SetDownState()
-        {
-            CrossPlatformInputManager.SetButtonDown(Name);
-        }
+	public class ButtonHandler : MonoBehaviour
+	{
+		public void SetDownState(string name)
+		{
+			CrossPlatformInputManager.SetButtonDown(name);
+		}
 
 
-        public void SetUpState()
-        {
-            CrossPlatformInputManager.SetButtonUp(Name);
-        }
+		public void SetUpState(string name)
+		{
+			CrossPlatformInputManager.SetButtonUp(name);
+		}
 
 
-        public void SetAxisPositiveState()
-        {
-            CrossPlatformInputManager.SetAxisPositive(Name);
-        }
+		public void SetAxisPositiveState(string name)
+		{
+			CrossPlatformInputManager.SetAxisPositive(name);
+		}
 
 
-        public void SetAxisNeutralState()
-        {
-            CrossPlatformInputManager.SetAxisZero(Name);
-        }
+		public void SetAxisNeutralState(string name)
+		{
+			CrossPlatformInputManager.SetAxisZero(name);
+		}
 
 
-        public void SetAxisNegativeState()
-        {
-            CrossPlatformInputManager.SetAxisNegative(Name);
-        }
-
-        public void Update()
-        {
-
-        }
-    }
+		public void SetAxisNegativeState(string name)
+		{
+			CrossPlatformInputManager.SetAxisNegative(name);
+		}
+	}
 }
