@@ -34,6 +34,8 @@ public class GameScene : MonoBehaviour {
 	public PoolBehavior ActionButtonBase;
 	public PoolBehavior AttackMarkBase;
 
+	public GameObject SkillCutinBase;
+
     Vector3 FocusToPoint; // カメラが向かうべきポイント
     float CameraDistanceTo; // カメラの距離
     int CurZoom = 1;
@@ -63,11 +65,29 @@ public class GameScene : MonoBehaviour {
 
         Battle = new Battle();
 		TerrainGridNormal.Refresh ();
-		Battle.Init(stage, TerrainGridNormal.HeightMap);
-        RedrawAll();
-
-        Battle.StartThread();
     }
+
+	public void CutSceneFinished(){
+		Debug.Log ("CutSceneFinished");
+		cameraMode = CameraMode.Normal;
+		FocusToPoint = CameraTarget.transform.localPosition;
+		CameraDistanceTo = -20f;
+		MainCamera.transform.localPosition = new Vector3 (0, 0, -20);
+		MainCamera.transform.localRotation = Quaternion.identity;
+
+		var stage = G.Stages [0];
+		Battle.Init(stage, TerrainGridNormal.HeightMap);
+		RedrawAll();
+		Battle.StartThread();
+	}
+
+	public void OnSpeedupDown(){
+		Time.timeScale = 5.0f;
+	}
+
+	public void OnSpeedupUp(){
+		Time.timeScale = 1.0f;
+	}
 
     void Update(){
 		Application.targetFrameRate = 60;
@@ -226,7 +246,9 @@ public class GameScene : MonoBehaviour {
     {
         foreach( var ch in Battle.Map.Characters)
         {
-            UpdateCharacter(ch);
+			if (ch.Active) {
+				UpdateCharacter (ch);
+			}
         }
     }
 
@@ -277,8 +299,30 @@ public class GameScene : MonoBehaviour {
 		OnActionButtonClick (id);
 	}
 
+	//===================================================================
+	// 2Dエフェクト
+	//===================================================================
 
-    //===================================================================
+	bool fadeEnabled;
+	public SpriteRenderer Fade;
+
+	public void SetFade(bool val){
+		if (val == fadeEnabled)	return;
+		fadeEnabled = val;
+		if (val) {
+			Fade.gameObject.SetActive (true);
+		} else {
+			Fade.gameObject.SetActive (false);
+		}
+	}
+
+	public Camera ScreenEffectCamera;
+
+	public IPromise<GameObject> ShowScreenEffect(string name){
+		return ResourceCache.Create<GameObject> (name);
+	}
+
+	//===================================================================
     // メッセージハンドラ
     //===================================================================
 
@@ -338,6 +382,10 @@ public class GameScene : MonoBehaviour {
 			case "attack":
 				break;
 			case "skill":
+				SetFade(true);
+				var cutin = Instantiate(SkillCutinBase);
+				cutin.SetActive(true);
+				cr.Chara.Unfade = true;
 				break;
 			default:
 				throw new Exception("invalid action" + act);
@@ -400,7 +448,17 @@ public class GameScene : MonoBehaviour {
         var ch = (Character)mes.Param[0];
         var cr = GetCharacterRenderer(ch);
         var path = (Point[])mes.Param[1];
+		var focus = mes.Param.Length >= 3 && (bool)mes.Param [2];
         var dir = Direction.None;
+
+		if (focus) {
+			var pos = path [0].ToVector2 ();
+			var pos3 = new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f);
+			pos3.y = GetTerrainHeight(pos3);
+			FocusTo (pos3);
+			yield return new WaitForSeconds (0.3f);
+		}
+			
         while (true)
         {
             bool finish = false;
@@ -424,6 +482,10 @@ public class GameScene : MonoBehaviour {
             pos3.y = GetTerrainHeight(pos3);
             cr.transform.localPosition = pos3;
 			cr.transform.localRotation = dir.ToWorldQuaternion();
+
+			if (focus) {
+				FocusTo (cr.transform.position);
+			}
 
             if (finish) break;
             yield return null;

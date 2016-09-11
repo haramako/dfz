@@ -63,6 +63,10 @@ namespace Game {
 
     public int Race;
 
+    public int Speed;
+
+    public bool Active;
+
     public global::Master.Skill AttackSkill;
 
     public List<global::Master.Skill> Skills;
@@ -131,6 +135,12 @@ namespace Game {
       if (AtlasId != 0) {
         output.WriteInt32(19, AtlasId);
       }
+      if (Speed != 0) {
+        output.WriteInt32(20, Speed);
+      }
+      if (Active != false) {
+        output.WriteBool(21, Active);
+      }
     }
 
     public override int SerializedSize {
@@ -188,6 +198,12 @@ namespace Game {
       }
       if (Race != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(8, Race);
+      }
+      if (Speed != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(20, Speed);
+      }
+      if (Active != false) {
+        size += pb::CodedOutputStream.ComputeBoolSize(21, Active);
       }
       if( AttackSkill != null ){
         size += pb::CodedOutputStream.ComputeMessageSize(9, AttackSkill);
@@ -302,6 +318,14 @@ namespace Game {
           }
           case 152: {
             input.ReadInt32(ref this.AtlasId);
+            break;
+          }
+          case 160: {
+            input.ReadInt32(ref this.Speed);
+            break;
+          }
+          case 168: {
+            input.ReadBool(ref this.Active);
             break;
           }
         }

@@ -22,6 +22,8 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :jump_height, :int32, 6
     optional :attribute, :int32, 7
     optional :race, :int32, 8
+    optional :speed, :int32, 20
+    optional :Active, :bool, 21
     optional :attack_skill, :message, 9, "Master.Skill"
     repeated :skills, :message, 10, "Master.Skill"
     repeated :abilities, :message, 11, "Master.Ability"

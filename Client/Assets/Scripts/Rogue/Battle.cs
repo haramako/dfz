@@ -72,39 +72,69 @@ namespace Game
             return res;
         }
 
-        public void Process(){
-            while (true)
-            {
-                try
-                {
-                    switch (State)
-                    {
-                    case GameState.TurnStart:
-                        DoTurnStart();
-                        break;
-                    case GameState.Play:
-                        DoPlay();
-                        break;
-                    case GameState.TurnEnd:
-                        DoTurnEnd();
-                        break;
-                    case GameState.GameOver:
-                        break;
-                    }
-                }
-                catch (GameOverException)
-                {
-                    State = GameState.GameOver;
-                }
-                catch(Exception ex)
-                {
-                    UnityEngine.Debug.LogException(ex);
-                }
-            }
+		public Character FindCharacter(string name){
+			return Map.Characters.First (c => c.Name == name);
 		}
 
+		public void CutScene(){
+			var scs = stage_.Characters.ToDictionary (sc => sc.Name);
+			var names = new string[]{ "P1", "P2", "P3", "P4", "E2", "E5", "E7", "E8" };
+			foreach (var nm in names) {
+				var ch = FindCharacter (nm);
+				ch.Active = false;
+			}
+			foreach( var nm in names ){
+				var p1 = scs ["From:"+nm];
+				var fromPoint = new Point (p1.X, p1.Y);
+				var ch = FindCharacter (nm);
+				var path = Map.PathFinder.FindPath (fromPoint, ch.Position, 20, Map.StepAnywhere());
+				ch.Active = true;
+				Send ("Walk", ch, path.ToArray(), true);
+			}
+		}
+
+
+        public void Process(){
+			try{
+				CutScene ();
+
+	            while (true)
+	            {
+	                try
+	                {
+	                    switch (State)
+	                    {
+	                    case GameState.TurnStart:
+	                        DoTurnStart();
+	                        break;
+	                    case GameState.Play:
+	                        DoPlay();
+	                        break;
+	                    case GameState.TurnEnd:
+	                        DoTurnEnd();
+	                        break;
+	                    case GameState.GameOver:
+	                        break;
+	                    }
+	                }
+	                catch (GameOverException)
+	                {
+	                    State = GameState.GameOver;
+	                }
+	                catch(Exception ex)
+	                {
+	                    UnityEngine.Debug.LogException(ex);
+	                }
+	            }
+			}catch(Exception ex){
+				UnityEngine.Debug.LogException (ex);
+			}
+		}
+		
+		Stage stage_;
 		public void Init(Stage stage, float[,] heightMap)
         {
+			stage_ = stage;
 			Map = new Map (stage.Width, stage.Height);
 			for (int x = 0; x < stage.Width; x++) {
 				for (int y = 0; y < stage.Height; y++) {
@@ -116,9 +146,18 @@ namespace Game
 			var atlas = new int[] { 1, 2, 3, 168, 174, 210, 211 };
 			int i = 0;
 			foreach (var sc in stage.Characters) {
+				if (!(sc.Name.StartsWith ("E") || sc.Name.StartsWith ("P"))) {
+					continue;
+				}
 				var c = Character.CreateInstance();
 				c.Id = i++;
+				c.Name = sc.Name;
 				c.AtlasId = atlas[UnityEngine.Random.Range(0, atlas.Length - 1)];
+				if (sc.Name.StartsWith ("E")) {
+					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
+				} else {
+					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
+				}
 				Map.AddCharacter(c, new Point(sc.X,	sc.Y));
 			}
 				
@@ -131,7 +170,7 @@ namespace Game
 
 		public void DoPlay(){
 			State = GameState.TurnEnd;
-            foreach (var ch in Map.Characters)
+			foreach (var ch in Map.Characters.OrderBy(x=>x.Speed))
             {
                 var res = SendRecv("AMove", "QMove", ch);
                 var path = (Point[])res.Param[0];

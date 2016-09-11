@@ -148,7 +148,7 @@ namespace Game
 		public delegate bool FloorPredicate(ref Floor cell);
 
 		public bool FloorIsAnywhere(Point p){
-			return true;
+			return GetCell(p) != NullFloor;
 		}
 
 		public bool FloorIsWalkable(Point p){
@@ -218,6 +218,7 @@ namespace Game
 		public PathFinder.Stepable StepFlyable(int allowHeight) { return MakeWalkableFunc(FloorIsFlyable, allowHeight); }
 		public PathFinder.Stepable StepWalkableNow(int allowHeight) { return MakeWalkableFunc(FloorIsWalkableNow, allowHeight); }
 		public PathFinder.Stepable StepFlyableNow(int allowHeight)  { return MakeWalkableFunc(FloorIsFlyableNow, allowHeight); }
+		public PathFinder.Stepable StepAnywhere()  { return (f, t) => (FloorIsWalkable (t) ? 1 : (FloorIsAnywhere(t)? 2:9999)); }
 	}
 	
 }

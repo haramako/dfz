@@ -30,6 +30,7 @@ public class CharacterRenderer : MonoBehaviour {
 
 	public CharacterRendererState State;
 	public CharacterRendererPose Pose = CharacterRendererPose.Move;
+	public bool Unfade;
 
 	static Vector2 BasePos = new Vector2 (0, 0.85f);
 	static int[] RotateTable = new int[]{0,0,1,2,3,4,3,2,1};
@@ -53,6 +54,11 @@ public class CharacterRenderer : MonoBehaviour {
 		if( !Application.isPlaying ){
 			RecalcDir (UnityEditor.SceneView.lastActiveSceneView.camera);
 		}else{
+			if( Unfade ){
+				Sprite.sortingLayerName = "OverFade";
+			}else{
+				Sprite.sortingLayerName = "Character";
+			}
 			RecalcDir(Camera.current);
 		}
 		#else

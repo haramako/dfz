@@ -31,6 +31,8 @@ message Character {
 	int32 jump_height = 6;
 	int32 attribute = 7;
 	int32 race = 8;
+	int32 speed = 20;
+	bool Active = 21;
 	Master.Skill attack_skill = 9;
 	repeated Master.Skill skills = 10;
 	repeated Master.Ability abilities = 11;
