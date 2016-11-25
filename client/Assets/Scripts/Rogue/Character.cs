@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Game
 {
+	public interface IGameLog {
+	}
+
 	/// <summary>
 	/// ゲーム内のキャラクター
 	/// </summary>

@@ -55,7 +55,7 @@ namespace Game {
 				break;
 			case ScopeType.Straight:
 				{
-					var tmpPath = p.Map.PathFinder.FindStraight (p.FromPoint, p.Dir, Range, true, p.Map.StepFlyable(20));
+					var tmpPath = p.Map.PathFinder.FindStraight (p.FromPoint, p.Dir, Range, true, p.Map.StepFlyable());
 					res.Path = tmpPath;
 					//StraightPaths.Add (new POINT2 (from, tmpPath [tmpPath.Count - 1]));
 				}

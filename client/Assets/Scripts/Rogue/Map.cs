@@ -23,28 +23,27 @@ namespace Game
 	}
 
 	public class CellFire : CellStatus {
-		public CellStatusType Type { get { return CellStatusType.Fire; } }
+		public override CellStatusType Type { get { return CellStatusType.Fire; } }
 	}
 
 	public class CellFreeze : CellStatus {
-		public CellStatusType Type { get { return CellStatusType.Freeze; } }
+		public override CellStatusType Type { get { return CellStatusType.Freeze; } }
 	}
 	
 	public class Floor {
 		public int Val;
-		public int Height; // 高さ * 10
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
 
 		public bool Walkable {
 			get {
-				return (Val != 0 && Val != 2 );
+				return Val == 1;
 			}
 		}
 
 		public bool Flyable {
 			get {
-				return (Val != 0 && Val != 2);
+				return Val == 1;
 			}
 		}
 
@@ -145,8 +144,6 @@ namespace Game
 		//
 		//=======================================================================================
 
-		public delegate bool FloorPredicate(ref Floor cell);
-
 		public bool FloorIsAnywhere(Point p){
 			return GetCell(p) != NullFloor;
 		}
@@ -181,22 +178,36 @@ namespace Game
 		/// <returns>合成された PathFinder.Stepable デリゲート</returns>
 		/// <param name="predicate">移動可能かどうかを示す、Floor***able系の関数</param>
 		/// <param name="slantAnywhere">ナナメの場合に壁にじゃまされない場合はtrue</param>
-		public PathFinder.Stepable MakeWalkableFunc(Predicate<Point> predicate, int allowHeight = 10) {
-			return (from,to)=>{
-				if( predicate(to) ){
-					// 移動可能
-					if( this[to].Height <= this[from].Height + allowHeight ){
-						// 高さOK
+		public PathFinder.Stepable MakeWalkableFunc(Predicate<Point> predicate, bool slantAnywhere) {
+			if (slantAnywhere) {
+				return (from, to) => {
+					if (predicate (to)) {
+						// 移動可能
 						return 1;
-					}else{
-						// 高さNG
+					} else {
+						// 移動不可
 						return 9999;
 					}
-				}else{
-					// 移動不可
-					return 9999;
-				}
-			};
+				};
+			} else {
+				return (from, to) => {
+					if( from.X != to.X && from.Y != to.Y ){
+						// 斜め移動の場合
+						if( predicate (to) && FloorIsFlyable(new Point(from.X, to.Y)) && FloorIsFlyable(new Point(to.X, from.Y)) ){
+							return 1;
+						}else{
+							return 9999;
+						}
+					}
+					if (predicate (to)) {
+						// 移動可能
+						return 1;
+					} else {
+						// 移動不可
+						return 9999;
+					}
+				};
+			}
 		}
 
         public void TemporaryOpen(Point pos, Action action)
@@ -214,11 +225,11 @@ namespace Game
         }
 
         // 隣接する２マスの経路が、移動可能かどうかを表すdelegateを返す( 挙動は、対応するFloor***able()関数を参照 )
-		public PathFinder.Stepable StepWalkable(int allowHeight) { return MakeWalkableFunc(FloorIsWalkable, allowHeight); }
-		public PathFinder.Stepable StepFlyable(int allowHeight) { return MakeWalkableFunc(FloorIsFlyable, allowHeight); }
-		public PathFinder.Stepable StepWalkableNow(int allowHeight) { return MakeWalkableFunc(FloorIsWalkableNow, allowHeight); }
-		public PathFinder.Stepable StepFlyableNow(int allowHeight)  { return MakeWalkableFunc(FloorIsFlyableNow, allowHeight); }
-		public PathFinder.Stepable StepAnywhere()  { return (f, t) => (FloorIsWalkable (t) ? 1 : (FloorIsAnywhere(t)? 2:9999)); }
+		public PathFinder.Stepable StepWalkable(bool slantAnywhere = false) { return MakeWalkableFunc(FloorIsWalkable, slantAnywhere); }
+		public PathFinder.Stepable StepFlyable(bool slantAnywhere = false) { return MakeWalkableFunc(FloorIsFlyable, slantAnywhere); }
+		public PathFinder.Stepable StepWalkableNow(bool slantAnywhere = false) { return MakeWalkableFunc(FloorIsWalkableNow, slantAnywhere); }
+		public PathFinder.Stepable StepFlyableNow(bool slantAnywhere = false)  { return MakeWalkableFunc(FloorIsFlyableNow, slantAnywhere); }
+		public PathFinder.Stepable StepAnywhere(bool slantAnywhere = false)  { return (f, t) => (FloorIsWalkable (t) ? 1 : (FloorIsAnywhere(t)? 2:9999)); }
 	}
 	
 }

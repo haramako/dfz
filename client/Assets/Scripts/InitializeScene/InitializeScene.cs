@@ -18,7 +18,7 @@ public class InitializeScene : MonoBehaviour {
 		var cfsManager = CfsManager.Instance;
 		var cfs = new Cfs.Cfs (
 			Application.temporaryCachePath, 
-			new System.Uri("http://27.90.199.90/"), 
+			new System.Uri("http://cfs.dragon-fang.com/"), 
 			hash);
 		cfs.Filter = (f) => {
 			return !f.EndsWith(".ab") || f.Contains("WebPlayer");

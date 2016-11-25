@@ -7,6 +7,7 @@ using System.Linq;
 using RSG;
 using Game;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class GameScene : MonoBehaviour {
 
@@ -22,13 +23,11 @@ public class GameScene : MonoBehaviour {
         Walking,
     }
 
-	public Terrain Terrain;
-	public MeshRenderer TerrainGridMesh;
-	public TerrainGrid TerrainGridNormal;
-    public TerrainGrid TerrainGridActive;
 	public GameObject CameraTarget;
 	public Camera MainCamera;
 	public CharacterContainer CharacterBase;
+
+	public GameSceneView View;
 
 	public GameObject ActionButtons;
 	public PoolBehavior ActionButtonBase;
@@ -36,50 +35,34 @@ public class GameScene : MonoBehaviour {
 
 	public GameObject SkillCutinBase;
 
+	public GameObject[] FieldObjects;
+
     Vector3 FocusToPoint; // カメラが向かうべきポイント
     float CameraDistanceTo; // カメラの距離
     int CurZoom = 1;
 	CameraMode cameraMode = CameraMode.None;
 
-    public new Dictionary<int, CharacterContainer> Characters = new Dictionary<int, CharacterContainer>();
+    public Dictionary<int, CharacterContainer> Characters = new Dictionary<int, CharacterContainer>();
 
-    public Battle Battle { get; private set; }
+    public Field Field { get; private set; }
 
     Mode mode;
 
 	void Start(){
 		var stage = G.Stages [0];
-		var sm = new int[stage.Width,stage.Height];
-		for( int i=0; i< stage.Tiles.Count; i++){
-			sm[i%stage.Width,i/stage.Width] = (stage.Tiles[i] == 0 || stage.Tiles[i] == 2 )?0:1;
-		}
 
         mode = Mode.None;
-		TerrainGridNormal.StatMap = sm;
-		TerrainGridActive.gameObject.SetActive (true);
-		TerrainGridActive.StatMap = new int[stage.Width, stage.Height];
-        TerrainGridActive.SetActiveGrids(new Point[0]);
         FocusToPoint = CameraTarget.transform.localPosition;
         CameraDistanceTo = -20f;
 		ActionButtons.SetActive (false);
 
-        Battle = new Battle();
-		TerrainGridNormal.Refresh ();
+        Field = new Field();
+		Field.Init (stage);
+
+		initField ();
+
+		Field.StartThread ();
     }
-
-	public void CutSceneFinished(){
-		Debug.Log ("CutSceneFinished");
-		cameraMode = CameraMode.Normal;
-		FocusToPoint = CameraTarget.transform.localPosition;
-		CameraDistanceTo = -20f;
-		MainCamera.transform.localPosition = new Vector3 (0, 0, -20);
-		MainCamera.transform.localRotation = Quaternion.identity;
-
-		var stage = G.Stages [0];
-		Battle.Init(stage, TerrainGridNormal.HeightMap);
-		RedrawAll();
-		Battle.StartThread();
-	}
 
 	public void OnSpeedupDown(){
 		Time.timeScale = 5.0f;
@@ -89,8 +72,38 @@ public class GameScene : MonoBehaviour {
 		Time.timeScale = 1.0f;
 	}
 
+	public void initField(){
+		var map = Field.Map;
+		for (int z = 0; z < map.Height; z++) {
+			for (int x = 0; x < map.Width; x++) {
+				var cell = map [x, z];
+				GameObject obj;
+				if (cell.Val == 1) {
+					obj = Instantiate (FieldObjects [0]);
+				}else{
+					obj = Instantiate (FieldObjects [1]);
+				}
+				obj.transform.localPosition = PointToVector (new Point (x, z));
+			}
+		}
+
+		foreach (var ch in Field.Map.Characters) {
+			ch.Dir = Direction.South;
+			UpdateCharacter(ch);
+		}
+
+		var mainch = Field.FindCharacter ("P1");
+		curCharacter = mainch;
+		MoveCameraTo (PointToVector( mainch.Position));
+		CameraDistanceTo = -40.0f;
+		cameraMode = CameraMode.Normal;
+	}
+
     void Update(){
 		Application.targetFrameRate = 60;
+
+		messageLoop ();
+		updateWalking ();
 
         var curPos = CameraTarget.transform.localPosition;
         curPos = Vector3.Lerp(FocusToPoint, curPos, Mathf.Pow(0.05f, Time.deltaTime));
@@ -106,29 +119,33 @@ public class GameScene : MonoBehaviour {
 			break;
 		}
 
-        if (mode == Mode.None)
-        {
-			Game.Message mes;
-            if (Battle.SendQueue.TryDequeue(out mes))
-            {
-                this.SendMessage(mes.Type, mes);
-            }
-        }
-
-		if (Input.GetKeyDown (KeyCode.S)) {
-			this.OnActionButtonClick ("skill");
-		}
-
 		if (Input.GetKey (KeyCode.F)) {
 			Time.timeScale = 10.0f;
 		} else {
 			Time.timeScale = 1.0f;
 		}
+
+	}
+
+	void messageLoop(){
+		//if (mode == Mode.None)
+		//{
+			while (true) {
+				Game.Message mes;
+				if (Field.SendQueue.TryDequeue (out mes)) {
+					this.SendMessage (mes.Type, mes);
+				} else {
+					break;
+				}
+			}
+		//}
 	}
 
     void Send(string command, params object[] param)
     {
-        Battle.RecvQueue.Enqueue(new Message(command, param));
+        Field.RecvQueue.Enqueue(new Message(command, param));
+		System.Threading.Thread.Sleep(4); // ちょっとだけまつ
+		messageLoop ();
     }
 
 	void MoveCameraTo(Vector3 pos){
@@ -149,8 +166,6 @@ public class GameScene : MonoBehaviour {
     public void OnDrag(PointerEventData ev){
         if (ev.button != PointerEventData.InputButton.Left) return;
         var delta = new Vector3 (ev.delta.x / Screen.width, 0, ev.delta.y / Screen.height);
-		var rot = Quaternion.Euler (0, 45, 0);
-		delta = rot * delta;
         MoveCameraTo( CameraTarget.transform.localPosition - delta * 10f);
 	}
 
@@ -164,34 +179,25 @@ public class GameScene : MonoBehaviour {
             switch (mode)
             {
             case Mode.QMove:
-                {
-					if (hit == curPosition) {
-						OnActionButtonClick ("move");
-					} else if (curRange.Any (p => (p == hit))) {
-						Debug.Log ("from" + curCharacter.Position + " to " + hit);
-						Point[] path = null;
-						Battle.Map.TemporaryOpen (curCharacter.Position, () => {
-							path = Battle.Map.PathFinder.FindPath (curPosition, hit, 6, Battle.Map.StepWalkableNow (10)).ToArray ();
-						});
-						if (path != null) {
-							curPosition = hit;
-							Walking (curCharacter, path);
-						}
-					}else if( curAttackRange.Any(p=>(p==hit))){
-						if ((hit - curPosition).GridLength () <= 1) {
-							var cr = GetCharacterRenderer (curCharacter);
-							cr.Chara.State = CharacterRendererState.None;
-							Send("AMove", curPath, "Attack", hit);
-							mode = Mode.None;
-							CloseAction();
-						}
-					}
-                }
+				OnFieldClick (hit);
                 break;
             default:
                 // DO NOTHING;
                 break;
             }
+		}
+	}
+
+	public void OnFieldClick(Point pos){
+		Debug.Log ("from" + curCharacter.Position + " to " + pos);
+		List<Point> path = null;
+		//Field.Map.TemporaryOpen (curCharacter.Position, () => {
+			path = Field.Map.PathFinder.FindPath (curCharacter.Position, pos, Field.Map.StepWalkableNow (), 10);
+		//});
+		if (path != null) {
+			View.ShowCursor (path);
+			Send ("AMove", path);
+			mode = Mode.None;
 		}
 	}
 
@@ -214,21 +220,7 @@ public class GameScene : MonoBehaviour {
     }
 
 	public Vector3 PointToVector(Point p){
-		var v = new Vector3 (p.X + 0.5f, 0, p.Y + 0.5f);
-		v.y = GetTerrainHeight (v);
-		return v;
-	}
-		
-	// 高さを取得する
-	public float GetTerrainHeight(Vector3 pos){
-		pos.y = 1000;
-		var ray = new Ray (pos, Vector3.down);
-		RaycastHit hit;
-		if (Physics.Raycast (ray, out hit)) {
-			return hit.point.y;
-		} else {
-			return 0;
-		}
+		return new Vector3 (p.X + 0.5f, 0, p.Y + 0.5f);
 	}
 
 	// スクリーン座標から、マス目の位置を取得する
@@ -258,9 +250,13 @@ public class GameScene : MonoBehaviour {
         }
     }
 
+	//===================================================================
+	// キャラクタの描画
+	//===================================================================
+
     public void RedrawAll()
     {
-        foreach( var ch in Battle.Map.Characters)
+        foreach( var ch in Field.Map.Characters)
         {
 			if (ch.Active) {
 				UpdateCharacter (ch);
@@ -287,12 +283,12 @@ public class GameScene : MonoBehaviour {
     {
         var cr = GetCharacterRenderer(ch);
         var pos = new Vector3(ch.Position.X + 0.5f, 0, ch.Position.Y + 0.5f);
-        pos.y = GetTerrainHeight(pos);
         cr.transform.localPosition = pos;
-		if (ch.AtlasId == 285 ) {
-			cr.transform.localScale = new Vector3 (2.5f, 2.5f, 2.5f);
-		}
     }
+
+	//===================================================================
+	// アクションボタン
+	//===================================================================
 
 	Action<string> OnActionButtonClick;
 
@@ -346,65 +342,30 @@ public class GameScene : MonoBehaviour {
     //===================================================================
 
     Character curCharacter;
-	Point curPosition;
-	Point[] curRange;
 	Point[] curAttackRange;
-	Point[] curPath;
 
     public void QMove(Message mes)
     {
         var ch = (Character)mes.Param[0];
         var cr = GetCharacterRenderer(ch);
         Point[] range = null;
-        Battle.Map.TemporaryOpen(ch.Position, () => { 
-			range = Battle.Map.PathFinder.FindMoveRange(ch.Position, 5, Battle.Map.StepWalkableNow(10)).ToArray(); 
-			List<Point> atks = new List<Point>();
-			foreach (var pos in range) {
-				foreach( var dir in DirectionUtil.All4 ){
-					var p2 = pos + dir.ToPos();
-					if( Battle.Map[p2].Character != null ){
-						atks.Add(p2);
-					}
-				}
-			}
-			curAttackRange = atks.Distinct().ToArray();
-		});
 
 		cr.Chara.State = CharacterRendererState.Active;
         mode = Mode.QMove;
         curCharacter = ch;
-		curPosition = ch.Position;
-		curRange = range;
-        TerrainGridActive.SetActiveGrids(range);
-
-		AttackMarkBase.ReleaseAll ();
-		foreach (var pos in curAttackRange) {
-			var attackMark = AttackMarkBase.Create ();
-			var cr2 = GetCharacterRenderer (Battle.Map [pos].Character);
-			attackMark.transform.SetParent (null, false);
-			attackMark.transform.position = cr2.transform.position + new Vector3(-0.5f,1f,-0.5f);
-		}
 
 		OpenAction (act=>{
 			switch(act){
 			case "cancel":
-				curPosition = ch.Position;
-				RedrawAll();
-				FocusTo(cr.transform.position);
+				CloseAction();
 				break;
 			case "move":
-				cr.Chara.State = CharacterRendererState.None;
-				Send("AMove", curPath);
-				mode = Mode.None;
 				CloseAction();
 				break;
 			case "attack":
+				CloseAction();
 				break;
 			case "skill":
-				cr.Chara.State = CharacterRendererState.None;
-				var dir = (curPath[curPath.Length-1] - curPath[curPath.Length-2]).ToDir();
-				Send("AMove", curPath, "Skill", dir);
-				mode = Mode.None;
 				CloseAction();
 				break;
 			default:
@@ -419,109 +380,68 @@ public class GameScene : MonoBehaviour {
         FocusTo(cr.transform.position);
     }
 
-	void Walking(Character ch, Point[] path){
-		StartCoroutine (WalkingCoroutin (ch, path));
-	}
+	bool first = true;
 
-	IEnumerator WalkingCoroutin(Character ch, Point[] path){
-		float n = 0;
-		var cr = GetCharacterRenderer(ch);
-		var dir = Direction.None;
-		while (true)
-		{
-			bool finish = false;
-			n += Time.deltaTime * 5;
-			var i = (int)n;
-			Vector2 pos;
-			if (n >= path.Length - 1)
-			{
-				finish = true;
-				pos = path[path.Length - 1].ToVector2();
-			}
-			else
-			{
-				var prevPos = path[i];
-				var nextPos = path[i + 1];
-				dir = (nextPos - prevPos).ToDir();
-				pos = Vector2.Lerp(prevPos.ToVector2(), nextPos.ToVector2(), Mathf.Repeat(n, 1));
-			}
-
-			var pos3 = new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f);
-			pos3.y = GetTerrainHeight(pos3);
-			cr.transform.localPosition = pos3;
-			cr.transform.localRotation = dir.ToWorldQuaternion ();
-
-			if (finish) break;
-			yield return null;
-		}
-
-		FocusTo(cr.transform.position);
-
-		Battle.Map.TemporaryOpen (curCharacter.Position, () => {
-			curPath = Battle.Map.PathFinder.FindPath (curCharacter.Position, path[path.Length-1], 5, Battle.Map.StepWalkableNow (10)).ToArray ();
-		});
-	}
-
-    IEnumerator Walk(Message mes)
+    void Walk(Message mes)
     {
-        float n = 0;
         var ch = (Character)mes.Param[0];
         var cr = GetCharacterRenderer(ch);
-        var path = (Point[])mes.Param[1];
-		var focus = mes.Param.Length >= 3 && (bool)mes.Param [2];
-        var dir = Direction.None;
+        var prevPos = (Point)mes.Param[1];
+		var pos = (Point)mes.Param [2];
 
-		if (focus) {
-			var pos = path [0].ToVector2 ();
-			var pos3 = new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f);
-			pos3.y = GetTerrainHeight(pos3);
-			FocusTo (pos3);
-			yield return new WaitForSeconds (0.3f);
-		}
-			
+        var dir = (pos - prevPos).ToDir();
+		var pos3 = PointToVector (pos);
 		cr.Animate ("EnemyWalk01");
+		cr.transform.localRotation = dir.ToWorldQuaternion();
 
-        while (true)
-        {
-            bool finish = false;
-            n += Time.deltaTime * 5;
-            var i = (int)n;
-            Vector2 pos;
-            if (n >= path.Length - 1)
-            {
-                finish = true;
-                pos = path[path.Length - 1].ToVector2();
-            }
-            else
-            {
-                var prevPos = path[i];
-                var nextPos = path[i + 1];
-                dir = (nextPos - prevPos).ToDir();
-                pos = Vector2.Lerp(prevPos.ToVector2(), nextPos.ToVector2(), Mathf.Repeat(n, 1));
-            }
-
-            var pos3 = new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f);
-            pos3.y = GetTerrainHeight(pos3);
-            cr.transform.localPosition = pos3;
-			cr.transform.localRotation = dir.ToWorldQuaternion();
-
-			if (focus) {
-				FocusTo (cr.transform.position);
+		walkings.Add (new Walking {
+			CharacterContainer = cr,
+			From = cr.transform.localPosition,
+			To = pos3,
+			Duration = 0.2f,
+			CurrentTime = walkingRest,
+			OnFinished = ()=>{ 
+				Send(null); 
+				messageLoop(); 
 			}
-
-            if (finish) break;
-            yield return null;
-        }
-        FocusTo(cr.transform.position);
-
-		Debug.Log (ch.Dir);
-		cr.transform.localRotation = ch.Dir.ToWorldQuaternion ();
-
-		cr.Stay ();
-
-        RedrawAll();
-        Send(null);
+		});
     }
+
+	public class Walking {
+		public CharacterContainer CharacterContainer;
+		public Vector3 From;
+		public Vector3 To;
+		public float Duration;
+		public float CurrentTime;
+		public Action OnFinished;
+	}
+
+	List<Walking> walkings = new List<Walking> ();
+	float walkingRest;
+
+	// 歩きのupdateごとの処理
+	void updateWalking(){
+		walkingRest = 0;
+
+		float deltaTime = Time.deltaTime;
+		foreach (var w in walkings) {
+			w.CurrentTime += deltaTime;
+			if (w.CurrentTime >= w.Duration) {
+				w.CurrentTime = w.Duration;
+			}
+			w.CharacterContainer.transform.localPosition = Vector3.Lerp (w.From, w.To, w.CurrentTime / w.Duration);
+			FocusToPoint = w.CharacterContainer.transform.localPosition;
+		}
+		Action onfinished = null;
+		foreach (var w in walkings) {
+			if (w.OnFinished != null && w.CurrentTime >= w.Duration) {
+				walkingRest = w.CurrentTime - w.Duration;
+				onfinished = w.OnFinished;
+			}
+		}
+		walkings.RemoveAll (w => (w.CurrentTime >= w.Duration));
+		if( onfinished != null ) onfinished ();
+	}
 
 	public void RedrawChar(Message mes){
 		var ch = (Character)mes.Param[0];
@@ -612,11 +532,5 @@ public class GameScene : MonoBehaviour {
 
 		RedrawAll();
 		Send(null);
-	}
-
-	public void KillDragon(){
-		var d = GameObject.Find ("Dragon");
-		d.SetActive (false);
-		Send (null);
 	}
 }

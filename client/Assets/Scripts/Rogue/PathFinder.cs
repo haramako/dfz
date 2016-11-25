@@ -59,7 +59,7 @@ namespace Game {
 			while( stackPos > 0 ){
 				Point cur = stack[--stackPos];
 				int curRest = rest[cur.Y*Width+cur.X];
-				foreach( Direction dir in DirectionUtil.All4 ){
+				foreach( Direction dir in DirectionUtil.All ){
 					Point dirPos = dir.ToPos ();
 					Point moveTo = new Point(cur.X + dirPos.X, cur.Y + dirPos.Y);
 					var cost = isWalkable (cur, moveTo);
@@ -100,7 +100,7 @@ namespace Game {
         /// <summary>
         /// 始点と終点を指定して経路を選択する
         /// </summary>
-        public List<Point> FindPath( Point _from, Point _to, int movePoint, Stepable isWalkable ){
+		public List<Point> FindPath( Point _from, Point _to, Stepable isWalkable, int movePoint = 100, bool includeFrom = false){
 			updateMoveCostTable(_from, movePoint, isWalkable);
 
 			// restから導かれる複数の経路から一つの経路にしぼる
@@ -113,7 +113,9 @@ namespace Game {
                     result.Add(new Point(cur));
                     cur -= fromDir [cur.Y*Width+cur.X].ToPos ();
 				}
-                result.Add(new Point(cur)); // 最後に自分を含む
+				if( includeFrom ){
+                	result.Add(new Point(cur)); // 最後に自分を含む
+				}
 
                 result.Reverse ();
 				return result;

@@ -27,10 +27,8 @@ namespace Game
         }
     }
 
-    public class Battle
+    public class Field
 	{
-        public static Battle Instance;
-
 		public Map Map { get; private set; }
 		public GameState State { get; private set; }
 		public int TurnNum{ get; private set; }
@@ -38,11 +36,13 @@ namespace Game
         public ConcurrentQueue<Message> RecvQueue = new ConcurrentQueue<Message>();
         public Thread GameThread;
 
+		Stage stage_;
+
 		public void log(object obj){
 			UnityEngine.Debug.Log (obj);
 		}
 		
-		public Battle ()
+		public Field ()
 		{
 			State = GameState.TurnStart;
 			TurnNum = 0;
@@ -76,40 +76,8 @@ namespace Game
 			return Map.Characters.First (c => c.Name == name);
 		}
 
-		public void CutScene(){
-			var scs = stage_.Characters.ToDictionary (sc => sc.Name);
-			var names = new string[]{ "P1", "P2", "P3", "P4", "E1", "E2", "E5", "E7", "E8", "E9", "E10" };
-			foreach (var nm in names) {
-				var ch = FindCharacter (nm);
-				ch.Active = false;
-			}
-			foreach( var nm in names ){
-				if (nm == "E1") {
-					var ch = FindCharacter (nm);
-					Send ("KillDragon");
-					ch.Active = true;
-					ch.Dir = Direction.West;
-					Send ("RedrawChar",ch);
-				} else {
-					var p1 = scs ["From:" + nm];
-					var fromPoint = new Point (p1.X, p1.Y);
-					var ch = FindCharacter (nm);
-					var path = Map.PathFinder.FindPath (fromPoint, ch.Position, 20, Map.StepAnywhere ());
-					ch.Active = true;
-					if (nm.StartsWith ("E")) {
-						ch.Dir = Direction.West;
-					} else {
-						ch.Dir = Direction.East;
-					}
-					Send ("Walk", ch, path.ToArray (), true);
-				}
-			}
-		}
-
-
         public void Process(){
 			try{
-				CutScene ();
 
 	            while (true)
 	            {
@@ -144,15 +112,13 @@ namespace Game
 			}
 		}
 		
-		Stage stage_;
-		public void Init(Stage stage, float[,] heightMap)
+		public void Init(Stage stage)
         {
 			stage_ = stage;
 			Map = new Map (stage.Width, stage.Height);
 			for (int x = 0; x < stage.Width; x++) {
 				for (int y = 0; y < stage.Height; y++) {
 					Map [x, y].Val = stage.Tiles [x + y * stage.Width];
-					Map [x, y].Height = (int)(heightMap [x, y] * 10);
 				}
 			}
 
@@ -181,23 +147,20 @@ namespace Game
 			State = GameState.Play;
 		}
 
+		List<Point> path_;
+
 		public void DoPlay(){
 			State = GameState.TurnEnd;
 			foreach (var ch in Map.Characters.OrderBy(x=>x.Speed))
             {
-                var res = SendRecv("AMove", "QMove", ch);
-                var path = (Point[])res.Param[0];
-				WalkCharacter(ch, path);
-				if (res.Param.Length > 1) {
-					var subcommand = (string)res.Param [1];
-					if (subcommand == "Attack") {
-						var targetPos = (Point)res.Param [2];
-						var target = Map [targetPos].Character;
-						SendRecv (null, "Attack", ch, target, (target.Position - ch.Position).ToDir (), 99);
-					}else if (subcommand == "Skill") {
-						var dir = (Direction)res.Param [2];
-						var path2 = Map.PathFinder.FindStraight (ch.Position, dir, 5, true, Map.StepAnywhere()).ToArray();
-						SendRecv (null, "Skill", ch, null, dir, path2);
+				if (ch.Name == "P1") {
+					if (path_ == null || path_.Count <= 0) {
+						var res = SendRecv ("AMove", "QMove", ch);
+						path_ = (List<Point>)res.Param [0];
+					}
+					if (path_.Count > 0) {
+						WalkCharacter (ch, path_ [0]);
+						path_.RemoveAt (0);
 					}
 				}
             }
@@ -207,10 +170,11 @@ namespace Game
 			State = GameState.TurnStart;
 		}
 
-        public void WalkCharacter(Character ch, Point[] path)
+        public void WalkCharacter(Character ch, Point pos)
         {
-            Map.MoveCharacter(ch, path.Last());
-            SendRecv(null, "Walk", ch, path);
+			var oldPos = ch.Position;
+            Map.MoveCharacter(ch, pos);
+			SendRecv(null, "Walk", ch, oldPos, pos);
         }
 
 		public string Display(){
@@ -219,7 +183,7 @@ namespace Game
 				for (int x = 0; x < Map.Height; x++) {
 					var ch = Map[x,y].Character;
 					if( ch != null ){
-						sb.AppendFormat ("{0} ", ch.Name[0]);
+						sb.AppendFormat ("{0} ", ch.Name [0]);
 					}else{
 						sb.AppendFormat ("{0} ", Map [x, y].Val);
 					}
