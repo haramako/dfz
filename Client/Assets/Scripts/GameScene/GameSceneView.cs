@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Game;
+using DG.Tweening;
 
 public class GameSceneView : MonoBehaviour {
 
@@ -16,7 +17,6 @@ public class GameSceneView : MonoBehaviour {
 	}
 
 	public void ShowCursor(IEnumerable<Point> path){
-		CursorBase.ReleaseAll ();
 		foreach (var p in path) {
 			var cursor = CursorBase.Create ();
 			var pos = GameScene.PointToVector (p);
@@ -27,8 +27,15 @@ public class GameSceneView : MonoBehaviour {
 
 	public void SpendCurosr(){
 		if (cursors_.Count > 0) {
-			CursorBase.Release (cursors_ [0]);
+			var cur = cursors_ [0];
 			cursors_.RemoveAt (0);
+
+			cur.FindByName<SpriteRenderer> ("New Sprite").material.DOFade (0, 1.0f);
+			cur.transform.DOScale (1.7f, 1.1f).OnComplete(()=>{
+				cur.FindByName<SpriteRenderer> ("New Sprite").material.color = Color.white;
+				cur.transform.localScale = Vector3.one;
+				CursorBase.Release (cur);
+			});
 		}
 	}
 

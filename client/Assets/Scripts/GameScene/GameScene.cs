@@ -8,6 +8,7 @@ using RSG;
 using Game;
 using UnityEngine.UI;
 using DG.Tweening;
+using System.Linq;
 
 public class GameScene : MonoBehaviour {
 
@@ -46,7 +47,7 @@ public class GameScene : MonoBehaviour {
 
     public Field Field { get; private set; }
 
-    Mode mode;
+    public Mode mode;
 
 	void Start(){
 		var stage = G.Stages [0];
@@ -128,22 +129,22 @@ public class GameScene : MonoBehaviour {
 	}
 
 	void messageLoop(){
-		//if (mode == Mode.None)
-		//{
-			while (true) {
-				Game.Message mes;
-				if (Field.SendQueue.TryDequeue (out mes)) {
-					this.SendMessage (mes.Type, mes);
-				} else {
-					break;
-				}
+		while (true) {
+			GameLog.ICommand log;
+			if (Field.SendQueue.TryDequeue (out log)) {
+				log.Process (this);
+			} else {
+				break;
 			}
-		//}
+		}
 	}
 
-    void Send(string command, params object[] param)
+    void Send(GameLog.IRequest request)
     {
-        Field.RecvQueue.Enqueue(new Message(command, param));
+		if (request == null) {
+			throw new System.ArgumentNullException ("Request must not be null");
+		}
+		Field.RecvQueue.Enqueue (request);
 		System.Threading.Thread.Sleep(4); // ちょっとだけまつ
 		messageLoop ();
     }
@@ -196,7 +197,9 @@ public class GameScene : MonoBehaviour {
 		//});
 		if (path != null) {
 			View.ShowCursor (path);
-			Send ("AMove", path);
+			var req = GameLog.WalkRequest.CreateInstance ();
+			req.Path = path.Select (p => new GameLog.Point (p)).ToList ();
+			Send (req);
 			mode = Mode.None;
 		}
 	}
@@ -380,32 +383,20 @@ public class GameScene : MonoBehaviour {
         FocusTo(cr.transform.position);
     }
 
-	bool first = true;
-
-    void Walk(Message mes)
-    {
-        var ch = (Character)mes.Param[0];
-        var cr = GetCharacterRenderer(ch);
-        var prevPos = (Point)mes.Param[1];
-		var pos = (Point)mes.Param [2];
-
-        var dir = (pos - prevPos).ToDir();
-		var pos3 = PointToVector (pos);
-		cr.Animate ("EnemyWalk01");
-		cr.transform.localRotation = dir.ToWorldQuaternion();
-
+	public void StartWalking(CharacterContainer cc, Point to){
+		var pos3 = PointToVector (to);
 		walkings.Add (new Walking {
-			CharacterContainer = cr,
-			From = cr.transform.localPosition,
+			CharacterContainer = cc,
+			From = cc.transform.localPosition,
 			To = pos3,
 			Duration = 0.2f,
 			CurrentTime = walkingRest,
 			OnFinished = ()=>{ 
-				Send(null); 
+				Send(GameLog.AckRequest.CreateInstance()); 
 				messageLoop(); 
 			}
 		});
-    }
+	}
 
 	public class Walking {
 		public CharacterContainer CharacterContainer;
@@ -448,7 +439,7 @@ public class GameScene : MonoBehaviour {
 		var cr = GetCharacterRenderer(ch);
 		UpdateCharacter (ch);
 		cr.transform.localRotation = ch.Dir.ToWorldQuaternion ();
-		Send (null);
+		Send(GameLog.AckRequest.CreateInstance()); 
 	}
 
 	IEnumerator Attack(Message mes)
@@ -482,7 +473,7 @@ public class GameScene : MonoBehaviour {
 		targetCr.Chara.Pose = CharacterRendererPose.Move;
 
 		RedrawAll();
-		Send(null);
+		Send(GameLog.AckRequest.CreateInstance()); 
 	}
 
 	public GameObject SkFire;
@@ -531,6 +522,6 @@ public class GameScene : MonoBehaviour {
 		SetFade (false);
 
 		RedrawAll();
-		Send(null);
+		Send(GameLog.AckRequest.CreateInstance()); 
 	}
 }

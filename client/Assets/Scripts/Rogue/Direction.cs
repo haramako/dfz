@@ -21,11 +21,11 @@ namespace Game {
 		public static readonly Direction[] All4 = new Direction[]{Direction.North, Direction.East, Direction.South, Direction.West};
 	}
 
-	/// DIRECTION関係の拡張メソッド
+	/// Direction関係の拡張メソッド
 	public static class DirectionExtension {
 
 		static readonly int[] xByDir = {0, 0, 1, 1, 1, 0, -1, -1, -1 };
-		static readonly int[] yByDir = {0, -1, -1, 0, 1, 1, 1, 0, -1 };
+		static readonly int[] yByDir = {0, 1, 1, 0, -1, -1, -1, 0, 1 };
 
 		/// <summary>
 		/// Pointに変換する(NORTH = (0,-1)とする)
@@ -63,7 +63,7 @@ namespace Game {
 			if (dir == Direction.None) {
 				return UnityEngine.Quaternion.identity;
 			}else{
-				return UnityEngine.Quaternion.AngleAxis(225 - (int)dir * 45, UnityEngine.Vector3.up);
+				return UnityEngine.Quaternion.AngleAxis(-45 + (int)dir * 45, UnityEngine.Vector3.up);
 			}
 		}
 	}

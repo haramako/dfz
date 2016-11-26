@@ -14,6 +14,148 @@ namespace GameLog {
   }
   #region Messages
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class Point : pb.Message {
+    private Point() { }
+    public static Point CreateInstance() { var obj = new Point(); obj.Finish(); return obj; }
+    public static Point CreateEmpty() { return new Point(); }
+    private static readonly Point defaultInstance = new Point();
+    public static Point DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int X;
+
+    public int Y;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (X != 0) {
+        output.WriteInt32(1, X);
+      }
+      if (Y != 0) {
+        output.WriteInt32(2, Y);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (X != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, X);
+      }
+      if (Y != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, Y);
+      }
+      return size;
+    }
+    public static Point ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Point ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Point ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.X);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.Y);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class WaitForRequest : pb.Message {
+    private WaitForRequest() { }
+    public static WaitForRequest CreateInstance() { var obj = new WaitForRequest(); obj.Finish(); return obj; }
+    public static WaitForRequest CreateEmpty() { return new WaitForRequest(); }
+    private static readonly WaitForRequest defaultInstance = new WaitForRequest();
+    public static WaitForRequest DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      return size;
+    }
+    public static WaitForRequest ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static WaitForRequest ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static WaitForRequest ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class Walk : pb.Message {
     private Walk() { }
     public static Walk CreateInstance() { var obj = new Walk(); obj.Finish(); return obj; }
@@ -29,6 +171,8 @@ namespace GameLog {
 
     public int Y;
 
+    public int Dir;
+
     #region Lite runtime methods
     #endregion
 
@@ -42,6 +186,9 @@ namespace GameLog {
       }
       if (Y != 0) {
         output.WriteInt32(3, Y);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(4, Dir);
       }
     }
 
@@ -61,6 +208,9 @@ namespace GameLog {
       }
       if (Y != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(3, Y);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(4, Dir);
       }
       return size;
     }
@@ -98,6 +248,10 @@ namespace GameLog {
             input.ReadInt32(ref this.Y);
             break;
           }
+          case 32: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
         }
       }
     }
@@ -109,24 +263,195 @@ namespace GameLog {
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-  public sealed partial class WalkOrder : pb.Message {
-    private WalkOrder() { }
-    public static WalkOrder CreateInstance() { var obj = new WalkOrder(); obj.Finish(); return obj; }
-    public static WalkOrder CreateEmpty() { return new WalkOrder(); }
-    private static readonly WalkOrder defaultInstance = new WalkOrder();
-    public static WalkOrder DefaultInstance {
+  public sealed partial class Shutdown : pb.Message {
+    private Shutdown() { }
+    public static Shutdown CreateInstance() { var obj = new Shutdown(); obj.Finish(); return obj; }
+    public static Shutdown CreateEmpty() { return new Shutdown(); }
+    private static readonly Shutdown defaultInstance = new Shutdown();
+    public static Shutdown DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      return size;
+    }
+    public static Shutdown ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Shutdown ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Shutdown ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class AckRequest : pb.Message {
+    private AckRequest() { }
+    public static AckRequest CreateInstance() { var obj = new AckRequest(); obj.Finish(); return obj; }
+    public static AckRequest CreateEmpty() { return new AckRequest(); }
+    private static readonly AckRequest defaultInstance = new AckRequest();
+    public static AckRequest DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      return size;
+    }
+    public static AckRequest ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static AckRequest ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static AckRequest ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class ShutdownRequest : pb.Message {
+    private ShutdownRequest() { }
+    public static ShutdownRequest CreateInstance() { var obj = new ShutdownRequest(); obj.Finish(); return obj; }
+    public static ShutdownRequest CreateEmpty() { return new ShutdownRequest(); }
+    private static readonly ShutdownRequest defaultInstance = new ShutdownRequest();
+    public static ShutdownRequest DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      return size;
+    }
+    public static ShutdownRequest ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static ShutdownRequest ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static ShutdownRequest ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class WalkRequest : pb.Message {
+    private WalkRequest() { }
+    public static WalkRequest CreateInstance() { var obj = new WalkRequest(); obj.Finish(); return obj; }
+    public static WalkRequest CreateEmpty() { return new WalkRequest(); }
+    private static readonly WalkRequest defaultInstance = new WalkRequest();
+    public static WalkRequest DefaultInstance {
       get { return defaultInstance; }
     }
 
     public int CharacterId;
 
-    public int FromX;
-
-    public int FromY;
-
-    public int ToX;
-
-    public int ToY;
+    public List<global::GameLog.Point> Path;
 
     #region Lite runtime methods
     #endregion
@@ -136,17 +461,8 @@ namespace GameLog {
       if (CharacterId != 0) {
         output.WriteInt32(1, CharacterId);
       }
-      if (FromX != 0) {
-        output.WriteInt32(2, FromX);
-      }
-      if (FromY != 0) {
-        output.WriteInt32(3, FromY);
-      }
-      if (ToX != 0) {
-        output.WriteInt32(4, ToX);
-      }
-      if (ToY != 0) {
-        output.WriteInt32(5, ToY);
+      if (Path != null && Path.Count > 0) {
+        output.WriteMessageArray(2, Path);
       }
     }
 
@@ -161,27 +477,20 @@ namespace GameLog {
       if (CharacterId != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(1, CharacterId);
       }
-      if (FromX != 0) {
-        size += pb::CodedOutputStream.ComputeInt32Size(2, FromX);
-      }
-      if (FromY != 0) {
-        size += pb::CodedOutputStream.ComputeInt32Size(3, FromY);
-      }
-      if (ToX != 0) {
-        size += pb::CodedOutputStream.ComputeInt32Size(4, ToX);
-      }
-      if (ToY != 0) {
-        size += pb::CodedOutputStream.ComputeInt32Size(5, ToY);
+      if( Path != null ) {
+        foreach (global::GameLog.Point element in Path) {
+          size += pb::CodedOutputStream.ComputeMessageSize(2, element);
+        }
       }
       return size;
     }
-    public static WalkOrder ParseFrom(byte[] data) {
+    public static WalkRequest ParseFrom(byte[] data) {
       var mes = CreateInstance(); mes.MergeFrom(data); return mes;
     }
-    public static WalkOrder ParseFrom(global::System.IO.Stream input) {
+    public static WalkRequest ParseFrom(global::System.IO.Stream input) {
       var mes = CreateInstance(); mes.MergeFrom(input); return mes;
     }
-    public static WalkOrder ParseFrom(pb::CodedInputStream input) {
+    public static WalkRequest ParseFrom(pb::CodedInputStream input) {
       var mes = CreateInstance(); mes.MergeFrom(input); return mes;
     }
     public override void MergeFrom(pb::CodedInputStream input) {
@@ -201,20 +510,8 @@ namespace GameLog {
             input.ReadInt32(ref this.CharacterId);
             break;
           }
-          case 16: {
-            input.ReadInt32(ref this.FromX);
-            break;
-          }
-          case 24: {
-            input.ReadInt32(ref this.FromY);
-            break;
-          }
-          case 32: {
-            input.ReadInt32(ref this.ToX);
-            break;
-          }
-          case 40: {
-            input.ReadInt32(ref this.ToY);
+          case 18: {
+            input.ReadMessageArray(tag, this.Path, global::GameLog.Point.CreateEmpty);
             break;
           }
         }
@@ -224,6 +521,9 @@ namespace GameLog {
     public override void Init() {
     }
     public override void Finish() {
+    if( Path == null ){
+      Path = new List<global::GameLog.Point>();
+    }
     }
   }
 

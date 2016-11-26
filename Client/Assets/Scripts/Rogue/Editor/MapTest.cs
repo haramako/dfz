@@ -10,25 +10,6 @@ namespace Game {
 
 		Map map;
 
-		Map load(string mapdata){
-			var newMap = new Map (8,8);
-			int y = 0;
-			foreach( var line in mapdata.Split('\n')){
-				if (line == "") continue;
-				int x = 0;
-				foreach (var c in line) {
-					int n;
-					if (int.TryParse (""+c, out n)) {
-						//Debug.Log (""+x+","+y+"="+n);
-						newMap [x, y].Val = n;
-						x++;
-					}
-				}
-				y++;
-			}
-			return newMap;
-		}
-
 		string pathToString(List<Point> path){
 			if (path == null) {
 				return "null";
@@ -37,14 +18,15 @@ namespace Game {
 			}
 		}
 
-		[TestFixtureSetUp]
+		[SetUp]
 		public void SetUp(){
-			map = load (@"
-				00000
-				01010
-				01110
-				01110
-				00000");
+			map = TestUtil.CreateMap (
+			//   01234
+				"00000", // 4
+				"01110", // 3
+				"01110", // 2
+				"01010", // 1
+				"00000");// 0
 		}
 
 		[TestCase(1,1,3,1,4)]
@@ -85,6 +67,7 @@ namespace Game {
 			}
 		}
 
+		[Test]
 		public void TestLimitedWithZero (){
 			var path = map.PathFinder.FindPath (new Point (1, 1), new Point (1, 1), map.StepFlyable (), 1);
 			Assert.IsNotNull (path);

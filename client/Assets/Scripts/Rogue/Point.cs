@@ -30,6 +30,10 @@ namespace Game
 			Y = src.Y;
 		}
 
+		public static implicit operator GameLog.Point(Point src){
+			return new GameLog.Point(src.X, src.Y);
+		}
+
 		public static Point operator + (Point a, Point b) {
 			return new Point (a.X + b.X, a.Y + b.Y);
 		}
@@ -76,9 +80,9 @@ namespace Game
 		}
 
 		static Direction[] pos2dir = new Direction[] {
-			Direction.NorthWest, Direction.North, Direction.NorthEast,
-			Direction.West, Direction.None, Direction.East,
 			Direction.SouthWest, Direction.South, Direction.SouthEast,
+			Direction.West, Direction.None, Direction.East,
+			Direction.NorthWest, Direction.North, Direction.NorthEast,
 		};
 
 		/// <summary>

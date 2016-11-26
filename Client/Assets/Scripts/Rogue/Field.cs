@@ -14,6 +14,7 @@ namespace Game
         Play,
 		TurnEnd,
 		GameOver,
+		Shutdowned,
 	}
 
     public class Message
@@ -32,16 +33,12 @@ namespace Game
 		public Map Map { get; private set; }
 		public GameState State { get; private set; }
 		public int TurnNum{ get; private set; }
-        public ConcurrentQueue<Message> SendQueue = new ConcurrentQueue<Message>();
-        public ConcurrentQueue<Message> RecvQueue = new ConcurrentQueue<Message>();
+		public ConcurrentQueue<GameLog.ICommand> SendQueue = new ConcurrentQueue<GameLog.ICommand>();
+		public ConcurrentQueue<GameLog.IRequest> RecvQueue = new ConcurrentQueue<GameLog.IRequest>();
         public Thread GameThread;
 
 		Stage stage_;
 
-		public void log(object obj){
-			UnityEngine.Debug.Log (obj);
-		}
-		
 		public Field ()
 		{
 			State = GameState.TurnStart;
@@ -54,23 +51,66 @@ namespace Game
             GameThread.Start();
         }
 
-        public Message Send(string command, params object[] param){
-			log("Send: " + command + ": " + UnityEngine.JsonUtility.ToJson(param));
-			SendQueue.Enqueue (new Message (command, param ));
-            var recv = RecvQueue.Dequeue();
-            log("Recv: " + recv.Type + ": " + UnityEngine.JsonUtility.ToJson(recv.Param));
-            return recv;
+		public void Shutdown(){
+			if (State != GameState.Shutdowned) {
+				Request (GameLog.ShutdownRequest.CreateInstance ());
+			}
+		}
+
+		public GameLog.ICommand Request(GameLog.IRequest request){
+			if (State == GameState.Shutdowned) {
+				throw new System.InvalidOperationException ("field is already shutdowned");
+			}
+			RecvQueue.Enqueue (request);
+			return SendQueue.Dequeue ();
+		}
+
+		public void log(object obj){
+					#if UNITY
+					UnityEngine.Debug.Log (obj);
+					#else
+					System.Console.WriteLine(obj);
+					#endif
+				}
+
+		string inspect(object obj){
+#if UNITY
+			return UnityEngine.JsonUtility.ToJson(obj);
+#else
+			return obj.ToString();
+#endif
+		}
+
+		public class ShutdownException: Exception {}
+
+		public GameLog.IRequest Send(GameLog.ICommand command){
+			if (command == null) {
+				throw new ArgumentNullException ("command must not be null");
+			}
+			log("F->S: " + command + ": " + inspect(command));
+			SendQueue.Enqueue (command);
+            var req = RecvQueue.Dequeue();
+			log("F<-S: " + req.GetType() + ": " + inspect(req));
+			if (req is GameLog.ShutdownRequest) {
+				//SendQueue.Enqueue (GameLog.Shutdown.CreateInstance());
+				throw new ShutdownException ();
+			}
+            return req;
         }
 
-        public Message SendRecv(string recvType, string command, params object[] param)
+		public T SendRecv<T>(GameLog.ICommand command) where T : GameLog.IRequest
         {
-            var res = Send(command, param);
-            if( res.Type != recvType)
+			var res = Send(command);
+			if( res.GetType() != typeof(T))
             {
-                throw new InvalidOperationException("require " + recvType + " but " + res.Type);
+				throw new InvalidOperationException("require " + typeof(T) + " but " + res.GetType());
             }
-            return res;
+			return (T)res;
         }
+
+		public Character FindCharacter(int cid){
+			return Map.Characters.First (c => c.Id == cid);
+		}
 
 		public Character FindCharacter(string name){
 			return Map.Characters.First (c => c.Name == name);
@@ -102,14 +142,32 @@ namespace Game
 	                {
 	                    State = GameState.GameOver;
 	                }
+					catch(ShutdownException){
+						break;
+					}
 	                catch(Exception ex)
 	                {
+#if UNITY
 	                    UnityEngine.Debug.LogException(ex);
+#else
+						throw;
+#endif
 	                }
 	            }
 			}catch(Exception ex){
+#if UNITY
 				UnityEngine.Debug.LogException (ex);
+#else
+				throw;
+#endif
 			}
+			log ("Shutdown");
+			SendQueue.Enqueue (GameLog.Shutdown.CreateInstance ());
+			State = GameState.Shutdowned;
+		}
+
+		public void Init(Map map){
+			Map = map;
 		}
 		
 		public void Init(Stage stage)
@@ -150,13 +208,12 @@ namespace Game
 		List<Point> path_;
 
 		public void DoPlay(){
-			State = GameState.TurnEnd;
 			foreach (var ch in Map.Characters.OrderBy(x=>x.Speed))
             {
 				if (ch.Name == "P1") {
 					if (path_ == null || path_.Count <= 0) {
-						var res = SendRecv ("AMove", "QMove", ch);
-						path_ = (List<Point>)res.Param [0];
+						var res = SendRecv<GameLog.WalkRequest> (GameLog.WaitForRequest.CreateInstance());
+						path_ = res.Path.Select (p => new Point (p)).ToList ();
 					}
 					if (path_.Count > 0) {
 						WalkCharacter (ch, path_ [0]);
@@ -164,6 +221,7 @@ namespace Game
 					}
 				}
             }
+			State = GameState.TurnEnd;
         }
         
 		public void DoTurnEnd(){
@@ -174,7 +232,13 @@ namespace Game
         {
 			var oldPos = ch.Position;
             Map.MoveCharacter(ch, pos);
-			SendRecv(null, "Walk", ch, oldPos, pos);
+			ch.Dir = (pos - oldPos).ToDir ();
+			var cmd = GameLog.Walk.CreateInstance ();
+			cmd.CharacterId = ch.Id;
+			cmd.X = pos.X;
+			cmd.Y = pos.Y;
+			cmd.Dir = (int)ch.Dir;
+			SendRecv<GameLog.AckRequest> (cmd);
         }
 
 		public string Display(){

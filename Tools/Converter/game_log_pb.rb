@@ -6,21 +6,36 @@ require 'google/protobuf'
 require 'master_pb'
 require 'game_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
+  add_message "GameLog.Point" do
+    optional :x, :int32, 1
+    optional :y, :int32, 2
+  end
+  add_message "GameLog.WaitForRequest" do
+  end
   add_message "GameLog.Walk" do
     optional :character_id, :int32, 1
     optional :x, :int32, 2
     optional :y, :int32, 3
+    optional :dir, :int32, 4
   end
-  add_message "GameLog.WalkOrder" do
+  add_message "GameLog.Shutdown" do
+  end
+  add_message "GameLog.AckRequest" do
+  end
+  add_message "GameLog.ShutdownRequest" do
+  end
+  add_message "GameLog.WalkRequest" do
     optional :character_id, :int32, 1
-    optional :from_x, :int32, 2
-    optional :from_y, :int32, 3
-    optional :to_x, :int32, 4
-    optional :to_y, :int32, 5
+    repeated :path, :message, 2, "GameLog.Point"
   end
 end
 
 module GameLog
+  Point = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.Point").msgclass
+  WaitForRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.WaitForRequest").msgclass
   Walk = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.Walk").msgclass
-  WalkOrder = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.WalkOrder").msgclass
+  Shutdown = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.Shutdown").msgclass
+  AckRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.AckRequest").msgclass
+  ShutdownRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.ShutdownRequest").msgclass
+  WalkRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.WalkRequest").msgclass
 end
