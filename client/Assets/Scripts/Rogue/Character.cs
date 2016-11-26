@@ -32,6 +32,8 @@ namespace Game
 		}
 
 		public bool IsDead { get { return Hp <= 0; } }
+		public bool IsPlayer { get { return Type == CharacterType.Player; } }
+		public bool IsEnemy { get { return Type == CharacterType.Enemy; } }
 
 		public override string ToString(){
 			return Name;

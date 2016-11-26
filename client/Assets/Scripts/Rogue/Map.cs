@@ -186,7 +186,7 @@ namespace Game
 						return 1;
 					} else {
 						// 移動不可
-						return 9999;
+						return PathFinder.CantMove;
 					}
 				};
 			} else {
@@ -196,7 +196,7 @@ namespace Game
 						if( predicate (to) && FloorIsFlyable(new Point(from.X, to.Y)) && FloorIsFlyable(new Point(to.X, from.Y)) ){
 							return 1;
 						}else{
-							return 9999;
+							return PathFinder.CantMove;
 						}
 					}
 					if (predicate (to)) {
@@ -204,7 +204,7 @@ namespace Game
 						return 1;
 					} else {
 						// 移動不可
-						return 9999;
+						return PathFinder.CantMove;
 					}
 				};
 			}

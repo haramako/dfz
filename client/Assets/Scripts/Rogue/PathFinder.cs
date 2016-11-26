@@ -13,6 +13,9 @@ namespace Game {
 		/// スタックの最大サイズ
 		private static readonly int MaxStack = 1000;
 
+		/// 動けないこと表す移動量
+		public const int CantMove = 9999;
+
 		/// 各位置の残り移動力
 		private int[] rest;
 		/// 各の歩いてきた方向（南から北に歩いてきた場合は、北が格納されるので注意！）

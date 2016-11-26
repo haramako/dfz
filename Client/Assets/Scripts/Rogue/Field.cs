@@ -8,42 +8,41 @@ using Master;
 namespace Game
 {
 	public class GameOverException : Exception {}
+	public class ShutdownException: Exception {}
 
 	public enum GameState {
 		TurnStart,
+		Think,
+		Move,
         Play,
 		TurnEnd,
 		GameOver,
 		Shutdowned,
 	}
 
-    public class Message
-    {
-        public string Type { get; private set; }
-        public object[] Param { get; private set; }
-        public Message(string type, params object[] param)
-        {
-            Type = type;
-            Param = param;
-        }
-    }
-
     public class Field
 	{
-		public Map Map { get; private set; }
-		public GameState State { get; private set; }
-		public int TurnNum{ get; private set; }
 		public ConcurrentQueue<GameLog.ICommand> SendQueue = new ConcurrentQueue<GameLog.ICommand>();
 		public ConcurrentQueue<GameLog.IRequest> RecvQueue = new ConcurrentQueue<GameLog.IRequest>();
-        public Thread GameThread;
+		public Thread GameThread;
 
-		Stage stage_;
+		public Map Map { get; private set; }
+		public GameState State { get; private set; }
+		public int TurnNum { get; private set; }
+
+		public Character Player { get; private set; }
+
+		Stage stage;
 
 		public Field ()
 		{
 			State = GameState.TurnStart;
 			TurnNum = 0;
 		}
+
+		//========================================================
+		// プロセス通信
+		//========================================================
 
         public void StartThread()
         {
@@ -64,24 +63,6 @@ namespace Game
 			RecvQueue.Enqueue (request);
 			return SendQueue.Dequeue ();
 		}
-
-		public void log(object obj){
-					#if UNITY
-					UnityEngine.Debug.Log (obj);
-					#else
-					System.Console.WriteLine(obj);
-					#endif
-				}
-
-		string inspect(object obj){
-#if UNITY
-			return UnityEngine.JsonUtility.ToJson(obj);
-#else
-			return obj.ToString();
-#endif
-		}
-
-		public class ShutdownException: Exception {}
 
 		public GameLog.IRequest Send(GameLog.ICommand command){
 			if (command == null) {
@@ -108,6 +89,26 @@ namespace Game
 			return (T)res;
         }
 
+		//========================================================
+		// ユーティリティ
+		//========================================================
+
+		public void log(object obj){
+			#if UNITY
+			UnityEngine.Debug.Log (obj);
+			#else
+			System.Console.WriteLine(obj);
+			#endif
+		}
+
+		string inspect(object obj){
+			#if UNITY
+			return UnityEngine.JsonUtility.ToJson(obj);
+			#else
+			return obj.ToString();
+			#endif
+		}
+
 		public Character FindCharacter(int cid){
 			return Map.Characters.First (c => c.Id == cid);
 		}
@@ -116,63 +117,22 @@ namespace Game
 			return Map.Characters.First (c => c.Name == name);
 		}
 
-        public void Process(){
-			try{
-
-	            while (true)
-	            {
-	                try
-	                {
-	                    switch (State)
-	                    {
-	                    case GameState.TurnStart:
-	                        DoTurnStart();
-	                        break;
-	                    case GameState.Play:
-	                        DoPlay();
-	                        break;
-	                    case GameState.TurnEnd:
-	                        DoTurnEnd();
-	                        break;
-	                    case GameState.GameOver:
-	                        break;
-	                    }
-	                }
-	                catch (GameOverException)
-	                {
-	                    State = GameState.GameOver;
-	                }
-					catch(ShutdownException){
-						break;
-					}
-	                catch(Exception ex)
-	                {
-#if UNITY
-	                    UnityEngine.Debug.LogException(ex);
-#else
-						throw;
-#endif
-	                }
-	            }
-			}catch(Exception ex){
-#if UNITY
-				UnityEngine.Debug.LogException (ex);
-#else
-				throw;
-#endif
-			}
-			log ("Shutdown");
-			SendQueue.Enqueue (GameLog.Shutdown.CreateInstance ());
-			State = GameState.Shutdowned;
+		public void SetPlayerCharacter(Character c){
+			c.Type = CharacterType.Player;
+			Player = c;
 		}
+
+		//========================================================
+		// 初期化
+		//========================================================
 
 		public void Init(Map map){
 			Map = map;
 		}
 		
-		public void Init(Stage stage)
+		public void Init(Stage stage_)
         {
-			stage_ = stage;
+			stage = stage_;
 			Map = new Map (stage.Width, stage.Height);
 			for (int x = 0; x < stage.Width; x++) {
 				for (int y = 0; y < stage.Height; y++) {
@@ -200,17 +160,85 @@ namespace Game
 				
         }
 
+		//========================================================
+		// ターンの処理
+		//========================================================
+
+		public void Process(){
+			try{
+
+				while (true)
+				{
+					try
+					{
+						switch (State)
+						{
+						case GameState.TurnStart:
+							DoTurnStart();
+							break;
+						case GameState.Think:
+							DoThink();
+							break;
+						case GameState.Move:
+							DoMove();
+							break;
+						case GameState.Play:
+							DoPlay();
+							break;
+						case GameState.TurnEnd:
+							DoTurnEnd();
+							break;
+						case GameState.GameOver:
+							break;
+						}
+					}
+					catch (GameOverException)
+					{
+						State = GameState.GameOver;
+					}
+					catch(ShutdownException){
+						break;
+					}
+					catch(Exception ex)
+					{
+						#if UNITY
+						UnityEngine.Debug.LogException(ex);
+						#else
+						throw;
+						#endif
+					}
+				}
+			}catch(Exception ex){
+				#if UNITY
+				UnityEngine.Debug.LogException (ex);
+				#else
+				throw;
+				#endif
+			}
+			log ("Shutdown");
+			SendQueue.Enqueue (GameLog.Shutdown.CreateInstance ());
+			State = GameState.Shutdowned;
+		}
+
 		public void DoTurnStart(){
 			TurnNum++;
-			State = GameState.Play;
+			State = GameState.Think;
 		}
 
 		List<Point> path_;
 
+		public void DoThink(){
+			State = GameState.Move;
+		}
+
+		public void DoMove(){
+			State = GameState.Play;
+		}
+
 		public void DoPlay(){
 			foreach (var ch in Map.Characters.OrderBy(x=>x.Speed))
             {
-				if (ch.Name == "P1") {
+				if (ch.IsPlayer) {
 					if (path_ == null || path_.Count <= 0) {
 						var res = SendRecv<GameLog.WalkRequest> (GameLog.WaitForRequest.CreateInstance());
 						path_ = res.Path.Select (p => new Point (p)).ToList ();
@@ -223,10 +251,14 @@ namespace Game
             }
 			State = GameState.TurnEnd;
         }
-        
+
 		public void DoTurnEnd(){
 			State = GameState.TurnStart;
 		}
+
+		//========================================================
+		// キャラクターの処理
+		//========================================================
 
         public void WalkCharacter(Character ch, Point pos)
         {

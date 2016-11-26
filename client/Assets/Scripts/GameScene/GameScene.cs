@@ -347,6 +347,7 @@ public class GameScene : MonoBehaviour {
     Character curCharacter;
 	Point[] curAttackRange;
 
+	/*
     public void QMove(Message mes)
     {
         var ch = (Character)mes.Param[0];
@@ -382,6 +383,7 @@ public class GameScene : MonoBehaviour {
 
         FocusTo(cr.transform.position);
     }
+    */
 
 	public void StartWalking(CharacterContainer cc, Point to){
 		var pos3 = PointToVector (to);
@@ -434,6 +436,7 @@ public class GameScene : MonoBehaviour {
 		if( onfinished != null ) onfinished ();
 	}
 
+	#if false
 	public void RedrawChar(Message mes){
 		var ch = (Character)mes.Param[0];
 		var cr = GetCharacterRenderer(ch);
@@ -524,4 +527,5 @@ public class GameScene : MonoBehaviour {
 		RedrawAll();
 		Send(GameLog.AckRequest.CreateInstance()); 
 	}
+	#endif
 }
