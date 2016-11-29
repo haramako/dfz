@@ -42,7 +42,7 @@ namespace Game {
 		Field field;
 		int counter = 1;
 
-		Character AddChara(int x, int y, string name = null, int hp = 100, int attack = 10, int defense = 10){
+		Character AddChara(int x, int y, string name = null, int hp = 100, int attack = 10, int defense = 10, CharacterType type = CharacterType.Enemy){
 			var c = Character.CreateInstance ();
 			c.Id = counter;
 			if( name == null ) name = "E" + counter;
@@ -51,40 +51,30 @@ namespace Game {
 			c.MaxHp = hp;
 			c.Attack = attack;
 			c.Defense = defense;
+			c.Type = type;
 			counter++;
 			field.Map.AddCharacter (c, new Point(x, y));
+			if (type == CharacterType.Player) {
+				field.SetPlayerCharacter (c);
+			}
 			return c;
 		}
 
-		public List<GameLog.ICommand> wait(){
-			var result = new List<GameLog.ICommand> ();
-			while (true) {
-				if (field.State == GameState.Shutdowned) {
-					throw new System.InvalidOperationException ("already shutdowned");
-				}
-				var cmd = field.SendQueue.Dequeue ();
-				result.Add (cmd);
-				System.Console.WriteLine (cmd);
-				if (cmd is GameLog.WaitForRequest || cmd is GameLog.Shutdown) {
-					return result;
-				} else {
-					field.RecvQueue.Enqueue (GameLog.AckRequest.CreateInstance ());
-					return result;
-				}
-			}
+		public List<GameLog.ICommand> ack(){
+			return field.Request (new GameLog.AckResponseRequest ());
 		}
 
 		public List<GameLog.ICommand> walk(Character c, Direction dir){
-			var req = GameLog.WalkRequest.CreateInstance ();
-			req.CharacterId = c.Id;
-			req.Path = new List<GameLog.Point>(){ c.Position + dir.ToPos() };
-			field.RecvQueue.Enqueue (req);
-			return wait ();
+			var req = new GameLog.WalkRequest {
+				CharacterId = c.Id,
+				Path = new List<GameLog.Point> (){ c.Position + dir.ToPos () },
+			};
+			return field.Request (req);
 		}
 
 		public void start(){
 			field.StartThread ();
-			wait ();
+			ack ();
 		}
 
 		[SetUp]
@@ -99,24 +89,28 @@ namespace Game {
 				"0000000");// 0
 
 			field = new Field();
+			field.RequestTimeoutMillis = 1000;
 			field.Init(map);
 		}
 
 		[TearDown]
 		public void TearDown(){
+			System.Console.WriteLine ("teardown");
 			field.Shutdown ();
 		}
 
 		[TestCase]
 		public void TestShutdown(){
-			AddChara(1, 1, "P1");
+			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
 			field.StartThread ();
+			field.Request (new GameLog.AckResponseRequest ());
+			System.Threading.Thread.Sleep (10);
 			field.Shutdown ();
 		}
 
 		[TestCase]
 		public void TestWalk(){
-			var p = AddChara(1, 1, "P1");
+			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
 			start ();
 
 			var cmd = (GameLog.Walk)walk (p, Direction.North).Last();
@@ -129,12 +123,20 @@ namespace Game {
 
 
 		[TestCase]
-		public void TestEnemy(){
-			var p = AddChara(1, 4, "P1");
-			var e1 = AddChara(1, 1, "E1");
+		public void TestEnemyThinkToMove(){
+			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
+			var e1 = AddChara(1, 4, "E1");
 			start ();
 
-			var cmd = (GameLog.Walk)walk (p, Direction.North).Last();
+			walk (p, Direction.North);
+
+			Assert.AreEqual (new Point (1, 3), e1.Position);
+			Assert.AreEqual (Direction.South, e1.Dir);
+
+			walk (p, Direction.South);
+
+			Assert.AreEqual (new Point (1, 2), e1.Position);
+			Assert.AreEqual (Direction.South, e1.Dir);
 
 		}
 

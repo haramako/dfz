@@ -23,7 +23,7 @@ namespace Game {
   #region Messages
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class Character : pb.Message {
-    private Character() { }
+    public Character() { }
     public static Character CreateInstance() { var obj = new Character(); obj.Finish(); return obj; }
     public static Character CreateEmpty() { return new Character(); }
     private static readonly Character defaultInstance = new Character();

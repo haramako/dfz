@@ -4,6 +4,7 @@ using System.Threading;
 
 public class ConcurrentQueue<T>
 {
+	int limit;
     private readonly object syncLock = new object();
     private Queue<T> queue;
 
@@ -18,9 +19,10 @@ public class ConcurrentQueue<T>
         }
     }
 
-    public ConcurrentQueue()
+	public ConcurrentQueue(int limit_ = 0)
     {
         this.queue = new Queue<T>();
+		limit = limit_;
     }
 
     public T Peek()
@@ -31,32 +33,62 @@ public class ConcurrentQueue<T>
         }
     }
 
+	public bool TryEnqueue(T obj)
+	{
+		lock (syncLock)
+		{
+			while(true) {
+				if (limit > 0 && queue.Count >= limit) {
+					return false;
+				}else{
+					queue.Enqueue (obj);
+					if (queue.Count <= 1) {
+						Monitor.Pulse (syncLock);
+					}
+					return true;
+				}
+			}
+		}
+	}
+
     public void Enqueue(T obj)
     {
         lock (syncLock)
         {
-            queue.Enqueue(obj);
-            if( queue.Count <= 1)
-            {
-                Monitor.Pulse(syncLock);
-            }
+			while(true) {
+				if (limit > 0 && queue.Count >= limit) {
+					Monitor.Wait (syncLock);
+				}else{
+					queue.Enqueue (obj);
+					if (queue.Count <= 1) {
+						Monitor.Pulse (syncLock);
+					}
+					break;
+				}
+			}
         }
     }
 
-    public T Dequeue()
+	public T Dequeue(int timeoutMillis = -1)
     {
         lock (syncLock)
         {
             while (true)
             {
-                T result;
                 if(queue.Count > 0 )
                 {
                     return queue.Dequeue();
                 }
                 else
                 {
-                    Monitor.Wait(syncLock);
+					if (timeoutMillis >= 0) {
+						Monitor.Wait (syncLock, timeoutMillis);
+						if (queue.Count <= 0) {
+							throw new TimeoutException ("timeout dequeue");
+						}
+					} else {
+						Monitor.Wait (syncLock);
+					}
                 }
             }
         }

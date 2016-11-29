@@ -36,7 +36,7 @@ namespace Game{
 				return new MoveResult{};
 			}
 
-			var path = f.Map.PathFinder.FindPath (c.Position, target.Position, f.Map.StepWalkable ());
+			var path = f.Map.PathFinder.FindPath (c.Position, target.Position, f.Map.StepWalkable (), 2);
 			if (path == null) {
 				return new MoveResult{};
 			}

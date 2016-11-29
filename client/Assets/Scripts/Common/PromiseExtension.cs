@@ -23,6 +23,17 @@ namespace RSG {
 	}
 
 	public class PromiseEx {
+		public static IPromise Delay(float sec){
+			var promise = new Promise();
+			Worker.Instance.StartCoroutine (delayCoroutine(promise, sec));
+			return promise;
+		}
+
+		static IEnumerator delayCoroutine(Promise promise, float sec){
+			yield return new WaitForSeconds (sec);
+			promise.Resolve ();
+		}
+
 		public static IPromise<WWW> StartWWW(string url){
 			var promise = new Promise<WWW> ();
 			Worker.Instance.StartCoroutine (WWWToPromiseCoroutine(promise, new WWW(url)));

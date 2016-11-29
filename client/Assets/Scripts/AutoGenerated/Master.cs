@@ -15,7 +15,7 @@ namespace Master {
   #region Messages
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class PbxHeader : pb.Message {
-    private PbxHeader() { }
+    public PbxHeader() { }
     public static PbxHeader CreateInstance() { var obj = new PbxHeader(); obj.Finish(); return obj; }
     public static PbxHeader CreateEmpty() { return new PbxHeader(); }
     private static readonly PbxHeader defaultInstance = new PbxHeader();
@@ -28,7 +28,7 @@ namespace Master {
     public static partial class Types {
       [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
       public sealed partial class IntIndexEntry : pb.Message {
-        private IntIndexEntry() { }
+        public IntIndexEntry() { }
         public static IntIndexEntry CreateInstance() { var obj = new IntIndexEntry(); obj.Finish(); return obj; }
         public static IntIndexEntry CreateEmpty() { return new IntIndexEntry(); }
         private static readonly IntIndexEntry defaultInstance = new IntIndexEntry();
@@ -111,7 +111,7 @@ namespace Master {
 
       [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
       public sealed partial class StringIndexEntry : pb.Message {
-        private StringIndexEntry() { }
+        public StringIndexEntry() { }
         public static StringIndexEntry CreateInstance() { var obj = new StringIndexEntry(); obj.Finish(); return obj; }
         public static StringIndexEntry CreateEmpty() { return new StringIndexEntry(); }
         private static readonly StringIndexEntry defaultInstance = new StringIndexEntry();
@@ -280,7 +280,7 @@ namespace Master {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class Skill : pb.Message {
-    private Skill() { }
+    public Skill() { }
     public static Skill CreateInstance() { var obj = new Skill(); obj.Finish(); return obj; }
     public static Skill CreateEmpty() { return new Skill(); }
     private static readonly Skill defaultInstance = new Skill();
@@ -363,7 +363,7 @@ namespace Master {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class Ability : pb.Message {
-    private Ability() { }
+    public Ability() { }
     public static Ability CreateInstance() { var obj = new Ability(); obj.Finish(); return obj; }
     public static Ability CreateEmpty() { return new Ability(); }
     private static readonly Ability defaultInstance = new Ability();
@@ -434,7 +434,7 @@ namespace Master {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class CharacterTemplate : pb.Message {
-    private CharacterTemplate() { }
+    public CharacterTemplate() { }
     public static CharacterTemplate CreateInstance() { var obj = new CharacterTemplate(); obj.Finish(); return obj; }
     public static CharacterTemplate CreateEmpty() { return new CharacterTemplate(); }
     private static readonly CharacterTemplate defaultInstance = new CharacterTemplate();
@@ -565,7 +565,7 @@ namespace Master {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class StageCharacter : pb.Message {
-    private StageCharacter() { }
+    public StageCharacter() { }
     public static StageCharacter CreateInstance() { var obj = new StageCharacter(); obj.Finish(); return obj; }
     public static StageCharacter CreateEmpty() { return new StageCharacter(); }
     private static readonly StageCharacter defaultInstance = new StageCharacter();
@@ -708,7 +708,7 @@ namespace Master {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class Stage : pb.Message {
-    private Stage() { }
+    public Stage() { }
     public static Stage CreateInstance() { var obj = new Stage(); obj.Finish(); return obj; }
     public static Stage CreateEmpty() { return new Stage(); }
     private static readonly Stage defaultInstance = new Stage();

@@ -63,6 +63,7 @@ public class GameScene : MonoBehaviour {
 		initField ();
 
 		Field.StartThread ();
+		Send (new GameLog.AckResponseRequest ());
     }
 
 	public void OnSpeedupDown(){
@@ -130,21 +131,35 @@ public class GameScene : MonoBehaviour {
 
 	void messageLoop(){
 		while (true) {
-			GameLog.ICommand log;
-			if (Field.SendQueue.TryDequeue (out log)) {
-				log.Process (this);
-			} else {
+			List<GameLog.ICommand> cmds = Field.ReadCommandsAsync ();
+			if (cmds == null) {
+				break;
+			}
+			var promises = cmds.Select (cmd => {
+				return cmd.Process (this);
+			}).ToArray ();
+
+			switch (Field.WaitingType) {
+			case WaitingType.None:
+				break;
+			case WaitingType.Ack:
+				Promise.All (promises).Done (() => {
+					Send (new GameLog.AckResponseRequest ());
+				});
+				break;
+			case WaitingType.Action:
+				mode = Mode.QMove;
 				break;
 			}
 		}
 	}
 
-    void Send(GameLog.IRequest request)
+    public void Send(GameLog.IRequest request)
     {
 		if (request == null) {
 			throw new System.ArgumentNullException ("Request must not be null");
 		}
-		Field.RecvQueue.Enqueue (request);
+		Field.RequestAsync (request);
 		System.Threading.Thread.Sleep(4); // ちょっとだけまつ
 		messageLoop ();
     }
@@ -385,55 +400,58 @@ public class GameScene : MonoBehaviour {
     }
     */
 
-	public void StartWalking(CharacterContainer cc, Point to){
-		var pos3 = PointToVector (to);
-		walkings.Add (new Walking {
-			CharacterContainer = cc,
-			From = cc.transform.localPosition,
-			To = pos3,
-			Duration = 0.2f,
-			CurrentTime = walkingRest,
-			OnFinished = ()=>{ 
-				Send(GameLog.AckRequest.CreateInstance()); 
-				messageLoop(); 
-			}
-		});
+	public IPromise StartWalking(Walking w){
+		var promise = new Promise ();
+		walking = w;
+		w.Duration = 0.2f;
+		w.CurrentTime = walkingRest;
+		w.OnFinished = () => {
+			promise.Resolve ();
+		};
+		return promise;
 	}
 
 	public class Walking {
-		public CharacterContainer CharacterContainer;
-		public Vector3 From;
-		public Vector3 To;
+		public class Item {
+			public CharacterContainer CharacterContainer;
+			public Vector3 From;
+			public Vector3 To;
+		}
+
+		public Item[] Items;
 		public float Duration;
 		public float CurrentTime;
 		public Action OnFinished;
 	}
 
-	List<Walking> walkings = new List<Walking> ();
+	Walking walking;
 	float walkingRest;
 
 	// 歩きのupdateごとの処理
 	void updateWalking(){
 		walkingRest = 0;
+		if (walking == null) {
+			return;
+		}
 
-		float deltaTime = Time.deltaTime;
-		foreach (var w in walkings) {
-			w.CurrentTime += deltaTime;
-			if (w.CurrentTime >= w.Duration) {
-				w.CurrentTime = w.Duration;
-			}
-			w.CharacterContainer.transform.localPosition = Vector3.Lerp (w.From, w.To, w.CurrentTime / w.Duration);
-			FocusToPoint = w.CharacterContainer.transform.localPosition;
+		walking.CurrentTime += Time.deltaTime;
+		var cur = Mathf.Min(walking.CurrentTime, walking.Duration);
+
+		foreach (var w in walking.Items) {
+			w.CharacterContainer.transform.localPosition = Vector3.Lerp (w.From, w.To, cur / walking.Duration);
 		}
-		Action onfinished = null;
-		foreach (var w in walkings) {
-			if (w.OnFinished != null && w.CurrentTime >= w.Duration) {
-				walkingRest = w.CurrentTime - w.Duration;
-				onfinished = w.OnFinished;
+
+		if (walking.CurrentTime >= walking.Duration) {
+			walkingRest = walking.CurrentTime - walking.Duration;
+			if (walking.OnFinished != null) {
+				walking.OnFinished ();
 			}
+			walking = null;
+			View.SpendCurosr ();
 		}
-		walkings.RemoveAll (w => (w.CurrentTime >= w.Duration));
-		if( onfinished != null ) onfinished ();
+
+		var player = GetCharacterRenderer(Field.Player);
+		FocusToPoint = player.transform.localPosition;
 	}
 
 	#if false

@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Game;
+using RSG;
 
 namespace GameLog {
 	public interface ICommand {
-		void Process (GameScene scene);
+		IPromise Process (GameScene scene);
 	}
 
 	public interface IRequest {
@@ -27,24 +29,47 @@ namespace GameLog {
 	}
 
 	public partial class Shutdown : ICommand {
-		public void Process(GameScene scene){
-		}
-	}
-
-	public partial class WaitForRequest : ICommand {
-		public void Process(GameScene scene){
-			scene.mode = GameScene.Mode.QMove;
+		public IPromise Process(GameScene scene){
+			return Promise.Resolved ();
 		}
 	}
 
 	public partial class Walk : ICommand {
-		public void Process(GameScene scene){
+		public IPromise Process(GameScene scene){
 			var ch = scene.Field.FindCharacter (CharacterId);
 			var cc = scene.GetCharacterRenderer (ch);
 			cc.Animate ("EnemyWalk01");
 			cc.transform.localRotation = ((Direction)Dir).ToWorldQuaternion();
-			scene.StartWalking (cc, new Point (X, Y));
-			scene.View.SpendCurosr ();
+			var w = new GameScene.Walking(){
+				Items = new GameScene.Walking.Item[]{ new GameScene.Walking.Item{
+						CharacterContainer=cc, 
+						From=cc.transform.localPosition,
+						To=scene.PointToVector(new Point(X,Y)),
+					}}
+			};
+			return scene.StartWalking (w);
+		}
+	}
+
+	public partial class WalkMulti : ICommand {
+		public IPromise Process(GameScene scene){
+			var items = Items.Select( w=>{
+				var ch = scene.Field.FindCharacter (w.CharacterId);
+				var cc = scene.GetCharacterRenderer (ch);
+				cc.Animate ("EnemyWalk01");
+				cc.transform.localRotation = ((Direction)w.Dir).ToWorldQuaternion();
+				return new GameScene.Walking.Item{
+					CharacterContainer=cc, 
+					From=scene.PointToVector(new Point(w.OldX,w.OldY)),
+					To=scene.PointToVector(new Point(w.X,w.Y)),
+				};
+			}).ToArray();
+				
+			var walking = new GameScene.Walking(){
+				Items = items,
+			};
+
+			return scene.StartWalking (walking);
 		}
 	}
 
@@ -57,7 +82,7 @@ namespace GameLog {
 		}
 	}
 
-	public partial class AckRequest : IRequest {
+	public partial class AckResponseRequest : IRequest {
 		public void Process(Field f){
 		}
 	}
