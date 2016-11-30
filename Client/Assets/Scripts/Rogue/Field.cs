@@ -46,6 +46,8 @@ namespace Game
 
 		Stage stage;
 
+		public bool NoUnity;
+
 		public Field ()
 		{
 			State = GameState.Prelude;
@@ -172,27 +174,27 @@ namespace Game
 		//========================================================
 
 		public void log(object obj){
-			#if true
-			UnityEngine.Debug.Log (obj);
-			#else
-			System.Console.WriteLine(obj);
-			#endif
+			if (!NoUnity) {
+				UnityEngine.Debug.Log (obj);
+			} else {
+				System.Console.WriteLine (obj);
+			}
 		}
 
 		public void logException(Exception ex){
-			#if true
-			UnityEngine.Debug.LogException (ex);
-			#else
-			log (ex);
-			#endif
+			if (!NoUnity) {
+				UnityEngine.Debug.LogException (ex);
+			} else {
+				log (ex);
+			}
 		}
 
 		string inspect(object obj){
-			#if true
-			return UnityEngine.JsonUtility.ToJson(obj);
-			#else
-			return obj.ToString();
-			#endif
+			if (!NoUnity) {
+				return UnityEngine.JsonUtility.ToJson (obj);
+			} else {
+				return obj.ToString ();
+			}
 		}
 
 		public Character FindCharacter(int cid){
@@ -214,6 +216,35 @@ namespace Game
 
 		public void Init(Map map){
 			Map = map;
+		}
+
+		public void InitRandom(Stage stage_){
+			Map = new Map (64, 64);
+			var gen = new MapGenerator.Simple ();
+			gen.Generate (Map, new RandomXS(13456));
+
+			stage = stage_;
+			int i = 0;
+			foreach (var sc in stage.Characters) {
+				if (!(sc.Name.StartsWith ("E") || sc.Name.StartsWith ("P"))) {
+					continue;
+				}
+				var c = Character.CreateInstance();
+				c.Id = i++;
+				c.Name = sc.Name;
+				c.AtlasId = sc.Char;
+				c.Speed = sc.Speed;
+				c.Type = CharacterType.Enemy;
+				if (sc.Name == "P1") {
+					SetPlayerCharacter (c);
+					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
+				} else if (sc.Name.StartsWith ("E")) {
+					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
+				} else {
+					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
+				}
+				Map.AddCharacter(c, new Point(sc.X,	sc.Y));
+			}
 		}
 		
 		public void Init(Stage stage_)

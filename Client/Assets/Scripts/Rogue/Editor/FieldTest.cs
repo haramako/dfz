@@ -89,6 +89,7 @@ namespace Game {
 				"0000000");// 0
 
 			field = new Field();
+			field.NoUnity = true;
 			field.RequestTimeoutMillis = 1000;
 			field.Init(map);
 		}
@@ -113,9 +114,7 @@ namespace Game {
 			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
 			start ();
 
-			var cmd = (GameLog.Walk)walk (p, Direction.North).Last();
-			Assert.AreEqual (p.Position, new Point (cmd.X, cmd.Y));
-			Assert.AreEqual (p.Dir,	(Direction)cmd.Dir);
+			walk (p, Direction.North);
 
 			Assert.AreEqual (new Point (1, 2), p.Position);
 			Assert.AreEqual (Direction.North, p.Dir);

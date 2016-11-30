@@ -32,18 +32,19 @@ namespace Game
 	
 	public class Floor {
 		public int Val;
+		public int RoomId;
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
 
 		public bool Walkable {
 			get {
-				return Val == 1;
+				return Val == 1 || Val == 2;
 			}
 		}
 
 		public bool Flyable {
 			get {
-				return Val == 1;
+				return Val == 1 || Val == 2;
 			}
 		}
 
@@ -86,14 +87,52 @@ namespace Game
 			}
 		}
 
+		string numberToString(int n){
+			if (n < 0) {
+				return "" + n;
+			} else if (n < 10) {
+				return ((char)('0' + n)).ToString();
+			} else if (n < 36) {
+				return ((char)('A' + (n-10))).ToString();
+			} else {
+				return "" + n;
+			}
+		}
+
 		public string Display(){
 			var sb = new StringBuilder ();
-			for (int y = 0; y < Height; y++) {
+			for (int y = Height-1; y >= 0; y--) {
 				for (int x = 0; x < Width; x++) {
-					sb.AppendFormat ("{0},", GetCell(x, y).Val);
+					var val = GetCell (x, y).Val;
+					switch (val) {
+					case 0:
+						sb.Append (" ");
+						break;
+					case 1:
+						sb.Append (numberToString(GetCell(x,y).RoomId));
+						break;
+					case 2:
+						sb.Append ("#");
+						break;
+					default:
+						sb.Append ("[" + val + "]");
+						break;
+					}
+					//sb.AppendFormat ("{0:D2},", GetCell(x, y).Val);
 				}
 				sb.AppendLine ();
 			}
+
+			/*
+			sb.AppendLine ();
+
+			for (int y = Height-1; y >= 0; y--) {
+				for (int x = 0; x < Width; x++) {
+					sb.AppendFormat ("{0:D2},", GetCell(x, y).RoomId);
+				}
+				sb.AppendLine ();
+			}
+			*/
 			return sb.ToString ();
 		}
 

@@ -58,7 +58,7 @@ public class GameScene : MonoBehaviour {
 		ActionButtons.SetActive (false);
 
         Field = new Field();
-		Field.Init (stage);
+		Field.InitRandom (stage);
 
 		initField ();
 
@@ -80,7 +80,7 @@ public class GameScene : MonoBehaviour {
 			for (int x = 0; x < map.Width; x++) {
 				var cell = map [x, z];
 				GameObject obj;
-				if (cell.Val == 1) {
+				if (cell.Val == 1 || cell.Val == 2) {
 					obj = Instantiate (FieldObjects [0]);
 				}else{
 					obj = Instantiate (FieldObjects [1]);
