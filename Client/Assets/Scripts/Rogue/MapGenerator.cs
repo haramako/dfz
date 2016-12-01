@@ -16,7 +16,12 @@ namespace Game {
 }
 
 namespace Game.MapGenerator {
-	
+
+	/// <summary>
+	/// 矩形を表すオブジェクト.
+	/// 
+	/// (MinX,MinY)〜(MaxX,MaxY)の範囲、ただし Maxの点は含まない矩形を表す。
+	/// </summary>
 	public struct Rect {
 		public int MinX;
 		public int MinY;
@@ -53,6 +58,15 @@ namespace Game.MapGenerator {
 	}
 
 	public class Util {
+		
+		/// <summary>
+		/// 複数のPointから経路を表す点の集合を返す.
+		/// 
+		/// pointsの最初の点と最後の点も経路に含む。
+		/// また、直角に移動しない場合は、InvalidOperationException 例外を投げる。
+		/// </summary>
+		/// <returns>経路のすべての点</returns>
+		/// <param name="points">経路をあらわす複数の点</param>
 		public static List<Point> MakePath(params Point[] points){
 			if (points.Length <= 0) {
 				return new List<Point>{ };
@@ -86,14 +100,24 @@ namespace Game.MapGenerator {
 						}
 					}
 				} else {
-					throw new InvalidOperationException();
+					throw new InvalidOperationException("all path must be vertical/horizontal");
 				}
 			}
-			line.Add (points [points.Length - 1]);
+			line.Add (points [points.Length - 1]); // 最後の点を追加する
 
 			return line;
 		}
 
+		/// <summary>
+		/// 通路を描画する.
+		/// 
+		/// すでにある通路などと衝突した場合は、falseを返し、なにも描画されない。
+		/// </summary>
+		/// <returns><c>true</c>通路が描画できればtrueが返す。すでにある通路と衝突した場合はfalseを返す</returns>
+		/// <param name="map">描画対象のMap</param>
+		/// <param name="val">設定のVal</param>
+		/// <param name="roomId">設定するRoomId</param>
+		/// <param name="points">経路のPointの配列</param>
 		public static bool DrawNode(Map map, int val, int roomId, params Point[] points){
 			var path = MakePath (points);
 
@@ -115,6 +139,13 @@ namespace Game.MapGenerator {
 			return true;
 		}
 
+		/// <summary>
+		/// 矩形の領域を描画する
+		/// </summary>
+		/// <param name="map">描画Map</param>
+		/// <param name="r">対象の矩形(Maxの辺は含まない)</param>
+		/// <param name="val">設定するVal</param>
+		/// <param name="roomId">設定するRoomID</param>
 		public static void DrawRect(Map map, Rect r, int val, int roomId){
 			r.Normalize ();
 			for (var x = r.MinX; x < r.MaxX; x++) {
@@ -126,40 +157,53 @@ namespace Game.MapGenerator {
 		}
 	}
 
-	public class Simple : MapGeneratorBase {
+	/// <summary>
+	/// 部屋作成用に分割した空間
+	/// </summary>
+	public class RoomArea {
+		public int Id; // ID
+		public Rect Outer; // 空白を含むエリアの矩形
+		public Rect Inner; // 部屋そのものの矩形
+		public RoomArea[] Neighbors; // 隣接している部屋
 
-		public class RoomArea {
-			public int Id;
-			public Rect Outer;
-			public Rect Inner;
-			public RoomArea[] Neighbors;
-
-			public Direction NeighborDir(Rect r){
-				if (Outer.MinX == r.MaxX ){
-					if ((Outer.MaxY > r.MinY && Outer.MinY < r.MaxY)) {
-						return Direction.West;
-					}
-				} else if (Outer.MaxX == r.MinX) {
-					if ((Outer.MaxY > r.MinY && Outer.MinY < r.MaxY)) {
-						return Direction.East;
-					}
-				} else if (Outer.MinY == r.MaxY) {
-					if (Outer.MaxX > r.MinX && Outer.MinX < r.MaxX) {
-						return Direction.South;
-					}
-				} else if (Outer.MaxY == r.MinY) {
-					if (Outer.MaxX > r.MinX && Outer.MinX < r.MaxX) {
-						return Direction.North;
-					}
+		/// <summary>
+		/// 部屋が隣接しているかどうか、および接続している方向を取得する
+		/// </summary>
+		/// <returns>自分から見て対象のRoomAreaが隣接している方向</returns>
+		/// <param name="room">対象のRoomArea</param>
+		public Direction NeighborDir(RoomArea room){
+			var r = room.Outer;
+			if (Outer.MinX == r.MaxX ){
+				if ((Outer.MaxY > r.MinY && Outer.MinY < r.MaxY)) {
+					return Direction.West;
 				}
-				return Direction.None;
+			} else if (Outer.MaxX == r.MinX) {
+				if ((Outer.MaxY > r.MinY && Outer.MinY < r.MaxY)) {
+					return Direction.East;
+				}
+			} else if (Outer.MinY == r.MaxY) {
+				if (Outer.MaxX > r.MinX && Outer.MinX < r.MaxX) {
+					return Direction.South;
+				}
+			} else if (Outer.MaxY == r.MinY) {
+				if (Outer.MaxX > r.MinX && Outer.MinX < r.MaxX) {
+					return Direction.North;
+				}
 			}
-
-			public override string ToString ()
-			{
-				return "Room(id=" + Id + " r=" + Outer + " n=[" + string.Join (",", Neighbors.Select (r => "" + r.Id).ToArray()) + "])";
-			}
+			return Direction.None;
 		}
+
+		// 文字列に変換する
+		public override string ToString ()
+		{
+			return "RoomArea(id=" + Id + " o=" + Outer + " n=[" + string.Join (",", Neighbors.Select (r => "" + r.Id).ToArray()) + "])";
+		}
+	}
+
+	/// <summary>
+	/// 区間を２分割していって、部屋を配置する
+	/// </summary>
+	public class Simple : MapGeneratorBase {
 
 		public Simple() {
 		}
@@ -174,12 +218,12 @@ namespace Game.MapGenerator {
 			var root = new Rect (0, 0, map.Width, map.Height);
 
 			int i = 1;
-			var rooms = SplitRoom (root, 12).Select(r=>new RoomArea{Outer=r, Id=i++}).ToArray();
+			var rooms = SplitRoom (root, 8).Select(r=>new RoomArea{Outer=r, Id=i++}).ToArray();
 
 			foreach (var r in rooms) {
-				r.Neighbors = rooms.Where (r2 => (r.NeighborDir (r2.Outer) != Direction.None)).ToArray ();
+				r.Neighbors = rooms.Where (r2 => (r.NeighborDir (r2) != Direction.None)).ToArray ();
 				if (r.Neighbors.Length > 4) {
-					r.Neighbors = r.Neighbors.Take (4).ToArray ();
+					r.Neighbors = r.Neighbors.OrderBy(x=>random.RangeInt(0,100)).Take (4).ToArray ();
 				}
 			}
 
@@ -189,11 +233,16 @@ namespace Game.MapGenerator {
 				
 			foreach (var r in rooms) {
 				foreach (var r2 in r.Neighbors) {
-					for( int j=0; j<10; j++){
-						if (r.Id < r2.Id) {
+					if (r.Id < r2.Id) {
+						bool drawn = false;
+						for (int j = 0; j < 10; j++) {
 							if (MakeNode (r, r2)) {
+								drawn = true;
 								break;
 							}
+						}
+						if (!drawn) {
+							Console.WriteLine ("cant drawn");
 						}
 					}
 				}
@@ -205,7 +254,7 @@ namespace Game.MapGenerator {
 		}
 
 		public void MakeRoom(RoomArea r){
-			if (random.RangeInt (0, 10) < 3) {
+			if (random.RangeInt (0, 10) < 1) {
 				var w = 1;
 				var h = 1;
 				var x = random.RangeInt (2, r.Outer.Width - w - 2);
@@ -224,7 +273,7 @@ namespace Game.MapGenerator {
 		}
 
 		public bool MakeNode(RoomArea r1, RoomArea r2){
-			var dir = r1.NeighborDir (r2.Outer);
+			var dir = r1.NeighborDir (r2);
 			var p1 = new Point (random.RangeInt (r1.Inner.MinX, r1.Inner.MaxX), random.RangeInt (r1.Inner.MinY, r1.Inner.MaxY));
 			var p2 = new Point (random.RangeInt (r2.Inner.MinX, r2.Inner.MaxX), random.RangeInt (r2.Inner.MinY, r2.Inner.MaxY));
 

@@ -136,21 +136,22 @@ public class GameScene : MonoBehaviour {
 				break;
 			}
 			var promises = cmds.Select (cmd => {
+				Debug.Log(cmd);
 				return cmd.Process (this);
 			}).ToArray ();
 
-			switch (Field.WaitingType) {
-			case WaitingType.None:
-				break;
-			case WaitingType.Ack:
-				Promise.All (promises).Done (() => {
+			Promise.All (promises).Done (() => {
+				switch (Field.WaitingType) {
+				case WaitingType.None:
+					break;
+				case WaitingType.Ack:
 					Send (new GameLog.AckResponseRequest ());
-				});
-				break;
-			case WaitingType.Action:
-				mode = Mode.QMove;
-				break;
-			}
+					break;
+				case WaitingType.Action:
+					mode = Mode.QMove;
+					break;
+				}
+			});
 		}
 	}
 
@@ -159,6 +160,7 @@ public class GameScene : MonoBehaviour {
 		if (request == null) {
 			throw new System.ArgumentNullException ("Request must not be null");
 		}
+		Debug.Log (request);
 		Field.RequestAsync (request);
 		System.Threading.Thread.Sleep(4); // ちょっとだけまつ
 		messageLoop ();
@@ -206,16 +208,29 @@ public class GameScene : MonoBehaviour {
 
 	public void OnFieldClick(Point pos){
 		Debug.Log ("from" + curCharacter.Position + " to " + pos);
+
+		// 攻撃
+		var target = Field.Map [pos].Character;
+		if (target != null) {
+			if (target != Field.Player && (Field.Player.Position-pos).GridLength() == 1) {
+				var dir = (pos - Field.Player.Position).ToDir ();
+				mode = Mode.None;
+				Send (new GameLog.SkillRequest (){ CharacterId = Field.Player.Id, Dir = (int)dir, SkillId = "attack" });
+				return;
+			}
+		}
+
+		// 移動
 		List<Point> path = null;
-		//Field.Map.TemporaryOpen (curCharacter.Position, () => {
-			path = Field.Map.PathFinder.FindPath (curCharacter.Position, pos, Field.Map.StepWalkableNow (), 10);
-		//});
+		path = Field.Map.PathFinder.FindPath (curCharacter.Position, pos, Field.Map.StepWalkableNow (), 10);
+
 		if (path != null) {
 			View.ShowCursor (path);
-			var req = GameLog.WalkRequest.CreateInstance ();
-			req.Path = path.Select (p => new GameLog.Point (p)).ToList ();
-			Send (req);
+			var req = new GameLog.WalkRequest {
+				Path = path.Select (p => new GameLog.Point (p)).ToList ()
+			};
 			mode = Mode.None;
+			Send (req);
 		}
 	}
 
@@ -401,6 +416,7 @@ public class GameScene : MonoBehaviour {
     */
 
 	public IPromise StartWalking(Walking w){
+		Debug.Log ("start");
 		var promise = new Promise ();
 		walking = w;
 		w.Duration = 0.2f;
@@ -442,12 +458,14 @@ public class GameScene : MonoBehaviour {
 		}
 
 		if (walking.CurrentTime >= walking.Duration) {
+			var onFinished = walking.OnFinished;
 			walkingRest = walking.CurrentTime - walking.Duration;
-			if (walking.OnFinished != null) {
-				walking.OnFinished ();
-			}
 			walking = null;
 			View.SpendCurosr ();
+
+			if (onFinished != null) {
+				onFinished ();
+			}
 		}
 
 		var player = GetCharacterRenderer(Field.Player);

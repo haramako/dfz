@@ -106,13 +106,13 @@ namespace Game
 		}
 
 		/// <summary>
-		/// 縦横のみの移動で測った距離.
+		/// 縦横斜めの移動で測った距離.
 		/// 
-		/// 斜めへの移動は、２として換算される。
+		/// 斜めへの移動は、１として換算される。
 		/// </summary>
 		/// <returns>長さ</returns>
 		public int GridLength () {
-			return System.Math.Abs(X) + System.Math.Abs(Y);
+			return Math.Max(Math.Abs(X), Math.Abs(Y));
 		}
 	}
 

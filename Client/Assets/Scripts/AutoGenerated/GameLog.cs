@@ -12,6 +12,15 @@ namespace GameLog {
   public static partial class GameLog {
 
   }
+  #region Enums
+  public enum Animation {
+    None = 0,
+    Attack = 1,
+    Damaged = 2,
+  }
+
+  #endregion
+
   #region Messages
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class Point : pb.Message {
@@ -84,6 +93,77 @@ namespace GameLog {
           }
           case 16: {
             input.ReadInt32(ref this.Y);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class DamageInfo : pb.Message {
+    public DamageInfo() { }
+    public static DamageInfo CreateInstance() { var obj = new DamageInfo(); obj.Finish(); return obj; }
+    public static DamageInfo CreateEmpty() { return new DamageInfo(); }
+    private static readonly DamageInfo defaultInstance = new DamageInfo();
+    public static DamageInfo DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int Amount;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (Amount != 0) {
+        output.WriteInt32(1, Amount);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (Amount != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, Amount);
+      }
+      return size;
+    }
+    public static DamageInfo ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static DamageInfo ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static DamageInfo ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.Amount);
             break;
           }
         }
@@ -300,6 +380,470 @@ namespace GameLog {
     if( Items == null ){
       Items = new List<global::GameLog.Walk>();
     }
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class Skill : pb.Message {
+    public Skill() { }
+    public static Skill CreateInstance() { var obj = new Skill(); obj.Finish(); return obj; }
+    public static Skill CreateEmpty() { return new Skill(); }
+    private static readonly Skill defaultInstance = new Skill();
+    public static Skill DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int CharacterId;
+
+    public int X;
+
+    public int Y;
+
+    public int Dir;
+
+    public string SkillId = "";
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (CharacterId != 0) {
+        output.WriteInt32(1, CharacterId);
+      }
+      if (X != 0) {
+        output.WriteInt32(2, X);
+      }
+      if (Y != 0) {
+        output.WriteInt32(3, Y);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(4, Dir);
+      }
+      if (SkillId != "") {
+        output.WriteString(5, SkillId);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (CharacterId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, CharacterId);
+      }
+      if (X != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, X);
+      }
+      if (Y != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(3, Y);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(4, Dir);
+      }
+      if (SkillId != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(5, SkillId);
+      }
+      return size;
+    }
+    public static Skill ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Skill ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Skill ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.CharacterId);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.X);
+            break;
+          }
+          case 24: {
+            input.ReadInt32(ref this.Y);
+            break;
+          }
+          case 32: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
+          case 42: {
+            input.ReadString(ref this.SkillId);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class Damage : pb.Message {
+    public Damage() { }
+    public static Damage CreateInstance() { var obj = new Damage(); obj.Finish(); return obj; }
+    public static Damage CreateEmpty() { return new Damage(); }
+    private static readonly Damage defaultInstance = new Damage();
+    public static Damage DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int CharacterId;
+
+    public int X;
+
+    public int Y;
+
+    public int Dir;
+
+    public int Hp;
+
+    public int OldHp;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (CharacterId != 0) {
+        output.WriteInt32(1, CharacterId);
+      }
+      if (X != 0) {
+        output.WriteInt32(2, X);
+      }
+      if (Y != 0) {
+        output.WriteInt32(3, Y);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(4, Dir);
+      }
+      if (Hp != 0) {
+        output.WriteInt32(5, Hp);
+      }
+      if (OldHp != 0) {
+        output.WriteInt32(6, OldHp);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (CharacterId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, CharacterId);
+      }
+      if (X != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, X);
+      }
+      if (Y != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(3, Y);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(4, Dir);
+      }
+      if (Hp != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(5, Hp);
+      }
+      if (OldHp != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(6, OldHp);
+      }
+      return size;
+    }
+    public static Damage ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Damage ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Damage ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.CharacterId);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.X);
+            break;
+          }
+          case 24: {
+            input.ReadInt32(ref this.Y);
+            break;
+          }
+          case 32: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
+          case 40: {
+            input.ReadInt32(ref this.Hp);
+            break;
+          }
+          case 48: {
+            input.ReadInt32(ref this.OldHp);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class AnimateCharacter : pb.Message {
+    public AnimateCharacter() { }
+    public static AnimateCharacter CreateInstance() { var obj = new AnimateCharacter(); obj.Finish(); return obj; }
+    public static AnimateCharacter CreateEmpty() { return new AnimateCharacter(); }
+    private static readonly AnimateCharacter defaultInstance = new AnimateCharacter();
+    public static AnimateCharacter DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int CharacterId;
+
+    public int X;
+
+    public int Y;
+
+    public int Dir;
+
+    public global::GameLog.Animation Animation = global::GameLog.Animation.None;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (CharacterId != 0) {
+        output.WriteInt32(1, CharacterId);
+      }
+      if (X != 0) {
+        output.WriteInt32(2, X);
+      }
+      if (Y != 0) {
+        output.WriteInt32(3, Y);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(4, Dir);
+      }
+      if (Animation != global::GameLog.Animation.None) {
+        output.WriteEnum(5, (int) Animation, Animation);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (CharacterId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, CharacterId);
+      }
+      if (X != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, X);
+      }
+      if (Y != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(3, Y);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(4, Dir);
+      }
+      if (Animation != global::GameLog.Animation.None) {
+        size += pb::CodedOutputStream.ComputeEnumSize(5, (int) Animation);
+      }
+      return size;
+    }
+    public static AnimateCharacter ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static AnimateCharacter ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static AnimateCharacter ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.CharacterId);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.X);
+            break;
+          }
+          case 24: {
+            input.ReadInt32(ref this.Y);
+            break;
+          }
+          case 32: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
+          case 40: {
+            input.ReadEnum(ref this.Animation);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class KillCharacter : pb.Message {
+    public KillCharacter() { }
+    public static KillCharacter CreateInstance() { var obj = new KillCharacter(); obj.Finish(); return obj; }
+    public static KillCharacter CreateEmpty() { return new KillCharacter(); }
+    private static readonly KillCharacter defaultInstance = new KillCharacter();
+    public static KillCharacter DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int CharacterId;
+
+    public int X;
+
+    public int Y;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (CharacterId != 0) {
+        output.WriteInt32(1, CharacterId);
+      }
+      if (X != 0) {
+        output.WriteInt32(2, X);
+      }
+      if (Y != 0) {
+        output.WriteInt32(3, Y);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (CharacterId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, CharacterId);
+      }
+      if (X != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, X);
+      }
+      if (Y != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(3, Y);
+      }
+      return size;
+    }
+    public static KillCharacter ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static KillCharacter ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static KillCharacter ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.CharacterId);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.X);
+            break;
+          }
+          case 24: {
+            input.ReadInt32(ref this.Y);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
     }
   }
 
@@ -527,6 +1071,101 @@ namespace GameLog {
             if (pb::WireFormat.IsEndGroupTag(tag)) {
               return;
             }
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class SkillRequest : pb.Message {
+    public SkillRequest() { }
+    public static SkillRequest CreateInstance() { var obj = new SkillRequest(); obj.Finish(); return obj; }
+    public static SkillRequest CreateEmpty() { return new SkillRequest(); }
+    private static readonly SkillRequest defaultInstance = new SkillRequest();
+    public static SkillRequest DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int CharacterId;
+
+    public int Dir;
+
+    public string SkillId = "";
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (CharacterId != 0) {
+        output.WriteInt32(1, CharacterId);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(2, Dir);
+      }
+      if (SkillId != "") {
+        output.WriteString(3, SkillId);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (CharacterId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, CharacterId);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(2, Dir);
+      }
+      if (SkillId != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(3, SkillId);
+      }
+      return size;
+    }
+    public static SkillRequest ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static SkillRequest ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static SkillRequest ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.CharacterId);
+            break;
+          }
+          case 16: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
+          case 26: {
+            input.ReadString(ref this.SkillId);
             break;
           }
         }

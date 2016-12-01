@@ -73,12 +73,36 @@ namespace GameLog {
 		}
 	}
 
+	public partial class AnimateCharacter : ICommand {
+		public IPromise Process(GameScene scene){
+			var c = scene.Field.FindCharacter (CharacterId);
+			var cc = scene.GetCharacterRenderer(c);
+			cc.Animate ("EnemyAttack01");
+			cc.transform.localRotation = ((Direction)Dir).ToWorldQuaternion ();
+			return PromiseEx.Delay (0.5f);
+		}
+	}
+
+	public partial class KillCharacter : ICommand {
+		public IPromise Process(GameScene scene){
+			Debug.Log ("kill");
+			var c = scene.Field.FindCharacter (CharacterId);
+			var cc = scene.GetCharacterRenderer(c);
+			cc.Animate ("EnemyDamage01");
+			return PromiseEx.Delay (1.0f).Then (() => {
+				Object.Destroy (cc.gameObject);
+				scene.Characters.Remove (CharacterId);
+			});
+		}
+	}
+		
 	//========================================
 	// Requests
 	//========================================
 
 	public partial class WalkRequest : IRequest {
 		public void Process(Field f){
+			f.path_ = Path.Select (p => new Game.Point (p)).ToList ();
 		}
 	}
 
@@ -89,6 +113,17 @@ namespace GameLog {
 
 	public partial class ShutdownRequest : IRequest {
 		public void Process(Field f){
+		}
+	}
+
+	public partial class SkillRequest : IRequest {
+		public void Process(Field f){
+			var c = f.FindCharacter (CharacterId);
+			c.Dir = (Direction)Dir;
+			f.SendAndWait (new AnimateCharacter{ CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = Animation.Attack });
+			var scope = new SpecialScope (ScopeType.Straight, ScopeTargetType.Others, 1);
+			var special = new Game.Specials.Attack (){ };
+			f.UseSkill (c, (Direction)Dir, scope, special);
 		}
 	}
 }

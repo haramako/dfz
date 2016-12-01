@@ -72,6 +72,15 @@ namespace Game {
 			return field.Request (req);
 		}
 
+		public List<GameLog.ICommand> attack(Character c, Direction dir){
+			var req = new GameLog.SkillRequest {
+				CharacterId = c.Id,
+				Dir = (int)dir,
+				SkillId = "attack",
+			};
+			return field.Request (req);
+		}
+
 		public void start(){
 			field.StartThread ();
 			ack ();
@@ -136,6 +145,18 @@ namespace Game {
 
 			Assert.AreEqual (new Point (1, 2), e1.Position);
 			Assert.AreEqual (Direction.South, e1.Dir);
+
+		}
+
+		[TestCase]
+		public void TestPlayerAttack(){
+			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
+			var e1 = AddChara(1, 2, "E1");
+			start ();
+
+			attack (p, Direction.North);
+
+			Assert.AreEqual (90, e1.Hp);
 
 		}
 

@@ -48,6 +48,12 @@ namespace Game
 
 		public bool NoUnity;
 
+		/// <summary>
+		/// シャットダウンの原因となったエラー
+		/// </summary>
+		/// <value>The shutdown error.</value>
+		public Exception ShutdownError{ get; private set; }
+
 		public Field ()
 		{
 			State = GameState.Prelude;
@@ -83,6 +89,11 @@ namespace Game
 		public void Shutdown(){
 			if (State != GameState.Shutdowned) {
 				recvQueue.Enqueue (new GameLog.ShutdownRequest());
+
+				sendQueue.Dequeue (); // 反応があるまで待つ
+			}
+			if (ShutdownError != null) {
+				throw ShutdownError;
 			}
 		}
 
@@ -208,6 +219,29 @@ namespace Game
 		public void SetPlayerCharacter(Character c){
 			c.Type = CharacterType.Player;
 			Player = c;
+		}
+
+		public void ShowMessage(string msg, params object[] param){
+			log ("MSG: " + msg + " " + string.Join (" ", param.Select (x => x.ToString ()).ToArray ()));
+		}
+
+		public string Display(){
+			var sb = new StringBuilder ();
+			for (int y = 0; y < Map.Width; y++) {
+				for (int x = 0; x < Map.Height; x++) {
+					var ch = Map[x,y].Character;
+					if( ch != null ){
+						sb.AppendFormat ("{0} ", ch.Name [0]);
+					}else{
+						sb.AppendFormat ("{0} ", Map [x, y].Val);
+					}
+				}
+				sb.AppendLine ();
+			}
+			foreach( var ch in Map.Characters ){
+				sb.AppendFormat( "{0:d2}:{1} {2} HP={3} ATK={4} DEF={5}\n", ch.Id, ch.Name, ch.Position, ch.Hp, ch.Attack, ch.Defense);
+			}
+			return sb.ToString ();
 		}
 
 		//========================================================
@@ -337,10 +371,11 @@ namespace Game
 			catch(Exception ex)
 			{
 				logException (ex);
+				ShutdownError = ex;
 			}
 
 			log ("Shutdown");
-			Send (new GameLog.Shutdown ());
+			Send (new GameLog.Shutdown (){});
 
 			sendQueue.Enqueue (commandList);
 
@@ -352,18 +387,19 @@ namespace Game
 			State = GameState.Think;
 		}
 
-		List<Point> path_;
+		public List<Point> path_ = new List<Point>();
 
 		public void DoThink(){
 			while (true) {
-				if (path_ == null || path_.Count <= 0) {
-					var req = (GameLog.WalkRequest)WaitForRequest (WaitingType.Action);
-					path_ = req.Path.Select (p => new Point (p)).ToList ();
-				}
-				if (Map.FloorIsWalkableNow (path_ [0])) {
-					break;
+				if ( path_.Count <= 0) {
+					var req = WaitForRequest (WaitingType.Action);
+					req.Process (this);
 				} else {
-					path_ = null;
+					if (Map.FloorIsWalkableNow (path_ [0])) {
+						break;
+					} else {
+						path_.Clear ();
+					}
 				}
 			}
 			State = GameState.Move;
@@ -420,28 +456,46 @@ namespace Game
 				Dir = (int)c.Dir
 			};
 		}
+
 		public void WalkCharacter(Character c, Point pos)
         {
 			Send( makeWalkCommand (c, pos));
         }
 
-		public string Display(){
-			var sb = new StringBuilder ();
-			for (int y = 0; y < Map.Width; y++) {
-				for (int x = 0; x < Map.Height; x++) {
-					var ch = Map[x,y].Character;
-					if( ch != null ){
-						sb.AppendFormat ("{0} ", ch.Name [0]);
-					}else{
-						sb.AppendFormat ("{0} ", Map [x, y].Val);
-					}
+		public void UseSkill(Character c, Direction dir, SpecialScope scope, Special special){
+			ShowMessage ("UseSkill", c.Name);
+			var result = scope.GetRange (new ScopeParam (){ From = c, FromPoint = c.Position, Dir = dir, Map = Map });
+			foreach (var p in result.Targets) {
+				log (p);
+				var target = Map [p].Character;
+				if (target != null) {
+					ExecuteSpecial (special, new SpecialParam {
+						FromCharacter = c,
+						FromPoint = c.Position,
+						Target = target,
+						Pos = target.Position
+					});
 				}
-				sb.AppendLine ();
 			}
-			foreach( var ch in Map.Characters ){
-				sb.AppendFormat( "{0:d2}:{1} {2} HP={3} ATK={4} DEF={5}\n", ch.Id, ch.Name, ch.Position, ch.Hp, ch.Attack, ch.Defense);
+		}
+
+		public void ExecuteSpecial(Special special, SpecialParam p){
+			special.Execute (this, p);
+		}
+
+		public void AddDamage(Character c, GameLog.DamageInfo damage){
+			ShowMessage ("DamageCharacter", c.Name, damage.Amount);
+			c.Hp -= damage.Amount;
+			if (c.Hp <= 0) {
+				c.Hp = 0;
+				KillCharacter (c);
 			}
-			return sb.ToString ();
+		}
+
+		public void KillCharacter(Character c){
+			ShowMessage ("KillCharacter", c.Name);
+			SendAndWait (new GameLog.KillCharacter{ CharacterId = c.Id, X = c.Position.X, Y = c.Position.Y });
+			Map.RemoveCharacter (c);
 		}
 
 	}

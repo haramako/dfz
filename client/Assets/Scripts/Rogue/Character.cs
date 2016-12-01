@@ -35,6 +35,12 @@ namespace Game
 		public bool IsPlayer { get { return Type == CharacterType.Player; } }
 		public bool IsEnemy { get { return Type == CharacterType.Enemy; } }
 
+		Field f;
+
+		public void SetField(Field field){
+			f = field;
+		}
+
 		public override string ToString(){
 			return Name;
 		}

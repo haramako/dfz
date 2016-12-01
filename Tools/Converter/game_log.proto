@@ -13,19 +13,61 @@ message Point {
 	int32 y = 2;
 }
 
+message DamageInfo {
+	int32 Amount = 1;
+}
+
 // キャラクタの移動
 message Walk {
-	int32 character_id = 1;
-	int32 x = 2;
-	int32 y = 3;
-	int32 old_x = 4;
-	int32 old_y = 5;
-	int32 dir = 6;
+	int32 character_id = 1; // キャラクタID
+	int32 x = 2; // 移動先X
+	int32 y = 3; // 移動先Y
+	int32 old_x = 4; // 移動元
+	int32 old_y = 5; // 移動元
+	int32 dir = 6; // 方向
 }
 
 /// 複数キャラクタの同時移動
 message WalkMulti {
-	repeated Walk items = 1;
+	repeated Walk items = 1; // 移動情報のリスト
+}
+
+// スキルの実行
+message Skill {
+	int32 character_id = 1; // キャラクタID
+	int32 x = 2; // キャラクタの座標X
+	int32 y = 3; // キャラクタの座標Y
+	int32 dir = 4; // 方向
+	string skill_id = 5; // スキルID
+}
+
+message Damage {
+	int32 character_id = 1; // キャラクタID
+	int32 x = 2; // キャラクタの座標X
+	int32 y = 3; // キャラクタの座標Y
+	int32 dir = 4; // 方向
+	int32 hp = 5; // 攻撃後のHP
+	int32 old_hp = 6; // 攻撃前のHP
+}
+
+enum Animation {
+	None = 0;
+	Attack = 1;
+	Damaged = 2;
+}
+
+message AnimateCharacter {
+	int32 character_id = 1; // キャラクタID
+	int32 x = 2; // キャラクタの座標X
+	int32 y = 3; // キャラクタの座標Y
+	int32 dir = 4; // 方向
+	Animation animation = 5; // アニメーションの種類
+}
+
+message KillCharacter {
+	int32 character_id = 1; // キャラクタID
+	int32 x = 2; // キャラクタの座標X
+	int32 y = 3; // キャラクタの座標Y
 }
 
 message Shutdown {
@@ -40,7 +82,14 @@ message ShutdownRequest {
 message StayRequest {
 }
 
+message SkillRequest {
+	int32 character_id = 1; // キャラクタID
+	int32 dir = 2; // 方向
+	string skill_id = 3; // スキルID
+}
+
 message WalkRequest {
 	int32 character_id = 1;
 	repeated Point path = 2;
 }
+

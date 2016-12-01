@@ -17,31 +17,38 @@ namespace Game {
 		public List<Point> Targets;
 	}
 
+	public enum ScopeTargetType {
+		Both,
+		Ours,
+		Others,
+	}
+
+	public enum ScopeType {
+		/// 自分が対象
+		Self,
+		/// 直線状が対象
+		Straight,
+		/// (OBSOLETED)貫通する直線状自分が対象
+		Around,
+	}
+
 	/// <summary>
 	/// 特殊効果の効果範囲を表す
 	/// TODO: only/without, limit, num などを実装する？
 	/// </summary>
 	public class SpecialScope {
-		public enum ScopeTargetType {
-			Both,
-			Ours,
-			Others,
-		}
-
-		public enum ScopeType {
-			/// 自分が対象
-			Self,
-			/// 直線状が対象
-			Straight,
-			/// (OBSOLETED)貫通する直線状自分が対象
-			Around,
-		}
 
 		public ScopeTargetType TargetType { get; private set; }
 		public ScopeType Type { get; private set; }
 		public int Range { get; private set; }
 
 		public SpecialScope(){
+		}
+
+		public SpecialScope(ScopeType t = ScopeType.Straight, ScopeTargetType tt = ScopeTargetType.Others, int range = 1){
+			Type = t;
+			TargetType = tt;
+			Range = range;
 		}
 
 		public ScopeResult GetRange( ScopeParam p ){
