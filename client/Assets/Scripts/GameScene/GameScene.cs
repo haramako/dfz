@@ -86,6 +86,7 @@ public class GameScene : MonoBehaviour {
 					obj = Instantiate (FieldObjects [1]);
 				}
 				obj.transform.localPosition = PointToVector (new Point (x, z));
+				cell.Obj = obj.gameObject;
 			}
 		}
 
@@ -135,6 +136,8 @@ public class GameScene : MonoBehaviour {
 			if (cmds == null) {
 				break;
 			}
+			CloseAction ();
+
 			var promises = cmds.Select (cmd => {
 				Debug.Log(cmd);
 				return cmd.Process (this);
@@ -149,6 +152,22 @@ public class GameScene : MonoBehaviour {
 					break;
 				case WaitingType.Action:
 					mode = Mode.QMove;
+					OpenAction (act=>{
+						switch(act){
+						case "auto":
+							var path = Field.Thinking.ThinkAutoMove(Field.Player);
+							if( path.Count > 0 ){
+								StartMove(path);
+							}
+							break;
+						case "attack":
+							break;
+						default:
+							throw new Exception("invalid action" + act);
+						}
+					});
+					AddAction ("auto", "自動");
+					AddAction ("attack", "すぶり");
 					break;
 				}
 			});
@@ -165,6 +184,15 @@ public class GameScene : MonoBehaviour {
 		System.Threading.Thread.Sleep(4); // ちょっとだけまつ
 		messageLoop ();
     }
+
+	public void StartMove(List<Point> path){
+		View.ShowCursor (path);
+		var req = new GameLog.WalkRequest {
+			Path = path.Select (p => new GameLog.Point (p)).ToList ()
+		};
+		mode = Mode.None;
+		Send (req);
+	}
 
 	void MoveCameraTo(Vector3 pos){
         FocusToPoint = pos;
@@ -210,6 +238,12 @@ public class GameScene : MonoBehaviour {
 		Debug.Log ("from" + curCharacter.Position + " to " + pos);
 
 		// 攻撃
+		if (Field.Player.Position == pos) {
+			mode = Mode.None;
+			Send (new GameLog.SkillRequest (){ CharacterId = Field.Player.Id, Dir = (int)Field.Player.Dir, SkillId = "attack" });
+			return;
+		}
+			
 		var target = Field.Map [pos].Character;
 		if (target != null) {
 			if (target != Field.Player && (Field.Player.Position-pos).GridLength() == 1) {
@@ -318,6 +352,35 @@ public class GameScene : MonoBehaviour {
         var pos = new Vector3(ch.Position.X + 0.5f, 0, ch.Position.Y + 0.5f);
         cr.transform.localPosition = pos;
     }
+
+	public void UpdateViewport(){
+		Field.UpdateViewport ();
+
+		var map = Field.Map;
+		for (int z = 0; z < map.Height; z++) {
+			for (int x = 0; x < map.Width; x++) {
+				var obj = map [x, z].Obj;
+				if (obj != null) {
+					Color col;
+					if (map [x, z].Viewport ) {
+						obj.GetComponent<ColorChanger> ().Color = col = Color.white;
+						obj.SetActive (true);
+					} else if (map [x, z].Open) {
+						obj.GetComponent<ColorChanger> ().Color = col = Color.gray;
+						obj.SetActive (true);
+					} else {
+						obj.SetActive (false);
+						col = Color.black;
+					}
+					var c = map [x, z].Character;
+					if (c != null) {
+						var cc = GetCharacterRenderer (c);
+						cc.GetComponent<CharacterContainer> ().Chara.OverColor = col;
+					}
+				}
+			}
+		}
+	}
 
 	//===================================================================
 	// アクションボタン

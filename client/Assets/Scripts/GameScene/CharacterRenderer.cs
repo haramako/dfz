@@ -24,6 +24,9 @@ public class CharacterRenderer : MonoBehaviour {
 	public float PoseNum;
 	public float AnimNum;
 
+	[System.NonSerialized]
+	public Color OverColor = Color.white;
+
 	public SpriteSet SpriteSet;
 	//public string AtlasName;
 	public Direction Dir;
@@ -106,10 +109,10 @@ public class CharacterRenderer : MonoBehaviour {
 
 		switch( State ){
 		case CharacterRendererState.None:
-			Sprite.color = Color.white;
+			Sprite.color = Color.white * OverColor;
 			break;
 		case CharacterRendererState.Active:
-			Sprite.color = Color.Lerp (Color.white, Color.blue, Mathf.Repeat( Time.time, 1.0f));
+			Sprite.color = Color.Lerp (Color.white, Color.blue, Mathf.Repeat( Time.time, 1.0f)) * OverColor;
 			break;
 		}
 

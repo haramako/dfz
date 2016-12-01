@@ -64,6 +64,8 @@ namespace GameLog {
 					To=scene.PointToVector(new Point(w.X,w.Y)),
 				};
 			}).ToArray();
+
+			scene.UpdateViewport ();
 				
 			var walking = new GameScene.Walking(){
 				Items = items,
@@ -79,7 +81,7 @@ namespace GameLog {
 			var cc = scene.GetCharacterRenderer(c);
 			cc.Animate ("EnemyAttack01");
 			cc.transform.localRotation = ((Direction)Dir).ToWorldQuaternion ();
-			return PromiseEx.Delay (0.5f);
+			return PromiseEx.Delay (0.2f);
 		}
 	}
 
@@ -89,7 +91,7 @@ namespace GameLog {
 			var c = scene.Field.FindCharacter (CharacterId);
 			var cc = scene.GetCharacterRenderer(c);
 			cc.Animate ("EnemyDamage01");
-			return PromiseEx.Delay (1.0f).Then (() => {
+			return PromiseEx.Delay (0.2f).Then (() => {
 				Object.Destroy (cc.gameObject);
 				scene.Characters.Remove (CharacterId);
 			});

@@ -29,12 +29,31 @@ namespace Game
 	public class CellFreeze : CellStatus {
 		public override CellStatusType Type { get { return CellStatusType.Freeze; } }
 	}
+
+	[Flags]
+	public enum FloorFlag {
+		None = 0,
+		Viewport = 1,
+		Open = 2,
+	}
 	
 	public class Floor {
 		public int Val;
 		public int RoomId;
+		public FloorFlag Flag;
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
+		public UnityEngine.GameObject Obj;
+
+		public bool Viewport {
+			get { return (Flag & FloorFlag.Viewport) != FloorFlag.None; }
+			set { if(value){ Flag |= FloorFlag.Viewport; }else{ Flag &= ~FloorFlag.Viewport; }}
+		}
+
+		public bool Open {
+			get { return (Flag & FloorFlag.Open) != FloorFlag.None; }
+			set { if(value){ Flag |= FloorFlag.Open; }else{ Flag &= ~FloorFlag.Open; }}
+		}
 
 		public bool Walkable {
 			get {

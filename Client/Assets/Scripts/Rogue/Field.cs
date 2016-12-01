@@ -394,6 +394,9 @@ namespace Game
 				if ( path_.Count <= 0) {
 					var req = WaitForRequest (WaitingType.Action);
 					req.Process (this);
+					if (!(req is GameLog.WalkRequest)) {
+						break;
+					}
 				} else {
 					if (Map.FloorIsWalkableNow (path_ [0])) {
 						break;
@@ -498,6 +501,42 @@ namespace Game
 			Map.RemoveCharacter (c);
 		}
 
+		public void UpdateViewport(){
+			if (Player == null) {
+				return;
+			}
+
+			var room = Map [Player.Position].RoomId;
+
+			for (int x = 0; x < Map.Width; x++) {
+				for (int y = 0; y < Map.Height; y++) {
+					Map [x, y].Viewport = false;
+				}
+			}
+			for (int x = 0; x < Map.Width; x++) {
+				for (int y = 0; y < Map.Height; y++) {
+					var f = Map [x, y];
+
+					var view = false;
+					if (f.RoomId == 0) {
+						if (Player.Position == new Point (x, y)) {
+							view = true;
+						}
+					} else if (f.RoomId == room) {
+						view = true;
+					}
+
+					if (view) {
+						for (int dx = -1; dx <= 1; dx++) {
+							for (int dy = -1; dy <= 1; dy++) {
+								Map [x + dx, y + dy].Viewport = true;
+								Map [x + dx, y + dy].Open = true;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
