@@ -1,14 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Game;
 using RSG;
 
 namespace GameLog {
+	#if UNITY
 	public interface ICommand {
 		IPromise Process (GameScene scene);
 	}
+	#else
+	public interface ICommand {
+	}
+	#endif
 
 	public interface IRequest {
 		void Process (Field field);
@@ -28,6 +32,7 @@ namespace GameLog {
 		}
 	}
 
+#if UNITY
 	public partial class Shutdown : ICommand {
 		public IPromise Process(GameScene scene){
 			return Promise.Resolved ();
@@ -79,8 +84,20 @@ namespace GameLog {
 		public IPromise Process(GameScene scene){
 			var c = scene.Field.FindCharacter (CharacterId);
 			var cc = scene.GetCharacterRenderer(c);
-			cc.Animate ("EnemyAttack01");
+			string anim = null;
+			switch (Animation) {
+			case Animation.Attack:
+				anim = "EnemyAttack01";
+				break;
+			case Animation.Damaged:
+				anim = "EnemyDamage01";
+				break;
+			}
+			if (anim != null) {
+				cc.Animate (anim);
+			}
 			cc.transform.localRotation = ((Direction)Dir).ToWorldQuaternion ();
+			scene.UpdateCharacter (c);
 			return PromiseEx.Delay (0.2f);
 		}
 	}
@@ -95,8 +112,22 @@ namespace GameLog {
 				Object.Destroy (cc.gameObject);
 				scene.Characters.Remove (CharacterId);
 			});
+
+			scene.UpdateCharacter (c);
 		}
 	}
+	#else
+	public partial class Shutdown : ICommand {
+	}
+	public partial class Walk : ICommand {
+	}
+	public partial class WalkMulti : ICommand {
+	}
+	public partial class AnimateCharacter : ICommand {
+	}
+	public partial class KillCharacter : ICommand {
+	}
+	#endif
 		
 	//========================================
 	// Requests

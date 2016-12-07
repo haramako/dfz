@@ -4,6 +4,7 @@ using UnityEngine;
 using SLua;
 using LuaInterface;
 
+#if !SLUA_STANDALONE
 namespace SLua
 {
 	[CustomEditor(typeof(LuaSvrGameObject))]
@@ -21,3 +22,4 @@ namespace SLua
 		}
 	}
 }
+#endif

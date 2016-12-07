@@ -96,10 +96,12 @@ namespace Game
 			return Direction.None;
 		}
 
+		#if UNITY
         public UnityEngine.Vector2 ToVector2()
         {
             return new UnityEngine.Vector2(X, Y);
         }
+		#endif
 
 		public float Length () {
 			return (float)System.Math.Sqrt(X * X + Y * Y);

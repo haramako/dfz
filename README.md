@@ -57,3 +57,47 @@
  * ロギング
  * フォルダ構成標準
 
+# 思考ルーチンコード
+
+
+## lua
+B.Target = B.FindTarget() 
+B.UseSkill(Cooldown=3) or B.AttackTarget(B.Target) or B.GotoTarget(B.Target)
+
+## 独自言語
+FindPlayer(Len=10) 
+
+: (UseSkill(Cooldown=3) | AttackTarget() | GotoTarget())
+: GotoRandom()
+
+## Lisp
+
+(or
+  (if (FindPlayer Len 10)
+   (or (AttackTarget) (GotoTarget))
+  )
+  (GotoRandom)
+)
+
+
+## XML
+
+<Any>
+  <FindPlayer Len=10>
+    <AttackTarget/>
+    <GotoTarget/>
+  </FindPlayer>
+  <GotoRandom/>
+</Any>
+
+## DriverParam
+
+SkillCooldown=3
+UseSkill
+
+# コンストラクト
+
+If( Cond:Hoge(), Then:Or(Fuga(100, Piyo()), Hage()) Else:())
+
+(if (hoge) (or (fuga id:100 target:(piyo)) (hage)))
+

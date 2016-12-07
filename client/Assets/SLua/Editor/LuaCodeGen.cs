@@ -35,7 +35,7 @@ namespace SLua
 
 	public interface ICustomExportPost { }
 
-
+	#if !SLUA_STANDALONE
     public class LuaCodeGen : MonoBehaviour
 	{
 		static public string GenPath = SLuaSetting.Instance.UnityEngineGeneratePath;
@@ -2086,4 +2086,5 @@ namespace SLua
 		}
 
 	}
+	#endif
 }

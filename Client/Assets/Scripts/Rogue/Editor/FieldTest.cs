@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,6 +131,10 @@ namespace Game {
 
 		[TestCase]
 		public void TestEnemyThinkToMove(){
+			System.Console.WriteLine("hoge "+System.IO.Directory.GetCurrentDirectory());
+			System.Environment.SetEnvironmentVariable("PATH", System.Environment.GetEnvironmentVariable("PATH") + ":/Users/makoto/dfz/Auto/dfz" );
+			System.Console.WriteLine("fuga" + System.Environment.GetEnvironmentVariable("PATH"));
+
 			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
 			var e1 = AddChara(1, 4, "E1");
 			start ();

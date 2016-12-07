@@ -190,7 +190,6 @@ namespace SLua
 
 		public bool pcall(int nArgs, int errfunc)
 		{
-
 			if (!state.isMainThread())
 			{
 				Logger.LogError("Can't call lua function in bg thread");
@@ -454,7 +453,6 @@ namespace SLua
 		{
 			get
 			{
-
 				if (!isMainThread())
 				{
 					Logger.LogError("Can't access lua in bg thread");

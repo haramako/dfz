@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using UnityEngine;
 
 namespace Game
 {
@@ -36,6 +35,23 @@ namespace Game
 		public bool IsEnemy { get { return Type == CharacterType.Enemy; } }
 
 		Field f;
+
+		// ここから下は実行時のみに利用されるデータ、つまり保存されないので１ターンで蒸発する
+
+		/// <summary>
+		/// このターンに移動したかどうか？
+		/// </summary>
+		public bool Moved;
+
+		/// <summary>
+		/// 現在のターンの予定行動
+		/// </summary>
+		public ActionResult Action;
+
+		public void ClearTurnLocalVariables(){
+			Moved = false;
+			Action = new ActionResult ();
+		}
 
 		public void SetField(Field field){
 			f = field;

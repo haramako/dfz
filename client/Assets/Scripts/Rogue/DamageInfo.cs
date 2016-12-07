@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-namespace Game {
+﻿namespace Game {
 	public class DamageInfo {
 		public int Amount;
 	}

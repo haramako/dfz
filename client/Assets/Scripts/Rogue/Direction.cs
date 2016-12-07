@@ -59,6 +59,7 @@ namespace Game {
 			}
 		}
 
+		#if UNITY
 		public static UnityEngine.Quaternion ToWorldQuaternion(this Direction dir){
 			if (dir == Direction.None) {
 				return UnityEngine.Quaternion.identity;
@@ -66,5 +67,6 @@ namespace Game {
 				return UnityEngine.Quaternion.AngleAxis(-45 + (int)dir * 45, UnityEngine.Vector3.up);
 			}
 		}
+		#endif
 	}
 }

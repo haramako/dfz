@@ -58,12 +58,14 @@ public class GameScene : MonoBehaviour {
 		ActionButtons.SetActive (false);
 
         Field = new Field();
+		Field.NoLog = true;
 		Field.InitRandom (stage);
 
 		initField ();
 
 		Field.StartThread ();
 		Send (new GameLog.AckResponseRequest ());
+
     }
 
 	public void OnSpeedupDown(){
@@ -95,9 +97,7 @@ public class GameScene : MonoBehaviour {
 			UpdateCharacter(ch);
 		}
 
-		var mainch = Field.FindCharacter ("P1");
-		curCharacter = mainch;
-		MoveCameraTo (PointToVector( mainch.Position));
+		MoveCameraTo (PointToVector( Field.Player.Position));
 		CameraDistanceTo = -40.0f;
 		cameraMode = CameraMode.Normal;
 	}
@@ -139,7 +139,6 @@ public class GameScene : MonoBehaviour {
 			CloseAction ();
 
 			var promises = cmds.Select (cmd => {
-				Debug.Log(cmd);
 				return cmd.Process (this);
 			}).ToArray ();
 
@@ -179,9 +178,8 @@ public class GameScene : MonoBehaviour {
 		if (request == null) {
 			throw new System.ArgumentNullException ("Request must not be null");
 		}
-		Debug.Log (request);
 		Field.RequestAsync (request);
-		System.Threading.Thread.Sleep(4); // ちょっとだけまつ
+		System.Threading.Thread.Sleep(0); // ちょっとだけまつ
 		messageLoop ();
     }
 
@@ -235,7 +233,6 @@ public class GameScene : MonoBehaviour {
 	}
 
 	public void OnFieldClick(Point pos){
-		Debug.Log ("from" + curCharacter.Position + " to " + pos);
 
 		// 攻撃
 		if (Field.Player.Position == pos) {
@@ -256,7 +253,7 @@ public class GameScene : MonoBehaviour {
 
 		// 移動
 		List<Point> path = null;
-		path = Field.Map.PathFinder.FindPath (curCharacter.Position, pos, Field.Map.StepWalkableNow (), 10);
+		path = Field.Map.PathFinder.FindPath (Field.Player.Position, pos, Field.Map.StepWalkableNow (), 10);
 
 		if (path != null) {
 			View.ShowCursor (path);
@@ -346,11 +343,12 @@ public class GameScene : MonoBehaviour {
         return cc;
     }
 
-    public void UpdateCharacter(Character ch)
+    public void UpdateCharacter(Character c)
     {
-        var cr = GetCharacterRenderer(ch);
-        var pos = new Vector3(ch.Position.X + 0.5f, 0, ch.Position.Y + 0.5f);
-        cr.transform.localPosition = pos;
+        var cc = GetCharacterRenderer(c);
+        //var pos = new Vector3(c.Position.X + 0.5f, 0, c.Position.Y + 0.5f);
+        //cc.transform.localPosition = pos;
+		cc.Text.text = c.Name + "\nHP:" + c.Hp;
     }
 
 	public void UpdateViewport(){
@@ -363,15 +361,13 @@ public class GameScene : MonoBehaviour {
 				if (obj != null) {
 					Color col;
 					if (map [x, z].Viewport ) {
-						obj.GetComponent<ColorChanger> ().Color = col = Color.white;
-						obj.SetActive (true);
+						col = Color.white;
 					} else if (map [x, z].Open) {
-						obj.GetComponent<ColorChanger> ().Color = col = Color.gray;
-						obj.SetActive (true);
+						col = Color.gray;
 					} else {
-						obj.SetActive (false);
 						col = Color.black;
 					}
+					obj.GetComponent<ColorChanger> ().Color = col;
 					var c = map [x, z].Character;
 					if (c != null) {
 						var cc = GetCharacterRenderer (c);
@@ -437,49 +433,7 @@ public class GameScene : MonoBehaviour {
     // メッセージハンドラ
     //===================================================================
 
-    Character curCharacter;
-	Point[] curAttackRange;
-
-	/*
-    public void QMove(Message mes)
-    {
-        var ch = (Character)mes.Param[0];
-        var cr = GetCharacterRenderer(ch);
-        Point[] range = null;
-
-		cr.Chara.State = CharacterRendererState.Active;
-        mode = Mode.QMove;
-        curCharacter = ch;
-
-		OpenAction (act=>{
-			switch(act){
-			case "cancel":
-				CloseAction();
-				break;
-			case "move":
-				CloseAction();
-				break;
-			case "attack":
-				CloseAction();
-				break;
-			case "skill":
-				CloseAction();
-				break;
-			default:
-				throw new Exception("invalid action" + act);
-			}
-		});
-		AddAction ("cancel", "キャンセル");
-		AddAction ("move", "完了");
-		AddAction ("attack", "攻撃");
-		AddAction ("skill", "スキル");
-
-        FocusTo(cr.transform.position);
-    }
-    */
-
 	public IPromise StartWalking(Walking w){
-		Debug.Log ("start");
 		var promise = new Promise ();
 		walking = w;
 		w.Duration = 0.2f;
@@ -535,96 +489,4 @@ public class GameScene : MonoBehaviour {
 		FocusToPoint = player.transform.localPosition;
 	}
 
-	#if false
-	public void RedrawChar(Message mes){
-		var ch = (Character)mes.Param[0];
-		var cr = GetCharacterRenderer(ch);
-		UpdateCharacter (ch);
-		cr.transform.localRotation = ch.Dir.ToWorldQuaternion ();
-		Send(GameLog.AckRequest.CreateInstance()); 
-	}
-
-	IEnumerator Attack(Message mes)
-	{
-		var ch = (Character)mes.Param[0];
-		var target = (Character)mes.Param [1];
-		var dir = (Direction)mes.Param [2];
-		var damage = (int)mes.Param [3];
-
-		var cr = GetCharacterRenderer(ch);
-		var targetCr = GetCharacterRenderer (target);
-
-		cr.transform.localRotation = dir.ToWorldQuaternion ();
-
-		CameraDistanceTo = 15f;
-		yield return new WaitForSeconds(0.2f);
-
-		cr.Animate ("EnemyAttack01");
-		yield return new WaitForSeconds(1.0f);
-
-		targetCr.transform.localRotation = dir.Rotate(4).ToWorldQuaternion ();
-		targetCr.Animate ("EnemyDamage01");
-
-		FocusTo(cr.transform.position);
-
-		yield return new WaitForSeconds(1.0f);
-
-		CameraDistanceTo = 20f;
-
-		cr.Chara.Pose = CharacterRendererPose.Move;
-		targetCr.Chara.Pose = CharacterRendererPose.Move;
-
-		RedrawAll();
-		Send(GameLog.AckRequest.CreateInstance()); 
-	}
-
-	public GameObject SkFire;
-	IEnumerator Skill(Message mes)
-	{
-		var ch = (Character)mes.Param[0];
-		var targets = (Character[])mes.Param [1];
-		var dir = (Direction)mes.Param [2];
-		var path = (Point[])mes.Param [3];
-
-		var cr = GetCharacterRenderer(ch);
-		SetFade (true);
-		var cutin = Instantiate(SkillCutinBase);
-		cutin.SetActive(true);
-		cr.Chara.Unfade = true;
-		//var targetCr = GetCharacterRenderer (target);
-
-		cr.transform.localRotation = dir.ToWorldQuaternion ();
-
-		yield return new WaitForSeconds(4.0f);
-
-		var skillPos = PointToVector (path [path.Length / 2]);
-		FocusTo (skillPos);
-
-		cr.Animate ("EnemyAttack01");
-		yield return new WaitForSeconds(1.0f);
-
-		foreach (var pos in path) {
-			var obj = Instantiate (SkFire);
-			obj.SetActive (true);
-			obj.transform.position = PointToVector (pos);
-			yield return new WaitForSeconds (0.35f);
-		}
-
-		//targetCr.transform.localRotation = dir.Rotate(4).ToWorldQuaternion ();
-		//targetCr.Animate ("EnemyDamage01");
-
-		FocusTo(cr.transform.position);
-
-		yield return new WaitForSeconds(1.0f);
-
-		cr.Chara.Pose = CharacterRendererPose.Move;
-		//targetCr.Chara.Pose = CharacterRendererPose.Move;
-
-		cr.Chara.Unfade = false;
-		SetFade (false);
-
-		RedrawAll();
-		Send(GameLog.AckRequest.CreateInstance()); 
-	}
-	#endif
 }

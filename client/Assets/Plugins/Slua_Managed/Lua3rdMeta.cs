@@ -3,7 +3,9 @@ using LuaInterface;
 using System;
 using System.Linq;
 using System.Reflection;
+#if UNITY_EDITOR
 using UnityEngine;
+#endif
 using System.IO;
 
 namespace SLua{

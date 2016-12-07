@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Master;
+using SLua;
 
 namespace Game
 {
@@ -27,6 +28,7 @@ namespace Game
 		Action, // WalkRequest
 	}
 
+	[CustomLuaClass]
     public class Field
 	{
 		Thread gameThread;
@@ -43,9 +45,11 @@ namespace Game
 		public Thinking Thinking { get; private set; }
 
 		public Character Player { get; private set; }
+		public LuaState L { get; private set; }
 
 		Stage stage;
 
+		public bool NoLog;
 		public bool NoUnity;
 
 		/// <summary>
@@ -184,17 +188,24 @@ namespace Game
 		// ユーティリティ
 		//========================================================
 
+		[System.Diagnostics.DebuggerNonUserCode]
 		public void log(object obj){
-			if (!NoUnity) {
+			if (NoLog) {
+			} else if (!NoUnity) {
+				#if UNITY
 				UnityEngine.Debug.Log (obj);
+				#endif
 			} else {
 				System.Console.WriteLine (obj);
 			}
 		}
 
 		public void logException(Exception ex){
-			if (!NoUnity) {
+			if (NoLog) {
+			}else if (!NoUnity) {
+				#if UNITY
 				UnityEngine.Debug.LogException (ex);
+				#endif
 			} else {
 				log (ex);
 			}
@@ -202,7 +213,11 @@ namespace Game
 
 		string inspect(object obj){
 			if (!NoUnity) {
+				#if UNITY
 				return UnityEngine.JsonUtility.ToJson (obj);
+				#else
+				return null;
+				#endif
 			} else {
 				return obj.ToString ();
 			}
@@ -248,6 +263,15 @@ namespace Game
 		// 初期化
 		//========================================================
 
+		LuaSvr luaSvr;
+
+		public void InitLua(string src){
+			luaSvr = new LuaSvr ();
+			luaSvr.init (null, ()=>{});
+			L = luaSvr.luaState;
+			L.doString (src);
+		}
+
 		public void Init(Map map){
 			Map = map;
 		}
@@ -267,10 +291,12 @@ namespace Game
 				c.Id = i++;
 				c.Name = sc.Name;
 				c.AtlasId = sc.Char;
+				c.Hp = 20;
 				c.Speed = sc.Speed;
 				c.Type = CharacterType.Enemy;
 				if (sc.Name == "P1") {
 					SetPlayerCharacter (c);
+					c.Hp = 100;
 					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
 				} else if (sc.Name.StartsWith ("E")) {
 					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
@@ -298,12 +324,14 @@ namespace Game
 				}
 				var c = Character.CreateInstance();
 				c.Id = i++;
+				c.Hp = 20;
 				c.Name = sc.Name;
 				c.AtlasId = sc.Char;
 				c.Speed = sc.Speed;
 				c.Type = CharacterType.Enemy;
 				if (sc.Name == "P1") {
 					SetPlayerCharacter (c);
+					c.Hp = 100;
 					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
 				} else if (sc.Name.StartsWith ("E")) {
 					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
@@ -321,6 +349,19 @@ namespace Game
 
 		public void Process(){
 			try {
+				InitLua (@"
+function test(think, c)
+  print(getmetatable(think))
+  print(think:ToString())
+  local r = think:NewActionResult()
+  local y = Slua.CreateClass('Game.Thinking.Hoge')
+  local x = Slua.CreateClass('Game.ActionResult')
+  --r.MoveTo = 1
+  --return r
+  return nil
+end
+");
+				
 				while (true)
 				{
 					try
@@ -384,6 +425,11 @@ namespace Game
 
 		public void DoTurnStart(){
 			TurnNum++;
+
+			foreach (var c in Map.Characters) {
+				c.ClearTurnLocalVariables ();
+			}
+
 			State = GameState.Think;
 		}
 
@@ -419,12 +465,22 @@ namespace Game
 			foreach (var c in Map.Characters.OrderBy(x=>x.Speed))
 			{
 				if (!c.IsPlayer) {
+					var move = Thinking.ThinkLua (c, L.getFunction ("test"));
+					if (move.Type == ActionResultType.Move) {
+						if (Map.FloorIsWalkableNow (move.To)) {
+							commands.Add (makeWalkCommand (c, move.To));
+							c.Moved = true;
+						}
+					}
+					/*
 					var move = Thinking.ThinkMove (c);
 					if (move.IsMove) {
 						if (Map.FloorIsWalkableNow (move.MoveTo)) {
 							commands.Add (makeWalkCommand (c, move.MoveTo));
+							c.Moved = true;
 						}
 					}
+					*/
 				}
 			}
 
@@ -435,6 +491,18 @@ namespace Game
 		}
 
 		public void DoPlay(){
+			
+			foreach (var c in Map.Characters) {
+				if( c.IsPlayer || c.Moved) {
+					continue;
+				}
+
+				var action = Thinking.ThinkAttack (c);
+				if (action.Type == ActionResultType.Attack) {
+					AttackCharacter (c, action.Dir);
+				}
+			}
+
 			State = GameState.TurnEnd;
         }
 
@@ -482,6 +550,14 @@ namespace Game
 			}
 		}
 
+		public void AttackCharacter(Character c, Direction dir){
+			c.Dir = dir;
+			SendAndWait (new GameLog.AnimateCharacter{ CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = GameLog.Animation.Attack });
+			var scope = new SpecialScope (ScopeType.Straight, ScopeTargetType.Others, 1);
+			var special = new Specials.Attack (){ };
+			UseSkill (c, dir, scope, special);
+		}
+
 		public void ExecuteSpecial(Special special, SpecialParam p){
 			special.Execute (this, p);
 		}
@@ -492,6 +568,8 @@ namespace Game
 			if (c.Hp <= 0) {
 				c.Hp = 0;
 				KillCharacter (c);
+			} else {
+				SendAndWait (new GameLog.AnimateCharacter{ CharacterId = c.Id, Animation = GameLog.Animation.Damaged });
 			}
 		}
 

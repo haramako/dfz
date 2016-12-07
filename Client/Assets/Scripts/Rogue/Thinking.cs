@@ -4,9 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Game{
+	
+	public enum ActionResultType {
+		None,
+		Move, // To, Dir
+		Attack, // Target, To, Dir
+		Skill,
+	}
+
+	public class ActionResult {
+		public ActionResultType Type;
+		public Character Target;
+		public Point To;
+		public Direction Dir;
+	}
+
 	public class Thinking {
 
 		Field f;
+
+		public class Hoge {
+			public int X;
+		}
 
 		public Thinking(Field field){
 			f = field;
@@ -44,6 +63,25 @@ namespace Game{
 			return new MoveResult{ IsMove = true, MoveTo = path [0] };
 		}
 
+		public ActionResult ThinkAttack(Character c){
+			var target = FindTarget (c);
+
+			// ターゲットに攻撃できる？
+			if ((c.Position - target.Position).GridLength() <= 1) {
+				if (f.Map.StepFlyable () (c.Position, target.Position) != PathFinder.CantMove) {
+					return new ActionResult {
+						Type = ActionResultType.Attack,
+						Target = target,
+						To = target.Position,
+						Dir = (target.Position-c.Position).ToDir(),
+					};
+				}
+			}
+
+			// やることなし
+			return new ActionResult{ Type = ActionResultType.None };
+		}
+
 
 		public List<Point> ThinkAutoMove(Character c){
 			var path = new List<Point> ();
@@ -64,7 +102,6 @@ namespace Game{
 							foundDir = Direction.None;
 							break;
 						} else {
-							UnityEngine.Debug.Log (""+pos + " " + dir);
 							foundDir = dir;
 							n++;
 						}
@@ -82,5 +119,18 @@ namespace Game{
 			return path;
 		}
 
+		public int NewActionResult(){
+			return 0;
+			//return new ActionResult();
+		}
+
+		public ActionResult ThinkLua(Character c, SLua.LuaFunction func){
+			var result = func.call (this, c);
+			if (result == null) {
+				return new ActionResult ();
+			} else {
+				return (ActionResult)result;
+			}
+		}
 	}
 }

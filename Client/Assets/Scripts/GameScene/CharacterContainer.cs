@@ -6,6 +6,7 @@ using System.Collections;
 /// </summary>
 public class CharacterContainer : MonoBehaviour {
 	public CharacterRenderer Chara;
+	public TextMesh Text;
 	bool animating;
 
 	public void Start(){

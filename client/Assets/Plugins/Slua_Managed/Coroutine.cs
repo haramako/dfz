@@ -23,7 +23,9 @@
 #if !SLUA_STANDALONE
 namespace SLua
 {
+#if UNITY5
 	using UnityEngine;
+#endif
 	using System.Collections;
 	using LuaInterface;
 	using SLua;

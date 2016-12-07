@@ -43,7 +43,9 @@ namespace Game
 		public FloorFlag Flag;
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
+		#if UNITY
 		public UnityEngine.GameObject Obj;
+		#endif
 
 		public bool Viewport {
 			get { return (Flag & FloorFlag.Viewport) != FloorFlag.None; }

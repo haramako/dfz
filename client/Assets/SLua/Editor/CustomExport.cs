@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !SLUA_STANDALONE
 namespace SLua
 {
     using System.Collections.Generic;
@@ -712,3 +713,4 @@ namespace SLua
 
     }
 }
+#endif
