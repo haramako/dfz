@@ -114,8 +114,6 @@ namespace GameLog {
 				Object.Destroy (cc.gameObject);
 				scene.Characters.Remove (CharacterId);
 			});
-
-			scene.UpdateCharacter (c);
 		}
 	}
 	#else

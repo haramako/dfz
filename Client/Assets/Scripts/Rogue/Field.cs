@@ -203,7 +203,7 @@ namespace Game
 		public void logException(Exception ex){
 			if (NoLog) {
 			}else if (!NoUnity) {
-				#if UNITY
+				#if UNITY_5
 				UnityEngine.Debug.LogException (ex);
 				#endif
 			} else {
@@ -419,6 +419,7 @@ end
 			Send (new GameLog.Shutdown (){});
 
 			sendQueue.Enqueue (commandList);
+			log("enqueued");
 
 			State = GameState.Shutdowned;
 		}

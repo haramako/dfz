@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Game {
 
+	/// <summary>
+	/// ８方向の方向を表す値
+	/// </summary>
 	public enum Direction {
 		None,
 		North,
@@ -31,7 +34,6 @@ namespace Game {
 		/// Pointに変換する(NORTH = (0,-1)とする)
 		/// </summary>
 		/// <returns>The position.</returns>
-		/// <param name="dir">Dir.</param>
 		public static Point ToPos (this Direction dir) {
 			return new Point (xByDir [(int)dir], yByDir [(int)dir]);
 		}
@@ -39,7 +41,6 @@ namespace Game {
 		/// <summary>
 		/// 逆方向を取得する
 		/// </summary>
-		/// <param name="dir">Dir.</param>
 		public static Direction Inverse (this Direction dir) {
 			return dir.Rotate (4);
 		}
@@ -47,8 +48,7 @@ namespace Game {
 		//// <summary>
 		/// 回転する(nは正の数のときに右回り)
 		/// </summary>
-		/// <param name="dir">Dir.</param>
-		/// <param name="n">N.</param>
+		/// <param name="n">回転方向（性の値の時は右回り、負の値の時は左回り。８で１回転する）</param>
 		public static Direction Rotate (this Direction dir, int n) {
 			if (dir == Direction.None) {
 				return Direction.None;
@@ -60,6 +60,13 @@ namespace Game {
 		}
 
 		#if UNITY_5
+		/// <summary>
+		/// 回転を表すQuartenionを返す.
+		/// 北の方向は、全く回転しないものとなる。
+		/// オブジェクトのデフォルトの向きは(0,0,-1)であるべき。
+		/// </summary>
+		/// <returns>Directionが表すQuaternion.</returns>
+		/// <param name="dir">Dir.</param>
 		public static UnityEngine.Quaternion ToWorldQuaternion(this Direction dir){
 			if (dir == Direction.None) {
 				return UnityEngine.Quaternion.identity;
