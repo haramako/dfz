@@ -59,7 +59,7 @@ namespace Game {
 			}
 		}
 
-		#if UNITY
+		#if UNITY_5
 		public static UnityEngine.Quaternion ToWorldQuaternion(this Direction dir){
 			if (dir == Direction.None) {
 				return UnityEngine.Quaternion.identity;

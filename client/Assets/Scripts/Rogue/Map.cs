@@ -43,7 +43,7 @@ namespace Game
 		public FloorFlag Flag;
 		public List<CellStatus> Statuses = new List<CellStatus>();
 		public Character Character;
-		#if UNITY
+		#if UNITY_5
 		public UnityEngine.GameObject Obj;
 		#endif
 

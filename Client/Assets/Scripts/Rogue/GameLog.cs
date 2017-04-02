@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Game;
 using RSG;
+#if UNITY_5
+using UnityEngine;
+#endif
 
 namespace GameLog {
-	#if UNITY
+	#if UNITY_5
 	public interface ICommand {
 		IPromise Process (GameScene scene);
 	}
@@ -32,7 +35,7 @@ namespace GameLog {
 		}
 	}
 
-#if UNITY
+#if UNITY_5
 	public partial class Shutdown : ICommand {
 		public IPromise Process(GameScene scene){
 			return Promise.Resolved ();
@@ -104,7 +107,6 @@ namespace GameLog {
 
 	public partial class KillCharacter : ICommand {
 		public IPromise Process(GameScene scene){
-			Debug.Log ("kill");
 			var c = scene.Field.FindCharacter (CharacterId);
 			var cc = scene.GetCharacterRenderer(c);
 			cc.Animate ("EnemyDamage01");
