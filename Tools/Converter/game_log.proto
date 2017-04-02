@@ -5,8 +5,8 @@ syntax = "proto3";
  */
 package GameLog;
 
-import "master.proto";
-import "game.proto";
+//import "master.proto";
+//import "game.proto";
 
 message Point {
 	int32 x = 1;

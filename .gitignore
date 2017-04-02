@@ -1,3 +1,6 @@
+[#]*
+*~
+
 # Unity
 [Ll]ibrary/
 [Tt]emp/
@@ -11,27 +14,16 @@
 *.userprefs
 *.suo
 *.sln
+*.apk
 /LocalCache
-/doc
 
 # Mac
 __MACOSX
-*.DS_Store
-iOS_Xcode
-Assets/StreamingAssets/config.txt
-Assets/StreamingAssets/config.txt.meta
-Assets/MyAssets/Resources/Misc/config_development.txt
-Assets/MyAssets/Resources/Misc/config_development.txt.meta
-Assets/Resources/lua/*_ignored.lua.txt
-Assets/Resources/lua/*_ignored.lua.txt.meta
+.DS_Store
 Assets/BuildReport
 BuildReport.meta
 iOS_Xcode6
-/Heapshots/*
-/*.apk
-/Assets/SSMaker
-/Assets/SSMaker.meta
-/Assets/Editor/TapjoyXcodeUpdatePostBuild.log
+Assets/Editor/TapjoyXcodeUpdatePostBuild.log
 
 # UnityVS
 /UnityVS.*
@@ -39,29 +31,4 @@ iOS_Xcode6
 /Assets/UnityVS
 *.DotSettings
 
-[#]*
-workspace/FriendGachaClient/Assets/Resources/Misc/config_development.txt
-workspace/FriendGachaClient/Assets/Resources/Misc/config_development.txt.meta
-iOS_Xcode63
-TapjoyXcodeUpdatePostBuild.log
-cache
-/docs
-/*.png
-Assets/ConsolePro
-ConsolePro.meta
-/BuildAssetBundles
-/Assets/AssetBundles/Old
-Old-AssetBundles
-/Assets/StreamingAssets
-/Assets/StreamingAssets.meta
-NewAssetBundles
-NewAssetTextures
-iOS_Xcode7
-/Client/AssetBundles
-
-#3DS Build
-/*.cci
-/*.cci.xml
-/*.log
-/*.log.txt
-/*.cia
+/Doc

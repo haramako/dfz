@@ -465,14 +465,14 @@ end
 			foreach (var c in Map.Characters.OrderBy(x=>x.Speed))
 			{
 				if (!c.IsPlayer) {
+					/*
 					var move = Thinking.ThinkLua (c, L.getFunction ("test"));
 					if (move.Type == ActionResultType.Move) {
 						if (Map.FloorIsWalkableNow (move.To)) {
 							commands.Add (makeWalkCommand (c, move.To));
 							c.Moved = true;
 						}
-					}
-					/*
+					}*/
 					var move = Thinking.ThinkMove (c);
 					if (move.IsMove) {
 						if (Map.FloorIsWalkableNow (move.MoveTo)) {
@@ -480,7 +480,6 @@ end
 							c.Moved = true;
 						}
 					}
-					*/
 				}
 			}
 

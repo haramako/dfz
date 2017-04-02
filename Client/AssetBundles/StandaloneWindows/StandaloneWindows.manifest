@@ -1,0 +1,32 @@
+ManifestFileVersion: 0
+CRC: 954915279
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: enemy0003.ab
+      Dependencies: {}
+    Info_1:
+      Name: enemy0001.ab
+      Dependencies: {}
+    Info_2:
+      Name: enemy0168.ab
+      Dependencies: {}
+    Info_3:
+      Name: enemy0211.ab
+      Dependencies: {}
+    Info_4:
+      Name: enemy0002.ab
+      Dependencies: {}
+    Info_5:
+      Name: enemy0210.ab
+      Dependencies: {}
+    Info_6:
+      Name: enemy0174.ab
+      Dependencies: {}
+    Info_7:
+      Name: gamescene.ab
+      Dependencies:
+        Dependency_0: gamesceneresources.ab
+    Info_8:
+      Name: gamesceneresources.ab
+      Dependencies: {}

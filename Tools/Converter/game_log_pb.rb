@@ -3,8 +3,6 @@
 
 require 'google/protobuf'
 
-require 'master_pb'
-require 'game_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_message "GameLog.Point" do
     optional :x, :int32, 1

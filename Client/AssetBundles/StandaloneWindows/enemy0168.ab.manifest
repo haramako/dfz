@@ -1,0 +1,40 @@
+ManifestFileVersion: 0
+CRC: 1852669284
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 144b8f1303f5bd0ce2adafec3dc3468b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 9dea23ffc7e96552740e12d1ee5309d8
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+Assets:
+- Assets/Gardens/Characters/Enemy0168/move_2_2.png
+- Assets/Gardens/Characters/Enemy0168/attack_3_2.png
+- Assets/Gardens/Characters/Enemy0168/move_1_1.png
+- Assets/Gardens/Characters/Enemy0168/attack_1_1.png
+- Assets/Gardens/Characters/Enemy0168/attack_1_2.png
+- Assets/Gardens/Characters/Enemy0168/move_0_1.png
+- Assets/Gardens/Characters/Enemy0168/attack_4_2.png
+- Assets/Gardens/Characters/Enemy0168/attack_0_1.png
+- Assets/Gardens/Characters/Enemy0168/special_2.png
+- Assets/Gardens/Characters/Enemy0168/attack_4_1.png
+- Assets/Gardens/Characters/Enemy0168/move_4_1.png
+- Assets/Gardens/Characters/Enemy0168/attack_2_2.png
+- Assets/Gardens/Characters/Enemy0168/move_0_2.png
+- Assets/Gardens/Characters/Enemy0168/attack_0_2.png
+- Assets/Gardens/Characters/Enemy0168/move_4_2.png
+- Assets/Gardens/Characters/Enemy0168/attack_3_1.png
+- Assets/Gardens/Characters/Enemy0168/damage.png
+- Assets/Gardens/Characters/Enemy0168/move_3_2.png
+- Assets/Gardens/Characters/Enemy0168/move_3_1.png
+- Assets/Gardens/Characters/Enemy0168/special_1.png
+- Assets/Gardens/Characters/Enemy0168/move_1_2.png
+- Assets/Gardens/Characters/Enemy0168/move_2_1.png
+- Assets/Gardens/Characters/Enemy0168/attack_2_1.png
+Dependencies: []

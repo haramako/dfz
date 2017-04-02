@@ -1,0 +1,15 @@
+ManifestFileVersion: 0
+CRC: 0
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: aa47add49c82d945cc15e99549651b1b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 31d6cfe0d16ae931b73c59d7e0c089c0
+HashAppended: 0
+ClassTypes: []
+Assets:
+- Assets/Gardens/Scenes/GameScene/GameScene.unity
+Dependencies:
+- /Users/makoto/dfr/client/Assets/../AssetBundles/StandaloneWindows/gamesceneresources.ab

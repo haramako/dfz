@@ -86,6 +86,7 @@ public class GameScene : MonoBehaviour {
 					obj = Instantiate (FieldObjects [0]);
 				}else{
 					obj = Instantiate (FieldObjects [1]);
+					obj.transform.Rotate (new Vector3 (0, UnityEngine.Random.Range (0,360), 0));
 				}
 				obj.transform.localPosition = PointToVector (new Point (x, z));
 				cell.Obj = obj.gameObject;
@@ -367,7 +368,7 @@ public class GameScene : MonoBehaviour {
 					} else {
 						col = Color.black;
 					}
-					obj.GetComponent<ColorChanger> ().Color = col;
+					//obj.GetComponent<ColorChanger> ().Color = col;
 					var c = map [x, z].Character;
 					if (c != null) {
 						var cc = GetCharacterRenderer (c);
