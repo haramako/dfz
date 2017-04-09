@@ -14,6 +14,36 @@ message PbxHeader {
 // キャラクター
 //===========================================
 
+enum ScopeType {
+	Self = 0;
+	Straight = 1;
+	Around = 2;
+}
+
+enum ScopeTargetType {
+	Both = 0;
+	Ours = 1;
+	Others = 2;
+}
+
+message SpecialScope {
+	ScopeType type = 1;
+	ScopeTargetType target_type = 2;
+	int32 range = 3;
+}
+
+
+message SpecialTemplate {
+	SpecialScope scope = 1;
+	string type = 2;
+	int32 pow = 3;
+	int32 turn = 4;
+	int32 amount = 5;
+	int32 rand = 6;
+	int32 direct = 7;
+	int32 prob = 8;
+}
+
 message Skill {
 	int32 type = 1;
 	int32 power = 2;

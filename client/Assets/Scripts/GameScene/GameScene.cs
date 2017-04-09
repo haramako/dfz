@@ -40,6 +40,8 @@ public class GameScene : MonoBehaviour
 
 	public GameObject[] FieldObjects;
 
+	public Text MessageText;
+
 	Vector3 FocusToPoint; // カメラが向かうべきポイント
 	float CameraDistanceTo; // カメラの距離
 	int CurZoom = 1;
@@ -111,7 +113,7 @@ public class GameScene : MonoBehaviour
 		}
 
 		MoveCameraTo (PointToVector( Field.Player.Position));
-		CameraDistanceTo = -40.0f;
+		CameraDistanceTo = -30.0f;
 		cameraMode = CameraMode.Normal;
 	}
 
@@ -187,12 +189,31 @@ public class GameScene : MonoBehaviour
 									}
 									break;
 								case "attack":
+									{
+										Send(new GameLog.SkillRequest()
+										{
+											CharacterId = Field.Player.Id,
+											Dir = (int)Field.Player.Dir,
+											SkillId = "attack",
+										});
+									}
+									break;
+								case "skill":
+									{
+										Send(new GameLog.SkillRequest()
+										{
+											CharacterId = Field.Player.Id,
+											Dir = (int)Field.Player.Dir,
+											SkillId = "skill",
+										});
+									}
 									break;
 								default:
 									throw new Exception("invalid action" + act);
 							}
 						});
 						AddAction ("auto", "自動");
+						AddAction ("skill", "スキル");
 						AddAction ("attack", "すぶり");
 						break;
 				}
@@ -564,6 +585,14 @@ public class GameScene : MonoBehaviour
 
 		var player = GetCharacterRenderer(Field.Player);
 		FocusToPoint = player.transform.localPosition;
+	}
+
+	public void ShowMessage(GameLog.Message message)
+	{
+		var text = MessageText.text.Split ('\n');
+		var line =	message.MessageId + " " + string.Join (", ", message.Param.ToArray ());
+		text = new string[] {line} .Concat(text).Take(5).ToArray();
+		MessageText.text = string.Join ("\n", text);
 	}
 
 }

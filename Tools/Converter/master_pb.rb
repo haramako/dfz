@@ -8,6 +8,21 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     map :int_index, :int32, :int32, 1
     map :string_index, :string, :int32, 2
   end
+  add_message "Master.SpecialScope" do
+    optional :type, :enum, 1, "Master.ScopeType"
+    optional :target_type, :enum, 2, "Master.ScopeTargetType"
+    optional :range, :int32, 3
+  end
+  add_message "Master.SpecialTemplate" do
+    optional :scope, :message, 1, "Master.SpecialScope"
+    optional :type, :string, 2
+    optional :pow, :int32, 3
+    optional :turn, :int32, 4
+    optional :amount, :int32, 5
+    optional :rand, :int32, 6
+    optional :direct, :int32, 7
+    optional :prob, :int32, 8
+  end
   add_message "Master.Skill" do
     optional :type, :int32, 1
     optional :power, :int32, 2
@@ -41,13 +56,27 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     repeated :tiles, :int32, 6
     repeated :characters, :message, 7, "Master.StageCharacter"
   end
+  add_enum "Master.ScopeType" do
+    value :Self, 0
+    value :Straight, 1
+    value :Around, 2
+  end
+  add_enum "Master.ScopeTargetType" do
+    value :Both, 0
+    value :Ours, 1
+    value :Others, 2
+  end
 end
 
 module Master
   PbxHeader = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.PbxHeader").msgclass
+  SpecialScope = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.SpecialScope").msgclass
+  SpecialTemplate = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.SpecialTemplate").msgclass
   Skill = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.Skill").msgclass
   Ability = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.Ability").msgclass
   CharacterTemplate = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.CharacterTemplate").msgclass
   StageCharacter = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.StageCharacter").msgclass
   Stage = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.Stage").msgclass
+  ScopeType = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.ScopeType").enummodule
+  ScopeTargetType = Google::Protobuf::DescriptorPool.generated_pool.lookup("Master.ScopeTargetType").enummodule
 end

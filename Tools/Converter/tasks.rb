@@ -54,6 +54,7 @@ end
 
 task :map => ['Output/hoge-Stage.pb', 'Output/hoge-CharacterTemplate.pb']
 
+desc 'protoファイルからプロトコルを作成する'
 task :proto do
   ['master','game', 'game_log'].each do |proto|
     sh PROTOC, '--ruby_out=../Tools/Converter', '--proto_path='+ __dir__, __dir__+"/#{proto}.proto"

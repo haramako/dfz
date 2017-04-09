@@ -391,7 +391,7 @@ public class Lua_Game_Field : LuaObject {
 			checkType(l,2,out a1);
 			Game.Direction a2;
 			checkEnum(l,3,out a2);
-			Game.SpecialScope a3;
+			Master.SpecialScope a3;
 			checkType(l,4,out a3);
 			Game.Special a4;
 			checkType(l,5,out a4);

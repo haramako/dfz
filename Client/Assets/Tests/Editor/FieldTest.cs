@@ -110,7 +110,7 @@ namespace Game {
 
 		[TestCase]
 		public void TestShutdown(){
-			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
+			//var p = AddChara(1, 1, "P1", type: CharacterType.Player);
 			field.StartThread ();
 			field.Request (new GameLog.AckResponseRequest ());
 			System.Threading.Thread.Sleep (10);

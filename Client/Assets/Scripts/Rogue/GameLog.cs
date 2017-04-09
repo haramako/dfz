@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Game;
+using Master;
 using RSG;
 #if UNITY_5
 using UnityEngine;
@@ -147,6 +148,7 @@ namespace GameLog
 	{
 		public IPromise Process(GameScene scene)
 		{
+			scene.ShowMessage (this);
 			Debug.Log ("Message: " + MessageId + " " + string.Join (", ", Param.ToArray ()));
 			return Promise.Resolved ();
 		}

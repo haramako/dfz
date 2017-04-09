@@ -18,18 +18,22 @@ namespace Game
 	/// </summary>
 	public abstract class Special
 	{
-		public int Pow;
-		public int Turn;
-		public int Amount;
-		public int Rand;
-		public int Direct;
-		public int Prob;
+		public Master.SpecialTemplate T;
 
-		public SpecialScope Scope { get; private set; }
+		public Master.SpecialScope Scope { get; private set; }
 
 		public virtual void Execute (Field f, SpecialParam p)
 		{
 		}
+
+		static public Special Create(Master.SpecialTemplate t)
+		{
+			var type = Type.GetType (t.Type);
+			var instance = (Special)Activator.CreateInstance (type);
+			instance.T = t;
+			return instance;
+		}
+
 	}
 
 }
