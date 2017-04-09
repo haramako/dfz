@@ -6,30 +6,35 @@ using System.Linq;
 using UnityEditor;
 #endif
 
-public class SpriteSet : ScriptableObject {
+public class SpriteSet : ScriptableObject
+{
 	public Sprite[] Sprites;
 
-	public Sprite Find(string name){
+	public Sprite Find(string name)
+	{
 		return Sprites.FirstOrDefault (s => s.name == name);
 	}
 
-#if UNITY_EDITOR
+	#if UNITY_EDITOR
 	[MenuItem("Tools/CreateSpriteSet")]
-	public static void Create(){
+	public static void Create()
+	{
 		var objs = Selection.objects;
-		foreach (var obj in Selection.objects) {
+		foreach (var obj in Selection.objects)
+		{
 			var dir = obj as DefaultAsset;
 			CreateFromDir (dir);
 		}
 	}
 
-	public static void CreateFromDir(DefaultAsset dir){
+	public static void CreateFromDir(DefaultAsset dir)
+	{
 		var dirPath = AssetDatabase.GetAssetPath (dir.GetInstanceID ());
-		var spriteGuids = AssetDatabase.FindAssets ("t:sprite", new string[]{ dirPath });
+		var spriteGuids = AssetDatabase.FindAssets ("t:sprite", new string[] { dirPath });
 		var sprites = spriteGuids
-			.Select (guid => AssetDatabase.GUIDToAssetPath (guid))
-			.Select (path => AssetDatabase.LoadAssetAtPath<Sprite> (path))
-			.ToArray ();
+					  .Select (guid => AssetDatabase.GUIDToAssetPath (guid))
+					  .Select (path => AssetDatabase.LoadAssetAtPath<Sprite> (path))
+					  .ToArray ();
 
 		var obj = ScriptableObject.CreateInstance<SpriteSet> ();
 		obj.Sprites = sprites;
@@ -38,5 +43,5 @@ public class SpriteSet : ScriptableObject {
 		EditorUtility.SetDirty (obj);
 
 	}
-#endif
+	#endif
 }

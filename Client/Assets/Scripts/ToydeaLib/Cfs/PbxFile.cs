@@ -8,20 +8,24 @@ using Ionic.Zlib;
 
 #if false
 
-public class PbxFile {
+public class PbxFile
+{
 
 	public string Filename { get; private set; }
-	Dictionary<int,int> intIndex;
-	Dictionary<string,int> stringIndex;
+	Dictionary<int, int> intIndex;
+	Dictionary<string, int> stringIndex;
 	int dataOrigin;
 
-	public PbxFile(string filename){
+	public PbxFile(string filename)
+	{
 		Filename = filename;
 		readIndex ();
 	}
 
-	private void readIndex(){
-		using (var file = File.OpenRead (Filename)) {
+	private void readIndex()
+	{
+		using (var file = File.OpenRead (Filename))
+		{
 			var r = new BinaryReader (file);
 			var magic = r.ReadByte ();
 			if( magic != 'C' ) throw new ArgumentException("Invalid stream header");
@@ -35,11 +39,13 @@ public class PbxFile {
 		}
 	}
 
-	public bool Exists(int key){
+	public bool Exists(int key)
+	{
 		return intIndex.ContainsKey(key);
 	}
 
-	public bool Exists(string key){
+	public bool Exists(string key)
+	{
 		return stringIndex.ContainsKey(key);
 	}
 
@@ -53,7 +59,8 @@ public class PbxFile {
 		return getStreamByPosition( stringIndex [key] );
 	}
 
-	Stream getStreamByPosition(int pos){
+	Stream getStreamByPosition(int pos)
+	{
 		var file = File.OpenRead (Filename);
 		var r = new BinaryReader (file);
 		file.Seek (dataOrigin + pos, SeekOrigin.Begin);

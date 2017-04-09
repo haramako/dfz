@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CutScene : MonoBehaviour {
+public class CutScene : MonoBehaviour
+{
 
 
 	//===================================================================
@@ -19,12 +20,15 @@ public class CutScene : MonoBehaviour {
 	Vector3 targetPosition;
 	bool disable;
 
-	public IEnumerator Start(){
+	public IEnumerator Start()
+	{
 		targetPosition = CameraTargets [0].transform.position;
 		yield return null;
 		var anim = GetComponent<Animation> ();
-		while (true) {
-			if (!anim.isPlaying) {
+		while (true)
+		{
+			if (!anim.isPlaying)
+			{
 				Scene.SendMessage ("CutSceneFinished");
 				disable = true;
 				//GameObject.Destroy (gameObject);
@@ -34,15 +38,21 @@ public class CutScene : MonoBehaviour {
 		}
 	}
 
-	public void Update() {
+	public void Update()
+	{
 		if (disable)
 			return;
 		Vector3 target;
-		if (targetNum < 0) {
+		if (targetNum < 0)
+		{
 			target = CameraTargets [0].transform.position;
-		} else if (targetNum >= CameraTargets.Length - 1) {
+		}
+		else if (targetNum >= CameraTargets.Length - 1)
+		{
 			target = CameraTargets [CameraTargets.Length - 1].transform.position;
-		} else {
+		}
+		else
+		{
 			var t1 = CameraTargets [(int)targetNum];
 			var t2 = CameraTargets [(int)targetNum + 1];
 			target = Vector3.Lerp (t1.transform.position, t2.transform.position, Mathf.Repeat (targetNum, 1));

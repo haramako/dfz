@@ -5,7 +5,8 @@ using System.Collections.Generic;
 namespace Game
 {
 
-	public enum CellStatusType {
+	public enum CellStatusType
+	{
 		None,
 		Fire,
 		Freeze,
@@ -13,31 +14,36 @@ namespace Game
 		Lightning,
 	}
 
-	public abstract class CellStatus {
+	public abstract class CellStatus
+	{
 		public virtual CellStatusType Type { get { return CellStatusType.None; } }
 		public virtual CellStatusType Turn { get; private set; }
-		public virtual void OnEnterCharacter(){}
-		public virtual void OnExitCharacter(){}
-		public virtual void OnTurnStart(){}
-		public virtual void OnTurnEnd(){}
+		public virtual void OnEnterCharacter() {}
+		public virtual void OnExitCharacter() {}
+		public virtual void OnTurnStart() {}
+		public virtual void OnTurnEnd() {}
 	}
 
-	public class CellFire : CellStatus {
+	public class CellFire : CellStatus
+	{
 		public override CellStatusType Type { get { return CellStatusType.Fire; } }
 	}
 
-	public class CellFreeze : CellStatus {
+	public class CellFreeze : CellStatus
+	{
 		public override CellStatusType Type { get { return CellStatusType.Freeze; } }
 	}
 
 	[Flags]
-	public enum FloorFlag {
+	public enum FloorFlag
+	{
 		None = 0,
 		Viewport = 1,
 		Open = 2,
 	}
-	
-	public class Floor {
+
+	public class Floor
+	{
 		public int Val;
 		public int RoomId;
 		public FloorFlag Flag;
@@ -47,24 +53,30 @@ namespace Game
 		public UnityEngine.GameObject Obj;
 		#endif
 
-		public bool Viewport {
+		public bool Viewport
+		{
 			get { return (Flag & FloorFlag.Viewport) != FloorFlag.None; }
-			set { if(value){ Flag |= FloorFlag.Viewport; }else{ Flag &= ~FloorFlag.Viewport; }}
+			set { if(value) { Flag |= FloorFlag.Viewport; } else { Flag &= ~FloorFlag.Viewport; }}
 		}
 
-		public bool Open {
+		public bool Open
+		{
 			get { return (Flag & FloorFlag.Open) != FloorFlag.None; }
-			set { if(value){ Flag |= FloorFlag.Open; }else{ Flag &= ~FloorFlag.Open; }}
+			set { if(value) { Flag |= FloorFlag.Open; } else { Flag &= ~FloorFlag.Open; }}
 		}
 
-		public bool Walkable {
-			get {
+		public bool Walkable
+		{
+			get
+			{
 				return Val == 1 || Val == 2;
 			}
 		}
 
-		public bool Flyable {
-			get {
+		public bool Flyable
+		{
+			get
+			{
 				return Val == 1 || Val == 2;
 			}
 		}
@@ -85,59 +97,77 @@ namespace Game
 		{
 			Width = width;
 			Height = height;
-			NullFloor = new Floor (){ Val = 0 };
+			NullFloor = new Floor () { Val = 0 };
 			Data = new Floor[Width * Height];
-			for (int i = 0; i < Width * Height; i++) {
-				Data [i] = new Floor (){ Val = 0 };
+			for (int i = 0; i < Width * Height; i++)
+			{
+				Data [i] = new Floor () { Val = 0 };
 			}
 			PathFinder = new PathFinder (Width, Height);
 		}
 
-		public Floor this [int x, int y] { get { return GetCell(x,y); } }
+		public Floor this [int x, int y] { get { return GetCell(x, y); } }
 		public Floor this [Point p] { get { return GetCell(p); } }
 
-		public Floor GetCell(Point pos){
-			return GetCell(pos.X,pos.Y);
+		public Floor GetCell(Point pos)
+		{
+			return GetCell(pos.X, pos.Y);
 		}
 
-		public Floor GetCell(int x, int y){
-			if (x < 0 || x >= Width || y < 0 || y >= Height) {
+		public Floor GetCell(int x, int y)
+		{
+			if (x < 0 || x >= Width || y < 0 || y >= Height)
+			{
 				return NullFloor;
-			} else {
+			}
+			else
+			{
 				return Data [y * Width + x];
 			}
 		}
 
-		string numberToString(int n){
-			if (n < 0) {
+		string numberToString(int n)
+		{
+			if (n < 0)
+			{
 				return "" + n;
-			} else if (n < 10) {
+			}
+			else if (n < 10)
+			{
 				return ((char)('0' + n)).ToString();
-			} else if (n < 36) {
-				return ((char)('A' + (n-10))).ToString();
-			} else {
+			}
+			else if (n < 36)
+			{
+				return ((char)('A' + (n - 10))).ToString();
+			}
+			else
+			{
 				return "" + n;
 			}
 		}
 
-		public string Display(){
+		public string Display()
+		{
 			var sb = new StringBuilder ();
-			for (int y = Height-1; y >= 0; y--) {
-				for (int x = 0; x < Width; x++) {
+			for (int y = Height - 1; y >= 0; y--)
+			{
+				for (int x = 0; x < Width; x++)
+				{
 					var val = GetCell (x, y).Val;
-					switch (val) {
-					case 0:
-						sb.Append (" ");
-						break;
-					case 1:
-						sb.Append (numberToString(GetCell(x,y).RoomId));
-						break;
-					case 2:
-						sb.Append ("#");
-						break;
-					default:
-						sb.Append ("[" + val + "]");
-						break;
+					switch (val)
+					{
+						case 0:
+							sb.Append (" ");
+							break;
+						case 1:
+							sb.Append (numberToString(GetCell(x, y).RoomId));
+							break;
+						case 2:
+							sb.Append ("#");
+							break;
+						default:
+							sb.Append ("[" + val + "]");
+							break;
 					}
 					//sb.AppendFormat ("{0:D2},", GetCell(x, y).Val);
 				}
@@ -161,20 +191,23 @@ namespace Game
 		// キャラクターの追加と削除
 		//=======================================================
 
-		public void AddCharacter(Character c, Point pos){
-            if (this[pos].Character != null) throw new Exception("cannot add character");
-            c.Position = pos;
-            Characters.Add (c);
+		public void AddCharacter(Character c, Point pos)
+		{
+			if (this[pos].Character != null) throw new Exception("cannot add character");
+			c.Position = pos;
+			Characters.Add (c);
 			this [c.Position].Character = c;
 		}
 
-		public void RemoveCharacter(Character c){
-            Characters.Remove (c);
-            if (this[c.Position].Character != c) throw new Exception("cannot remove character");
-            this[c.Position].Character = null;
+		public void RemoveCharacter(Character c)
+		{
+			Characters.Remove (c);
+			if (this[c.Position].Character != c) throw new Exception("cannot remove character");
+			this[c.Position].Character = null;
 		}
 
-		public void MoveCharacter(Character c, Point pos){
+		public void MoveCharacter(Character c, Point pos)
+		{
 			if (this [c.Position].Character != c) throw new Exception ("cannot remove character");
 			this [c.Position].Character = null;
 			c.Position = pos;
@@ -194,7 +227,7 @@ namespace Game
 		// これは、ナナメ移動が移動先のセルだけではなく、両隣のセルも移動可能でないとできないため、その判定に必要となる。
 		//
 		// 使用例：
-		// 
+		//
 		// MapManager map;
 		// List<Point> path = map.PathFinder( new Point(10,10), new Point(20,20), map.StepWalkable() );
 		//    => path に 通常移動ユニットの(10,10)から(20,20)への経路情報が入る
@@ -204,29 +237,35 @@ namespace Game
 		//
 		//=======================================================================================
 
-		public bool FloorIsAnywhere(Point p){
+		public bool FloorIsAnywhere(Point p)
+		{
 			return GetCell(p) != NullFloor;
 		}
 
-		public bool FloorIsWalkable(Point p){
+		public bool FloorIsWalkable(Point p)
+		{
 			return GetCell (p).Walkable;
 		}
 
-		public bool FloorIsFlyable(Point p){
+		public bool FloorIsFlyable(Point p)
+		{
 			return GetCell (p).Flyable;
 		}
 
-		public bool FloorIsWalkableNow(Point p) { 
+		public bool FloorIsWalkableNow(Point p)
+		{
 			var cell = GetCell (p);
 			return cell.Walkable && cell.Character == null;
 		}
 
-		public bool FloorIsFlyableNow(Point p) { 
+		public bool FloorIsFlyableNow(Point p)
+		{
 			var cell = GetCell (p);
 			return cell.Flyable && cell.Character == null;
 		}
 
-		public bool FloorIsRoom(Point p) { 
+		public bool FloorIsRoom(Point p)
+		{
 			var cell = GetCell (p);
 			return cell.Walkable && cell.Character == null;
 		}
@@ -238,31 +277,47 @@ namespace Game
 		/// <returns>合成された PathFinder.Stepable デリゲート</returns>
 		/// <param name="predicate">移動可能かどうかを示す、Floor***able系の関数</param>
 		/// <param name="slantAnywhere">ナナメの場合に壁にじゃまされない場合はtrue</param>
-		public PathFinder.Stepable MakeWalkableFunc(Predicate<Point> predicate, bool slantAnywhere) {
-			if (slantAnywhere) {
-				return (from, to) => {
-					if (predicate (to)) {
+		public PathFinder.Stepable MakeWalkableFunc(Predicate<Point> predicate, bool slantAnywhere)
+		{
+			if (slantAnywhere)
+			{
+				return (from, to) =>
+				{
+					if (predicate (to))
+					{
 						// 移動可能
 						return 1;
-					} else {
+					}
+					else
+					{
 						// 移動不可
 						return PathFinder.CantMove;
 					}
 				};
-			} else {
-				return (from, to) => {
-					if( from.X != to.X && from.Y != to.Y ){
+			}
+			else
+			{
+				return (from, to) =>
+				{
+					if( from.X != to.X && from.Y != to.Y )
+					{
 						// 斜め移動の場合
-						if( predicate (to) && FloorIsFlyable(new Point(from.X, to.Y)) && FloorIsFlyable(new Point(to.X, from.Y)) ){
+						if( predicate (to) && FloorIsFlyable(new Point(from.X, to.Y)) && FloorIsFlyable(new Point(to.X, from.Y)) )
+						{
 							return 1;
-						}else{
+						}
+						else
+						{
 							return PathFinder.CantMove;
 						}
 					}
-					if (predicate (to)) {
+					if (predicate (to))
+					{
 						// 移動可能
 						return 1;
-					} else {
+					}
+					else
+					{
 						// 移動不可
 						return PathFinder.CantMove;
 					}
@@ -270,27 +325,27 @@ namespace Game
 			}
 		}
 
-        public void TemporaryOpen(Point pos, Action action)
-        {
-            var backup = this[pos].Character;
+		public void TemporaryOpen(Point pos, Action action)
+		{
+			var backup = this[pos].Character;
 			this [pos].Character = null;
-            try
-            {
-                action();
-            }
-            finally
-            {
-                this[pos].Character = backup;
-            }
-        }
+			try
+			{
+				action();
+			}
+			finally
+			{
+				this[pos].Character = backup;
+			}
+		}
 
-        // 隣接する２マスの経路が、移動可能かどうかを表すdelegateを返す( 挙動は、対応するFloor***able()関数を参照 )
+		// 隣接する２マスの経路が、移動可能かどうかを表すdelegateを返す( 挙動は、対応するFloor***able()関数を参照 )
 		public PathFinder.Stepable StepWalkable(bool slantAnywhere = false) { return MakeWalkableFunc(FloorIsWalkable, slantAnywhere); }
 		public PathFinder.Stepable StepFlyable(bool slantAnywhere = false) { return MakeWalkableFunc(FloorIsFlyable, slantAnywhere); }
 		public PathFinder.Stepable StepWalkableNow(bool slantAnywhere = false) { return MakeWalkableFunc(FloorIsWalkableNow, slantAnywhere); }
 		public PathFinder.Stepable StepFlyableNow(bool slantAnywhere = false)  { return MakeWalkableFunc(FloorIsFlyableNow, slantAnywhere); }
-		public PathFinder.Stepable StepAnywhere(bool slantAnywhere = false)  { return (f, t) => (FloorIsWalkable (t) ? 1 : (FloorIsAnywhere(t)? 2:9999)); }
+		public PathFinder.Stepable StepAnywhere(bool slantAnywhere = false)  { return (f, t) => (FloorIsWalkable (t) ? 1 : (FloorIsAnywhere(t) ? 2 : 9999)); }
 	}
-	
+
 }
 

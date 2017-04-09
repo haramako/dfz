@@ -3,30 +3,38 @@ using System.Linq;
 
 namespace Game
 {
-	public interface IGameLog {
+	public interface IGameLog
+	{
 	}
 
 	/// <summary>
 	/// ゲーム内のキャラクター
 	/// </summary>
-	public sealed partial class Character : Google.ProtocolBuffers.Message {
+	public sealed partial class Character : Google.ProtocolBuffers.Message
+	{
 
-		public Point Position { 
-			get { 
-				return new Point(X,Y);
+		public Point Position
+		{
+			get
+			{
+				return new Point(X, Y);
 			}
-			set {
+			set
+			{
 				X = value.X;
 				Y = value.Y;
 			}
 		}
 
-		public Direction Dir {
-			get { 
-				return (Direction)SavedDir; 
+		public Direction Dir
+		{
+			get
+			{
+				return (Direction)SavedDir;
 			}
-			set { 
-				SavedDir = (int)value; 
+			set
+			{
+				SavedDir = (int)value;
 			}
 		}
 
@@ -48,16 +56,19 @@ namespace Game
 		/// </summary>
 		public ActionResult Action;
 
-		public void ClearTurnLocalVariables(){
+		public void ClearTurnLocalVariables()
+		{
 			Moved = false;
 			Action = new ActionResult ();
 		}
 
-		public void SetField(Field field){
+		public void SetField(Field field)
+		{
 			f = field;
 		}
 
-		public override string ToString(){
+		public override string ToString()
+		{
 			return Name;
 		}
 	}

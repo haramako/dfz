@@ -6,31 +6,34 @@ using System;
 using SLua;
 using System.Linq;
 
-public static class Util {
+public static class Util
+{
 
-	public static T FindByName<T>(this GameObject obj,string name) where T : Component
+	public static T FindByName<T>(this GameObject obj, string name) where T : Component
 	{
 		return obj
-			.EachChildren ()
-			.Where (o => (o.name == name))
-			.Select (o => o.GetComponent<T>())
-			.Where (c => (c != null))
-			.FirstOrDefault ();
+			   .EachChildren ()
+			   .Where (o => (o.name == name))
+			   .Select (o => o.GetComponent<T>())
+			   .Where (c => (c != null))
+			   .FirstOrDefault ();
 	}
 
-	public static GameObject FindByName(this GameObject obj,string name)
+	public static GameObject FindByName(this GameObject obj, string name)
 	{
 		return obj
-			.EachChildren ()
-			.Where (o => (o.name == name))
-			.FirstOrDefault ();
+			   .EachChildren ()
+			   .Where (o => (o.name == name))
+			   .FirstOrDefault ();
 	}
 
 	public static IEnumerable<GameObject> EachChildren(this GameObject obj)
 	{
-		foreach (Transform child in obj.transform) {
+		foreach (Transform child in obj.transform)
+		{
 			yield return child.gameObject;
-			foreach (var x in child.gameObject.EachChildren()) {
+			foreach (var x in child.gameObject.EachChildren())
+			{
 				yield return x;
 			}
 		}
@@ -41,20 +44,22 @@ public static class Util {
 	/// </summary>
 	/// <returns>The ancestors.</returns>
 	/// <param name="obj">Object.</param>
-	public static T FindAncestorByName<T>(this GameObject obj, string name) where T: Component{
+	public static T FindAncestorByName<T>(this GameObject obj, string name) where T: Component
+	{
 		return obj
-			.EachAncestors ()
-			.Where (o => (o.name == name))
-			.Select (o => o.GetComponent<T>())
-			.Where (c => (c != null))
-			.FirstOrDefault ();
+			   .EachAncestors ()
+			   .Where (o => (o.name == name))
+			   .Select (o => o.GetComponent<T>())
+			   .Where (c => (c != null))
+			   .FirstOrDefault ();
 	}
 
-	public static GameObject FindAncestorByName(this GameObject obj, string name) {
+	public static GameObject FindAncestorByName(this GameObject obj, string name)
+	{
 		return obj
-			.EachAncestors ()
-			.Where (o => (o.name == name))
-			.FirstOrDefault ();
+			   .EachAncestors ()
+			   .Where (o => (o.name == name))
+			   .FirstOrDefault ();
 	}
 
 	/// <summary>
@@ -65,7 +70,8 @@ public static class Util {
 	public static IEnumerable<GameObject> EachAncestors(this GameObject obj, bool includeSelf = false)
 	{
 		Transform cur = (includeSelf ?  obj.transform : obj.transform.parent);
-		while (cur != null) {
+		while (cur != null)
+		{
 			yield return cur.gameObject;
 			cur = cur.parent;
 		}

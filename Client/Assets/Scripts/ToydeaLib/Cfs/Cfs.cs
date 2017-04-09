@@ -11,9 +11,11 @@ using RSG;
 using System.Net;
 #endif
 
-namespace Cfs {
+namespace Cfs
+{
 
-	public enum CfsState {
+	public enum CfsState
+	{
 		None = 0,
 		DownloadingIndex,
 		DownloadedIndex,
@@ -21,7 +23,8 @@ namespace Cfs {
 		Ready,
 	}
 
-	public class Cfs {
+	public class Cfs
+	{
 		public readonly string LocalRoot;
 		public readonly Uri BaseUri;
 		public readonly string BucketPath;
@@ -38,7 +41,8 @@ namespace Cfs {
 
 		public bool Canceling { get; private set; }
 
-		public Cfs(string localRoot, Uri baseUri, string bucketPath){
+		public Cfs(string localRoot, Uri baseUri, string bucketPath)
+		{
 			LocalRoot = localRoot.TrimEnd(Path.DirectorySeparatorChar);
 			BaseUri = baseUri;
 			BucketPath = bucketPath;
@@ -46,34 +50,40 @@ namespace Cfs {
 			prepare ();
 		}
 
-		void prepare(){
+		void prepare()
+		{
 			// ディレクトリを作成する
 			string[] pathParts = LocalRoot.Split(Path.DirectorySeparatorChar);
-			for (int i = 0; i < pathParts.Length; i++) {
+			for (int i = 0; i < pathParts.Length; i++)
+			{
 				if (i == 0 && pathParts [i] == "") pathParts [i] = "/";
 				if (i > 0) pathParts [i] = Path.Combine (pathParts [i - 1], pathParts [i]);
 				if (pathParts[i] != "" && !Directory.Exists (pathParts [i])) Directory.CreateDirectory (pathParts [i]);
 			}
 		}
 
-		public void WriteBucket(string hash, byte[] data){
+		public void WriteBucket(string hash, byte[] data)
+		{
 			writeFile (hash, new MemoryStream (data), ContentAttr.All);
 			bucket = new Bucket (getStringFromHash (hash, ContentAttr.All), Filter);
 		}
 
-		public void WriteFile(string filename, byte[] data){
+		public void WriteFile(string filename, byte[] data)
+		{
 			var hash = bucket.Files [filename].Hash;
 			writeFile (hash, new MemoryStream(data), ContentAttr.All);
 		}
 
-		public Uri UrlFromHash(string hash){
-			return new Uri(BaseUri + "data/" + hash.Substring(0,2) + "/" + hash.Substring(2));
+		public Uri UrlFromHash(string hash)
+		{
+			return new Uri(BaseUri + "data/" + hash.Substring(0, 2) + "/" + hash.Substring(2));
 		}
 
 
-#if UNITY_EDITOR
-		
-		public void DownloadIndexSync(){
+		#if UNITY_EDITOR
+
+		public void DownloadIndexSync()
+		{
 			state = CfsState.DownloadingIndex;
 
 			fetchSync (BucketPath, true);
@@ -82,73 +92,90 @@ namespace Cfs {
 			state = CfsState.DownloadedIndex;
 		}
 
-		public void DownloadSync( IEnumerable<FileInfo> files){
-			foreach( var file in files.Where (f => !File.Exists(LocalPathFromFile(f.Filename)))){
+		public void DownloadSync( IEnumerable<FileInfo> files)
+		{
+			foreach( var file in files.Where (f => !File.Exists(LocalPathFromFile(f.Filename))))
+			{
 				//Debug.Log ("downloading " + file.Filename);
 				fetchSync (file.Hash, true);
 			}
 		}
 
-		void fetchSync(string hash, bool padded){
-			var url = BaseUri + "data/" + hash.Substring(0,2) + "/" + hash.Substring(2);
+		void fetchSync(string hash, bool padded)
+		{
+			var url = BaseUri + "data/" + hash.Substring(0, 2) + "/" + hash.Substring(2);
 			var request = (HttpWebRequest)WebRequest.Create (url);
 			var res = request.GetResponse ();
-			using (var stream = res.GetResponseStream ()) {
+			using (var stream = res.GetResponseStream ())
+			{
 				writeFile (hash, stream, ContentAttr.All);
 			}
 		}
 
-#endif
-		
+		#endif
+
 		//========================================================================
 		// Hashを使ったアクセス関数
 		//========================================================================
 
-		string localPathFromHash(string hash){
+		string localPathFromHash(string hash)
+		{
 			return Path.Combine (LocalRoot, hash);
 		}
 
-		Stream getStreamFromHash(string hash, ContentAttr attr){
+		Stream getStreamFromHash(string hash, ContentAttr attr)
+		{
 			var stream = File.OpenRead (localPathFromHash (hash));
 			return decode(stream, attr);
 		}
 
-		string getStringFromHash(string hash, ContentAttr attr){
-			using (var stream = getStreamFromHash (hash, attr)) {
+		string getStringFromHash(string hash, ContentAttr attr)
+		{
+			using (var stream = getStreamFromHash (hash, attr))
+			{
 				return new StreamReader (stream).ReadToEnd ();
 			}
 		}
 
-		public void writeFile(string hash, Stream stream, ContentAttr attr){
+		public void writeFile(string hash, Stream stream, ContentAttr attr)
+		{
 			var path = localPathFromHash (hash);
 
 			// テンポラリファイルに書き込む
 			var tmpPath = tempPath();
-			using (var tmp = File.Open (tmpPath, FileMode.Create)) {
+			using (var tmp = File.Open (tmpPath, FileMode.Create))
+			{
 				var buf = new byte[8192];
 				int len = 0;
 				int read;
-				while ((read = stream.Read (buf, 0, buf.Length)) > 0) {
+				while ((read = stream.Read (buf, 0, buf.Length)) > 0)
+				{
 					tmp.Write (buf, 0, read);
 					len += read;
 				}
 				// パディングをする(AESがブロックサイズでしか復号できないため）
-				if ((attr & ContentAttr.Crypted) != 0 && len % 16 != 0) {
+				if ((attr & ContentAttr.Crypted) != 0 && len % 16 != 0)
+				{
 					var pad = new byte[16];
 					tmp.Write (pad, 0, 16 - len % 16);
 				}
 			}
 			// アトミックにするために、Mone/Replaceを使用している
-			if (File.Exists (path)) {
+			if (File.Exists (path))
+			{
 				File.Replace (tmpPath, path, null);
-			} else {
+			}
+			else
+			{
 				File.Move (tmpPath, path);
 			}
 		}
 
-		Stream decode(Stream srcStream, ContentAttr attr){
+		Stream decode(Stream srcStream, ContentAttr attr)
+		{
 			var result = srcStream;
-			if ((attr & ContentAttr.Crypted) != 0) {
+			if ((attr & ContentAttr.Crypted) != 0)
+			{
 				var cipher = new AesManaged ();
 				cipher.Padding = PaddingMode.None;
 				cipher.Mode = CipherMode.CFB;
@@ -160,10 +187,11 @@ namespace Cfs {
 				result = new CryptoStream (result, cipher.CreateDecryptor (), CryptoStreamMode.Read);
 			}
 
-			if( (attr & ContentAttr.Compressed) != 0 ){
+			if( (attr & ContentAttr.Compressed) != 0 )
+			{
 				// ZLibのヘッダーを2byteを読み飛ばす
 				// See: http://wiz.came.ac/blog/2009/09/zlibdll-zlibnet-deflatestream.html
-				result.ReadByte (); 
+				result.ReadByte ();
 				result.ReadByte ();
 				result = new DeflateStream (result, CompressionMode.Decompress);
 			}
@@ -171,7 +199,8 @@ namespace Cfs {
 			return result;
 		}
 
-		string tempPath(){
+		string tempPath()
+		{
 			return Path.Combine (LocalRoot, "cfstmpfile");
 		}
 
@@ -179,67 +208,87 @@ namespace Cfs {
 		// ファイル名を使ったアクセス関数
 		//========================================================================
 
-		public Uri UrlFromFile(string filename){
+		public Uri UrlFromFile(string filename)
+		{
 			var hash = bucket.Files [filename].Hash;
-			return new Uri(BaseUri + "data/" + hash.Substring(0,2) + "/" + hash.Substring(2));
+			return new Uri(BaseUri + "data/" + hash.Substring(0, 2) + "/" + hash.Substring(2));
 		}
 
-		public string LocalPathFromFile(string filename){
+		public string LocalPathFromFile(string filename)
+		{
 			FileInfo file;
-			if (bucket.Files.TryGetValue (filename, out file)) {
+			if (bucket.Files.TryGetValue (filename, out file))
+			{
 				return Path.Combine (LocalRoot, file.Hash);
-			} else {
+			}
+			else
+			{
 				throw new FileNotFoundException (string.Format ("<color=red><b>cfs file '{0}' is not found.</b></color>", filename));
 			}
 		}
 
-		public byte[] GetBytes(string filename){
+		public byte[] GetBytes(string filename)
+		{
 			Configure.Log ("CfsLog", "open file " + filename);
 			var file = bucket.Files [filename];
 			var buf = new byte[file.OrigSize];
-			using (var stream = decode (File.OpenRead (LocalPathFromFile (filename)), bucket.Files [filename].Attr)) {
+			using (var stream = decode (File.OpenRead (LocalPathFromFile (filename)), bucket.Files [filename].Attr))
+			{
 				stream.Read (buf, 0, buf.Length);
 				return buf;
 			}
 		}
 
-		public Stream GetStream(string filename){
+		public Stream GetStream(string filename)
+		{
 			Configure.Log ("CfsLog", "open file " + filename);
 			return decode(File.OpenRead(LocalPathFromFile (filename)), bucket.Files[filename].Attr);
 		}
 
-		public string GetString(string filename){
-			using (var stream = GetStream (filename)) {
+		public string GetString(string filename)
+		{
+			using (var stream = GetStream (filename))
+			{
 				return new StreamReader (stream).ReadToEnd ();
 			}
 		}
 
-		public bool ExistsInBucket(string filename){
+		public bool ExistsInBucket(string filename)
+		{
 			return bucket.Files.ContainsKey (filename);
 		}
 
-		public bool Exists(string filename){
-            try {
-                return File.Exists(LocalPathFromFile(filename));
-            } catch {
-                return false;
-            }
+		public bool Exists(string filename)
+		{
+			try
+			{
+				return File.Exists(LocalPathFromFile(filename));
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		/// <summary>
 		/// キャッシュをすべてクリアする
 		/// </summary>
 		/// <returns>The cache.</returns>
-		public void ClearCache(){
-			try {
+		public void ClearCache()
+		{
+			try
+			{
 				Directory.Delete (LocalRoot, true);
 				CancelDownload();
-			}catch(Exception ex){
+			}
+			catch(Exception ex)
+			{
 				Debug.LogException (ex);
 			}
 		}
 
-		public void CancelDownload(){
+		public void CancelDownload()
+		{
 			Canceling = true;
 		}
 
@@ -247,33 +296,42 @@ namespace Cfs {
 		/// ファイルの状態をチェックする
 		/// </summary>
 		/// <param name="fullCheck">フルチェック（Hashの比較を行う）ならtrue</param>
-		public CheckResult Check(bool fullCheck){
+		public CheckResult Check(bool fullCheck)
+		{
 			var result = new CheckResult ();
 
-			var filelist = Directory.GetFiles (LocalRoot).Select(f=>Path.GetFileName(f)).ToList();
+			var filelist = Directory.GetFiles (LocalRoot).Select(f => Path.GetFileName(f)).ToList();
 			result.AllFileCount = filelist.Count;
 
 			// バケットファイルを調査
-			if (filelist.Contains (BucketPath)) {
+			if (filelist.Contains (BucketPath))
+			{
 				result.DownloadedFileCount++;
 				filelist.Remove (BucketPath);
 			}
 
 			// バケット内のファイルを調査
-			foreach (var file in bucket.Files.Values) {
-				if (filelist.Contains (file.Hash)) {
+			foreach (var file in bucket.Files.Values)
+			{
+				if (filelist.Contains (file.Hash))
+				{
 					result.DownloadedFileCount++;
 					filelist.Remove (file.Hash);
 
 					// fullCheckならhashを比較する
-					if (fullCheck) {
+					if (fullCheck)
+					{
 						var hash = getFileHash (localPathFromHash (file.Hash), file.Size);
-						if (hash != file.Hash) {
+						if (hash != file.Hash)
+						{
 							Debug.LogError ("invalid file hash '" + file.Filename + "' expect " + file.Hash + " but " + hash);
 							result.ErrorCount++;
-							try {
+							try
+							{
 								File.Delete(localPathFromHash (file.Hash));
-							}catch(Exception ex){
+							}
+							catch(Exception ex)
+							{
 								Debug.LogError ("cannot delete error file " + file.Hash + ", " + ex);
 							}
 						}
@@ -282,10 +340,14 @@ namespace Cfs {
 			}
 
 			// 不要になったファイルを削除する
-			foreach (var f in filelist) {
-				try {
+			foreach (var f in filelist)
+			{
+				try
+				{
 					File.Delete(Path.Combine(LocalRoot, f));
-				}catch(Exception ex){
+				}
+				catch(Exception ex)
+				{
 					Debug.LogError ("cannot delete file " + f + ", " + ex);
 					result.ErrorCount++;
 				}
@@ -295,8 +357,10 @@ namespace Cfs {
 			return result;
 		}
 
-		string getFileHash(string path, int size){
-			using (var f = File.OpenRead (path)) {
+		string getFileHash(string path, int size)
+		{
+			using (var f = File.OpenRead (path))
+			{
 				var md5 = MD5.Create ();
 				var buf = new byte[size];
 				f.Read (buf, 0, size); // padが入ってるかもしれないので、長さを制限する
@@ -305,8 +369,9 @@ namespace Cfs {
 		}
 	}
 
-	public class Bucket {
-		public Dictionary<string,FileInfo> Files = new Dictionary<string,FileInfo>();
+	public class Bucket
+	{
+		public Dictionary<string, FileInfo> Files = new Dictionary<string, FileInfo>();
 
 		/// <summary>
 		/// 文字列からバケットを生成する
@@ -316,8 +381,10 @@ namespace Cfs {
 		///   ファイル名によるフィルタ（帰り値が真ならそのファイルを使用する）.
 		///   nullを指定した場合はすべてのファイルを使用する
 		/// </param>
-		public Bucket(string src, Predicate<string> filter = null){
-			foreach (var line in src.Split('\n')) {
+		public Bucket(string src, Predicate<string> filter = null)
+		{
+			foreach (var line in src.Split('\n'))
+			{
 				if (line == "") continue;
 				var elements = line.Split ('\t');
 				var hash = elements [0];
@@ -333,21 +400,24 @@ namespace Cfs {
 	}
 
 	[Flags]
-	public enum ContentAttr {
+	public enum ContentAttr
+	{
 		None = 0,
 		Compressed = 1,
 		Crypted = 2,
 		All = 3,
 	}
 
-	public class FileInfo {
+	public class FileInfo
+	{
 		public readonly string Filename;
 		public readonly int Size;
 		public readonly string Hash;
 		public readonly int OrigSize;
 		public readonly string OrigHash;
 		public readonly ContentAttr Attr;
-		public FileInfo(string hash, string filename, int size, string origHash, int origSize, ContentAttr attr){
+		public FileInfo(string hash, string filename, int size, string origHash, int origSize, ContentAttr attr)
+		{
 			Hash = hash;
 			Filename = filename;
 			Size = size;
@@ -357,7 +427,8 @@ namespace Cfs {
 		}
 	}
 
-	public class DownloadProgress {
+	public class DownloadProgress
+	{
 		public int AllCount;
 		public int AllSize;
 		public int LoadedCount;
@@ -367,7 +438,8 @@ namespace Cfs {
 		public int CurrentFileProgress;
 	}
 
-	public class CheckResult {
+	public class CheckResult
+	{
 		public int AllFileCount;
 		public int DownloadedFileCount;
 		public int RemovedFileCount;

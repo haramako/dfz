@@ -2,17 +2,22 @@
 using System;
 using System.Collections;
 
-namespace RSG {
+namespace RSG
+{
 
 	/// <summary>
 	/// コルーチン実行のためのシングルトン
 	/// </summary>
-	class Worker : MonoBehaviour {
+	class Worker : MonoBehaviour
+	{
 		static Worker instance_;
 
-		public static Worker Instance {
-			get {
-				if (instance_ == null) {
+		public static Worker Instance
+		{
+			get
+			{
+				if (instance_ == null)
+				{
 					var obj = new GameObject ("<<PromiseWorker>>");
 					GameObject.DontDestroyOnLoad (obj);
 					instance_ = obj.AddComponent<Worker> ();
@@ -22,35 +27,44 @@ namespace RSG {
 		}
 	}
 
-	public class PromiseEx {
-		public static IPromise Delay(float sec){
+	public class PromiseEx
+	{
+		public static IPromise Delay(float sec)
+		{
 			var promise = new Promise();
 			Worker.Instance.StartCoroutine (delayCoroutine(promise, sec));
 			return promise;
 		}
 
-		static IEnumerator delayCoroutine(Promise promise, float sec){
+		static IEnumerator delayCoroutine(Promise promise, float sec)
+		{
 			yield return new WaitForSeconds (sec);
 			promise.Resolve ();
 		}
 
-		public static IPromise<WWW> StartWWW(string url){
+		public static IPromise<WWW> StartWWW(string url)
+		{
 			var promise = new Promise<WWW> ();
 			Worker.Instance.StartCoroutine (WWWToPromiseCoroutine(promise, new WWW(url)));
 			return promise;
 		}
 
-		public static IPromise<WWW> StartWWW(WWW www){
+		public static IPromise<WWW> StartWWW(WWW www)
+		{
 			var promise = new Promise<WWW> ();
 			Worker.Instance.StartCoroutine (WWWToPromiseCoroutine(promise, www));
 			return promise;
 		}
 
-		static IEnumerator WWWToPromiseCoroutine(Promise<WWW> promise, WWW www){
+		static IEnumerator WWWToPromiseCoroutine(Promise<WWW> promise, WWW www)
+		{
 			yield return www;
-			if (www.error != null) {
+			if (www.error != null)
+			{
 				promise.Reject (new Exception (www.error));
-			} else {
+			}
+			else
+			{
 				promise.Resolve (www);
 			}
 		}

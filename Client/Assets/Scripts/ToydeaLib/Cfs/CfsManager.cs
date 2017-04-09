@@ -7,23 +7,27 @@ using System.Linq;
 using System.IO;
 using Cfs;
 
-public class CfsManager : MonoBehaviour {
-	public enum CfsState {
-		None = 0,
-		DownloadingIndex,
-		DownloadedIndex,
-		DownloadingContents,
-		Ready,
-	}
+public class CfsManager : MonoBehaviour
+{
+public enum CfsState
+{
+	None = 0,
+	DownloadingIndex,
+	DownloadedIndex,
+	DownloadingContents,
+	Ready,
+}
 
-	public static CfsManager Instance;
-	public static ILogger Logger = Debug.logger;
+public static CfsManager Instance;
+public static ILogger Logger = Debug.logger;
 
-	public CfsState State { get; private set; }
-	public Cfs.Cfs Cfs { get; private set; }
+public CfsState State { get; private set; }
+public Cfs.Cfs Cfs { get; private set; }
 
-	public void Awake(){
-		if (Instance != null) {
+public void Awake()
+	{
+		if (Instance != null)
+		{
 			Destroy (this);
 			return;
 		}
@@ -31,37 +35,46 @@ public class CfsManager : MonoBehaviour {
 		Instance = this;
 	}
 
-	public void Init(Cfs.Cfs cfs){
+	public void Init(Cfs.Cfs cfs)
+	{
 		Cfs = cfs;
 	}
 
-	public void DownloadIndex(Action callback){
+	public void DownloadIndex(Action callback)
+	{
 		StartCoroutine (downloadIndexCoroutine(callback));
 	}
 
-	IEnumerator downloadIndexCoroutine(Action callback){
+	IEnumerator downloadIndexCoroutine(Action callback)
+	{
 		Logger.Log ("Cfs", "Cfs: start download index");
-		if (State != CfsState.None) {
+		if (State != CfsState.None)
+		{
 			throw new InvalidOperationException ("Invalid state " + State);
 		}
 		State = CfsState.DownloadingIndex;
 
 		string hash;
-		if (Cfs.BucketPath.Length != 32) {
+		if (Cfs.BucketPath.Length != 32)
+		{
 			var indexWww = new WWW ((Cfs.BaseUri + Cfs.BucketPath).ToString ());
 			yield return indexWww;
-			if (indexWww.error != null) {
+			if (indexWww.error != null)
+			{
 				Logger.LogError ("Cfs", "error" + indexWww.error);
 				yield break;
 			}
 			hash = indexWww.text.Trim();
-		} else {
+		}
+		else
+		{
 			hash = Cfs.BucketPath;
 		}
 
 		var www = new WWW (Cfs.UrlFromHash (hash).ToString());
 		yield return www;
-		if (www.error != null) {
+		if (www.error != null)
+		{
 			Logger.LogError ("Cfs", "error" + www.error);
 		}
 		Cfs.WriteBucket (hash, www.bytes);
@@ -74,7 +87,8 @@ public class CfsManager : MonoBehaviour {
 	/// ファイルをダウンロードする
 	/// </summary>
 	/// <param name="files">Files.</param>
-	public void Download( IEnumerable<string> files, Action callback = null){
+	public void Download( IEnumerable<string> files, Action callback = null)
+	{
 		Logger.Log ("Cfs", "start downloading ");
 
 		float start = Time.time;
@@ -82,46 +96,61 @@ public class CfsManager : MonoBehaviour {
 		int cached = 0;
 		int downloaded = 0;
 
-		foreach( var file_ in files ){
+		foreach( var file_ in files )
+		{
 			var file = file_;
 			all++;
-			if (Cfs.Exists (file)) {
+			if (Cfs.Exists (file))
+			{
 				cached++;
 				continue;
 			}
 			var url = Cfs.UrlFromFile(file).ToString();
-			queue_.Add( new DownloadInfo(){
-				Url = url, 
-				Callback = (info)=>{
-					if( info.www.error != null ){
+			queue_.Add( new DownloadInfo()
+			{
+				Url = url,
+				Callback = (info) =>
+				{
+					if( info.www.error != null )
+					{
 						Logger.LogError ("Cfs", "error downloading" + file + " from " + url + " ," + info.www.error);
-					}else{
+					}
+					else
+					{
 						Logger.Log ("Cfs", "finish downloading " + file + " from " + url);
 						Cfs.WriteFile (file, info.www.bytes);
 					}
-			}});
+				}
+			});
 			downloaded++;
 		}
-		queue_.Add( new DownloadInfo(){ 
-			Callback = (info)=>{
-				Logger.Log ("Cfs", string.Format("download finished {3:0.0} sec, all={0}, cached={1}, downloaded={2}", all, cached, downloaded, Time.time-start));
-				if( callback != null ){
+		queue_.Add( new DownloadInfo()
+		{
+			Callback = (info) =>
+			{
+				Logger.Log ("Cfs", string.Format("download finished {3:0.0} sec, all={0}, cached={1}, downloaded={2}", all, cached, downloaded, Time.time - start));
+				if( callback != null )
+				{
 					callback();
 				}
 			}
 		});
 	}
 
-	public class DownloadInfo {
+	public class DownloadInfo
+	{
 		public string Url;
 		public Action<DownloadInfo> Callback;
 		public WWW www;
 	}
 
 	List<DownloadInfo> queue_ = new List<DownloadInfo>();
-	IEnumerator Start(){
-		for (;;) {
-			if (queue_.Count <= 0) {
+	IEnumerator Start()
+	{
+		for (;;)
+		{
+			if (queue_.Count <= 0)
+			{
 				yield return null;
 				continue;
 			}
@@ -130,30 +159,39 @@ public class CfsManager : MonoBehaviour {
 			queue_.RemoveAt (0);
 
 			// コールバックを呼ぶだけ
-			if (info.Url == null) {
+			if (info.Url == null)
+			{
 				info.Callback (info);
 				continue;
 			}
 
 			WWW www;
-			while (true) {
+			while (true)
+			{
 				int retryCount = 0;
 				www = new WWW (info.Url);
 				yield return www;
-				if (www.error != null) {
-					if (retryCount >= 3) {
+				if (www.error != null)
+				{
+					if (retryCount >= 3)
+					{
 						break;
-					} else {
+					}
+					else
+					{
 						yield return new WaitForSeconds (1.0f);
 						www.Dispose ();
 						continue;
 					}
-				} else {
+				}
+				else
+				{
 					break;
 				}
 			}
 
-			if (info.Callback != null) {
+			if (info.Callback != null)
+			{
 				info.www = www;
 				info.Callback (info);
 			}

@@ -1,15 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Game {
+namespace Game
+{
 
-	public class Tactics {
+	public class Tactics
+	{
 
 
-		public Tactics(){
+		public Tactics()
+		{
 		}
 
-		public void MainLoop(){
+		public void MainLoop()
+		{
 		}
 
 	}

@@ -3,13 +3,16 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using RSG;
 
-public class InitializeScene : MonoBehaviour {
+public class InitializeScene : MonoBehaviour
+{
 
 	// Use this for initialization
-	IEnumerator Start () {
+	IEnumerator Start ()
+	{
 		var www = new WWW ("http://133.242.235.150:7000/tags/tb-dev");
 		yield return www;
-		if (!www.isDone) {
+		if (!www.isDone)
+		{
 			throw new System.Exception ("cannot download hash");
 		}
 
@@ -17,21 +20,24 @@ public class InitializeScene : MonoBehaviour {
 
 		var cfsManager = CfsManager.Instance;
 		var cfs = new Cfs.Cfs (
-			Application.temporaryCachePath, 
-			new System.Uri("http://cfs.dragon-fang.com/"), 
+			Application.temporaryCachePath,
+			new System.Uri("http://cfs.dragon-fang.com/"),
 			hash);
-		cfs.Filter = (f) => {
+		cfs.Filter = (f) =>
+		{
 			return !f.EndsWith(".ab") || f.Contains("WebPlayer");
 		};
 		cfsManager.Init (cfs);
 		bool finish = false;
-		cfsManager.DownloadIndex (()=>{finish=true;});
-		while (!finish) {
+		cfsManager.DownloadIndex (() => {finish = true;});
+		while (!finish)
+		{
 			yield return null;
 		}
 		finish = false;
-		cfsManager.Download (cfs.bucket.Files.Keys, ()=>{finish=true;});
-		while (!finish) {
+		cfsManager.Download (cfs.bucket.Files.Keys, () => {finish = true;});
+		while (!finish)
+		{
 			yield return null;
 		}
 
@@ -41,15 +47,18 @@ public class InitializeScene : MonoBehaviour {
 		SceneManager.LoadScene ("GameScene");
 
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
-	
+	void Update ()
+	{
+
 	}
 
-	public void OnButton1Click(){
+	public void OnButton1Click()
+	{
 		var d = new Promise<string> ();
-		d.Then (x => {
+		d.Then (x =>
+		{
 			Debug.Log (x);
 		});
 		d.Resolve ("hoge");

@@ -4,12 +4,12 @@ using UnityEditor;
 using System.IO;
 
 /// <summary>
-// ScriptableObjectをプレハブとして出力する汎用スクリプト  
+// ScriptableObjectをプレハブとして出力する汎用スクリプト
 /// </summary>
 // <remarks>
 // 指定したScriptableObjectをプレハブに変換する。
-// 1.Editorフォルダ下にCreateScriptableObjectPrefub.csを配置  
-// 2.ScriptableObjectのファイルを選択して右クリック→Create ScriptableObjectを選択  
+// 1.Editorフォルダ下にCreateScriptableObjectPrefub.csを配置
+// 2.ScriptableObjectのファイルを選択して右クリック→Create ScriptableObjectを選択
 // </remarks>
 public class ScriptableObjectToAsset
 {
@@ -18,7 +18,8 @@ public class ScriptableObjectToAsset
 	[MenuItem("Assets/Create ScriptableObject")]
 	static void Crate ()
 	{
-		foreach (Object selectedObject in Selection.objects) {
+		foreach (Object selectedObject in Selection.objects)
+		{
 			// get path
 			string path = getSavePath (selectedObject);
 
@@ -40,7 +41,8 @@ public class ScriptableObjectToAsset
 		string path = string.Format ("{0}/{1}.asset", dirPath, objectName);
 
 		if (File.Exists (path))
-			for (int i=1;; i++) {
+			for (int i = 1;; i++)
+			{
 				path = string.Format ("{0}/{1}({2}).asset", dirPath, objectName, i);
 				if (! File.Exists (path))
 					break;

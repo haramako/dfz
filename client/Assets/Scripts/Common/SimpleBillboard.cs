@@ -2,11 +2,13 @@
 using System.Collections;
 
 [ExecuteInEditMode]
-public class SimpleBillboard : MonoBehaviour {
+public class SimpleBillboard : MonoBehaviour
+{
 
 	Quaternion backupQuaternion;
 
-	public void OnWillRenderObject() {
+	public void OnWillRenderObject()
+	{
 		var camera = Camera.current;
 		if (camera == null) return;
 		backupQuaternion = transform.localRotation;
@@ -16,7 +18,8 @@ public class SimpleBillboard : MonoBehaviour {
 		transform.LookAt (transform.position - cameraForward, cameraUp);
 	}
 
-	public void OnPostRender(){
+	public void OnPostRender()
+	{
 		transform.localRotation = backupQuaternion;
 	}
 

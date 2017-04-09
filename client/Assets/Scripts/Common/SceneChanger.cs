@@ -1,4 +1,4 @@
-﻿#define DONT_USE_MULTI_SCENE 
+﻿#define DONT_USE_MULTI_SCENE
 // TODO: 3DS版が5.3に追いつくまで、一時的にマルチシーンを使わない
 
 using UnityEngine;
@@ -12,12 +12,14 @@ using UnityEngine.SceneManagement;
 
 #pragma warning disable 612, 618 // Unity5.3.2でwarningを抑制
 
-public enum SceneChangerState {
+public enum SceneChangerState
+{
 	NONE,
 	PROCESSING
 }
 
-public class SceneChangerOption {
+public class SceneChangerOption
+{
 	public string EffectName = "Effect228_SceneChangeShort";
 	// 以下は、SceneChanger内で使用する
 	public string PrevSceneName;
@@ -29,9 +31,9 @@ public class SceneChangerOption {
 /*
 /// <summary>
 /// シーン変更の処理を行う。
-/// 
-/// 
-/// 
+///
+///
+///
 /// </summary>
 public class SceneChanger : MonoSingleton<SceneChanger> {
 
@@ -129,7 +131,7 @@ public class SceneChanger : MonoSingleton<SceneChanger> {
 
 		Camera.SetActive (true); // シーンチェンジ時用カメラをONにする
 
-		yield return null; 
+		yield return null;
 		ResourceCache.ReleaseAll(0);
 
 		float startEyecatchTime = Time.time;
@@ -141,7 +143,7 @@ public class SceneChanger : MonoSingleton<SceneChanger> {
 		}
 
 		Configure.Log ("SceneChangerLog", "Load scene "+Option.NextSceneName);
-		
+
 		#if UNITY_N3DS
 		Application.LoadLevel(Option.NextSceneName);
 		#else

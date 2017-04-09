@@ -2,5 +2,6 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class AppText : Text {
+public class AppText : Text
+{
 }

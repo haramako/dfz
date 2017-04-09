@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Game {
+namespace Game
+{
 
-	static public class Utility {
+	static public class Utility
+	{
 
 		/// <summary>
 		/// 現在時刻を種として取得
@@ -17,7 +19,8 @@ namespace Game {
 	/// <summary>
 	/// 擬似乱数ジェネレータークラス
 	/// </summary>
-	public abstract class RandomBase {
+	public abstract class RandomBase
+	{
 
 		/// <summary>
 		/// 使用しているseed値
@@ -45,13 +48,16 @@ namespace Game {
 		/// <returns>The int.</returns>
 		/// <param name="min">Minimum.</param>
 		/// <param name="max">Max.</param>
-		public virtual Int32 RangeInt(int min, int max) {
-			if (min > max) {
+		public virtual Int32 RangeInt(int min, int max)
+		{
+			if (min > max)
+			{
 				min ^= max;
 				max ^= min;
 				min ^= max;
 			}
-			if ((min + 1) >= max) {
+			if ((min + 1) >= max)
+			{
 				return min;
 			}
 			return (Int32)(min + (NextUInt32() / ((double)UInt32.MaxValue + 1.0f)) * (max - min));
@@ -62,11 +68,14 @@ namespace Game {
 		/// int version
 		/// </summary>
 		/// <param name="rate">Rate.</param>
-		public virtual bool Probability(int rate) {
-			if (rate <= 0) {
+		public virtual bool Probability(int rate)
+		{
+			if (rate <= 0)
+			{
 				return false;
 			}
-			if (rate >= 100) {
+			if (rate >= 100)
+			{
 				return true;
 			}
 			int v = (int)((NextUInt32() / ((double)UInt32.MaxValue + 1.0f)) * 100);
@@ -78,11 +87,14 @@ namespace Game {
 		/// float Version
 		/// </summary>
 		/// <param name="rate">Rate.</param>
-		public virtual bool Probability(float rate) {
-			if (rate <= 0f) {
+		public virtual bool Probability(float rate)
+		{
+			if (rate <= 0f)
+			{
 				return false;
 			}
-			if (rate >= 100f) {
+			if (rate >= 100f)
+			{
 				return true;
 			}
 			float v = (int)((NextUInt32() / ((double)UInt32.MaxValue + 1.0f)) * 100);
@@ -95,13 +107,17 @@ namespace Game {
 		/// <returns>The lots.</returns>
 		/// <param name="list">List.</param>
 		/// <param name="maxcount">Maxcount.</param>
-		public virtual int ListLots(ref List<int> list, ref int maxcount) {
+		public virtual int ListLots(ref List<int> list, ref int maxcount)
+		{
 			int rand = (int)((NextUInt32() / ((double)UInt32.MaxValue + 1.0f)) * maxcount);
 			int idx = 0;
-			foreach (int lotsint in list) {
-				if (lotsint != 0) {
+			foreach (int lotsint in list)
+			{
+				if (lotsint != 0)
+				{
 					rand -= lotsint;
-					if (rand <= 0) {
+					if (rand <= 0)
+					{
 						return idx;
 					}
 				}
@@ -116,7 +132,8 @@ namespace Game {
 		/// <param name="list">List.</param>
 		/// <param name="startIndex">Start index.</param>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public virtual T Lots<T>(ref List<T> list, int startIndex = 0) {
+		public virtual T Lots<T>(ref List<T> list, int startIndex = 0)
+		{
 			int rand = RangeInt(startIndex, list.Count);
 			return list[rand];
 		}
@@ -125,7 +142,8 @@ namespace Game {
 		/// debug用
 		/// </summary>
 		/// <returns>A <see cref="System.String"/> that represents the current <see cref="RogueLib.Random.RandomBase"/>.</returns>
-		public override string ToString() {
+		public override string ToString()
+		{
 			return string.Format("<color=red><b>[RandomBase: Seed={0}, Counter={1}]</b></color>", Seed, Counter);
 		}
 	}
@@ -134,7 +152,8 @@ namespace Game {
 	/// xorshiftの擬似乱数ジェネレータークラス
 	/// http://www.jstatsoft.org/v08/i14/paper
 	/// </summary>
-	public sealed class RandomXS : RandomBase {
+	public sealed class RandomXS : RandomBase
+	{
 
 		/// <summary>
 		/// 内部状態ベクトル
@@ -146,7 +165,8 @@ namespace Game {
 		/// </summary>
 		/// <param name="seed">Seed.</param>
 		/// <param name="count">Count.</param>
-		public RandomXS(int seed, int count = 0) {
+		public RandomXS(int seed, int count = 0)
+		{
 			baseSeed = seed;
 			baseCounter = 0;
 
@@ -159,7 +179,8 @@ namespace Game {
 			z = 1812433253U * (y ^ (y >> 30)) + 3;
 
 			// resume
-			while (baseCounter != count) {
+			while (baseCounter != count)
+			{
 				NextUInt32();
 			}
 		}
@@ -167,7 +188,8 @@ namespace Game {
 		/// <summary>
 		/// 符号なし32bitの擬似乱数を生成
 		/// </summary>
-		public override UInt32 NextUInt32() {
+		public override UInt32 NextUInt32()
+		{
 			baseCounter++;
 
 			System.UInt32 t = (x ^ (x << 11));
@@ -178,12 +200,13 @@ namespace Game {
 		}
 	}
 
-#if false
+	#if false
 	/// <summary>
 	/// Mersenne Twisterの擬似乱数ジェネレータークラス
 	/// http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/ARTICLES/mt.pdf
 	/// </summary>
-	public sealed class RandomMT : RandomBase {
+	public sealed class RandomMT : RandomBase
+	{
 		private const int MEXP = 19937;
 		private const int POS1 = 122;
 		private const int SL1 = 18;
@@ -211,21 +234,24 @@ namespace Game {
 		/// </summary>
 		/// <param name="seed">Seed.</param>
 		/// <param name="count">Count.</param>
-		public RandomMT(int seed, int count = 0) {
+		public RandomMT(int seed, int count = 0)
+		{
 			baseSeed = seed;
 			baseCounter = 0;
 
 			// initialize
 			sfmt = new UInt32[N32];
 			sfmt[0] = (UInt32)seed;
-			for (int i = 1; i < N32; i++) {
+			for (int i = 1; i < N32; i++)
+			{
 				sfmt[i] = (UInt32)(1812433253 * (sfmt[i - 1] ^ (sfmt[i - 1] >> 30)) + i);
 			}
 			period_certification();
 			idx = N32;
 
 			// resume
-			while (baseCounter != count) {
+			while (baseCounter != count)
+			{
 				NextUInt32();
 			}
 		}
@@ -234,10 +260,12 @@ namespace Game {
 		/// 符号なし32bitの擬似乱数を生成
 		/// </summary>
 		/// <returns>The U int32.</returns>
-		public override UInt32 NextUInt32() {
+		public override UInt32 NextUInt32()
+		{
 			baseCounter++;
 
-			if (idx >= N32) {
+			if (idx >= N32)
+			{
 				idx = 0;
 				// re-create new table
 				int a = 0;
@@ -245,7 +273,8 @@ namespace Game {
 				int c = (N - 2) * 4;
 				int d = (N - 1) * 4;
 				UInt32[] p = this.sfmt;
-				do {
+				do
+				{
 					p[a + 3] = p[a + 3] ^ (p[a + 3] << 8) ^ (p[a + 2] >> 24) ^ (p[c + 3] >> 8) ^ ((p[b + 3] >> SR1) & MSK4) ^ (p[d + 3] << SL1);
 					p[a + 2] = p[a + 2] ^ (p[a + 2] << 8) ^ (p[a + 1] >> 24) ^ (p[c + 3] << 24) ^ (p[c + 2] >> 8) ^ ((p[b + 2] >> SR1) & MSK3) ^ (p[d + 2] << SL1);
 					p[a + 1] = p[a + 1] ^ (p[a + 1] << 8) ^ (p[a + 0] >> 24) ^ (p[c + 2] << 24) ^ (p[c + 1] >> 8) ^ ((p[b + 1] >> SR1) & MSK2) ^ (p[d + 1] << SL1);
@@ -254,10 +283,12 @@ namespace Game {
 					d = a;
 					a += 4;
 					b += 4;
-					if (b >= N32) {
+					if (b >= N32)
+					{
 						b = 0;
 					}
-				} while (a < N32);
+				}
+				while (a < N32);
 			}
 			return sfmt[idx++];
 		}
@@ -265,22 +296,29 @@ namespace Game {
 		/// <summary>
 		/// 乱数テーブルを作成
 		/// </summary>
-		private void period_certification() {
+		private void period_certification()
+		{
 			UInt32 inner = 0;
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 4; i++)
+			{
 				inner ^= sfmt[i] & PARITY[i];
 			}
-			for (int i = 16; i > 0; i >>= 1) {
+			for (int i = 16; i > 0; i >>= 1)
+			{
 				inner ^= inner >> i;
 			}
 			inner &= 1;
-			if (inner == 1) {
+			if (inner == 1)
+			{
 				return;
 			}
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 4; i++)
+			{
 				UInt32 work = 1;
-				for (int j = 0; j < 32; j++) {
-					if ((work & PARITY[i]) != 0) {
+				for (int j = 0; j < 32; j++)
+				{
+					if ((work & PARITY[i]) != 0)
+					{
 						sfmt[i] ^= work;
 						return;
 					}
@@ -289,5 +327,5 @@ namespace Game {
 			}
 		}
 	}
-#endif
+	#endif
 }
