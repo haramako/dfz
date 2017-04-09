@@ -93,3 +93,8 @@ message WalkRequest {
 	repeated Point path = 2;
 }
 
+// メッセージログを出力する
+message Message {
+	string message_id = 1; // メッセージID
+	repeated string param = 2; // パラメータ
+}

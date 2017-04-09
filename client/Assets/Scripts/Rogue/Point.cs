@@ -96,7 +96,7 @@ namespace Game
 			return Direction.None;
 		}
 
-		#if UNITY
+		#if UNITY_5
         public UnityEngine.Vector2 ToVector2()
         {
             return new UnityEngine.Vector2(X, Y);

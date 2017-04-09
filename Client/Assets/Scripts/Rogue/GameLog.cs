@@ -116,6 +116,14 @@ namespace GameLog {
 			});
 		}
 	}
+
+	public partial class Message : ICommand {
+		public IPromise Process(GameScene scene){
+			Debug.Log ("Message: " + MessageId + " " + string.Join (", ", Param.ToArray ()));
+			return Promise.Resolved ();
+		}
+	}
+
 	#else
 	public partial class Shutdown : ICommand {
 	}

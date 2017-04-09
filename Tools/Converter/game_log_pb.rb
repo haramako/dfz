@@ -66,6 +66,10 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :character_id, :int32, 1
     repeated :path, :message, 2, "GameLog.Point"
   end
+  add_message "GameLog.Message" do
+    optional :message_id, :string, 1
+    repeated :param, :string, 2
+  end
   add_enum "GameLog.Animation" do
     value :None, 0
     value :Attack, 1
@@ -88,5 +92,6 @@ module GameLog
   StayRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.StayRequest").msgclass
   SkillRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.SkillRequest").msgclass
   WalkRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.WalkRequest").msgclass
+  Message = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.Message").msgclass
   Animation = Google::Protobuf::DescriptorPool.generated_pool.lookup("GameLog.Animation").enummodule
 end

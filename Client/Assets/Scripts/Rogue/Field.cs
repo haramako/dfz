@@ -49,6 +49,9 @@ namespace Game
 
 		Stage stage;
 
+		/// <summary>
+		/// 通信ログを表示しない
+		/// </summary>
 		public bool NoLog;
 		public bool NoUnity;
 
@@ -192,7 +195,7 @@ namespace Game
 		public void log(object obj){
 			if (NoLog) {
 			} else if (!NoUnity) {
-				#if UNITY
+				#if UNITY_5
 				UnityEngine.Debug.Log (obj);
 				#endif
 			} else {
@@ -213,7 +216,7 @@ namespace Game
 
 		string inspect(object obj){
 			if (!NoUnity) {
-				#if UNITY
+				#if UNITY_5
 				return UnityEngine.JsonUtility.ToJson (obj);
 				#else
 				return null;
@@ -237,7 +240,9 @@ namespace Game
 		}
 
 		public void ShowMessage(string msg, params object[] param){
-			log ("MSG: " + msg + " " + string.Join (" ", param.Select (x => x.ToString ()).ToArray ()));
+			var strParam = param.Select (x => x.ToString ()).ToArray ();
+			Send (new GameLog.Message{ MessageId = msg, Param = strParam.ToList() });
+			log ("MSG: " + msg + " " + string.Join (" ", strParam));
 		}
 
 		public string Display(){

@@ -55,7 +55,9 @@ public class CharacterRenderer : MonoBehaviour {
 	void OnRenderObject(){
 		#if UNITY_EDITOR
 		if( !Application.isPlaying ){
-			RecalcDir (UnityEditor.SceneView.lastActiveSceneView.camera);
+			if( UnityEditor.SceneView.lastActiveSceneView != null ){
+				RecalcDir (UnityEditor.SceneView.lastActiveSceneView.camera);
+			}
 		}else{
 			if( Unfade ){
 				Sprite.sortingLayerName = "OverFade";

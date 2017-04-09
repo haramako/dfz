@@ -1266,6 +1266,97 @@ namespace GameLog {
     }
   }
 
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class Message : pb.Message {
+    public Message() { }
+    public static Message CreateInstance() { var obj = new Message(); obj.Finish(); return obj; }
+    public static Message CreateEmpty() { return new Message(); }
+    private static readonly Message defaultInstance = new Message();
+    public static Message DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public string MessageId = "";
+
+    public List<string> Param = new List<string>();
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (MessageId != "") {
+        output.WriteString(1, MessageId);
+      }
+      if (Param.Count > 0) {
+        output.WriteStringArray(2, Param);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (MessageId != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(1, MessageId);
+      }
+      {
+        int dataSize = 0;
+        foreach (string element in Param) {
+          dataSize += pb::CodedOutputStream.ComputeStringSizeNoTag(element);
+        }
+        size += dataSize;
+        size += 1 * Param.Count;
+      }
+      return size;
+    }
+    public static Message ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static Message ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static Message ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 10: {
+            input.ReadString(ref this.MessageId);
+            break;
+          }
+          case 18: {
+            input.ReadStringArray(tag, this.Param);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    if( Param == null ){
+      Param = new List<string>();
+    }
+    }
+  }
+
   #endregion
 
 }

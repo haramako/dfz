@@ -220,7 +220,6 @@ public class GameScene : MonoBehaviour {
 
 		Game.Point hit;
 		if (LaycastByScreenPosInt (ev.position, out hit)) {
-            Debug.Log(hit);
             switch (mode)
             {
             case Mode.QMove:

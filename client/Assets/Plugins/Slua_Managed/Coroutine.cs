@@ -23,7 +23,7 @@
 #if !SLUA_STANDALONE
 namespace SLua
 {
-#if UNITY5
+#if UNITY_5
 	using UnityEngine;
 #endif
 	using System.Collections;
