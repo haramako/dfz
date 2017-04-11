@@ -1,20 +1,11 @@
 # coding: utf-8
+
 require 'google/protobuf'
 require 'excel'
 require 'stringio'
 require 'active_support/inflector'
 require 'zlib'
-Dir[File.expand_path("../model/", __FILE__) << '/*.rb'].each{|file| require file }
-
-unless defined? logger 
-  def logger
-    unless $_logger
-      $_logger = Logger.new(STDOUT)
-      $_logger.level = Logger::ERROR
-    end
-    $_logger
-  end
-end
+Dir[File.expand_path("../model/", __FILE__) << '/*.rb'].each { |file| require file }
 
 # Protobuf へのモンキーパッチ
 module Google::Protobuf
@@ -29,19 +20,20 @@ class String
   def self.encode(x)
     x
   end
+
   def self.decode(x)
     x
   end
 end
 
+# rubocop:disable Metrics/ModuleLength
 module PbConvert
-
   module_function
 
   def clear_excel_cache
     @excel_cache = {}
   end
-  
+
   def excel_cache(path)
     @excel_cache = {} unless @excel_cache
     unless @excel_cache[path]
@@ -52,22 +44,20 @@ module PbConvert
   end
 
   def parse_pb(bin)
-    begin
-      if bin[0,20].match /PBX/
-        unpack_pbx(bin)
-      else
-        unpack_pb_list(bin)
-      end
-    rescue
-      puts $!
-      []
+    if bin[0, 20] =~ /PBX/
+      unpack_pbx(bin)
+    else
+      unpack_pb_list(bin)
     end
+  rescue
+    puts $ERROR_INFO
+    []
   end
 
   def pack_pbx(dict)
     type_name = (dict.values[0].class.descriptor.name.encode('ASCII') rescue 'String')
     pos = 0
-    index = Master::PbxHeader.new()
+    index = Master::PbxHeader.new
 
     list_bin = dict.map do |kv|
       if kv[0].is_a? Numeric
@@ -81,15 +71,17 @@ module PbConvert
     end
 
     index_bin = Master::PbxHeader.encode(index)
-    pack_chunk_list("PBX/#{type_name}", [index_bin]+list_bin)
+    pack_chunk_list("PBX/#{type_name}", [index_bin] + list_bin)
   end
 
   def unpack_pbx(bin)
     header, list = unpack_chunk_list(bin)
-    mo = header.match(/^PBX\/(.*)$/)
+    mo = header.match(%r{^PBX/(.*)$})
     raise "invalid pbx header '#{header}'" unless mo
 
-    type = eval(mo[1].gsub(/\./){'::'})
+    # rubocop:disable Security/Eval
+    type = eval(mo[1].gsub(/\./) { '::' })
+    # rubocop:enable Security/Eval
 
     index_bin = list.shift
     index = Master::PbxHeader.decode(index_bin)
@@ -98,8 +90,8 @@ module PbConvert
     r = {}
     (index.int_index.to_a + index.string_index.to_a).each do |kv|
       pos = header_index_size + kv[1]
-      len = bin[pos,4].unpack('L')[0]
-      obj = type.decode(Zlib::Inflate.inflate(bin[pos+4,len]))
+      len = bin[pos, 4].unpack('L')[0]
+      obj = type.decode(Zlib::Inflate.inflate(bin[pos + 4, len]))
       r[kv[0]] = obj
     end
     r
@@ -107,32 +99,34 @@ module PbConvert
 
   def pack_pb_list(list)
     type_name = list[0].class.descriptor.name.encode('ASCII')
-    pack_chunk_list( type_name, list.map {|x| x.class.encode(x) })
+    pack_chunk_list(type_name, list.map { |x| x.class.encode(x) })
   end
 
   def unpack_pb_list(s)
     type_name, list = unpack_chunk_list(s)
-    type = eval(type_name.gsub(/\./){'::'})
-    list.map {|bin| type.decode(bin) }
+    # rubocop:disable Security/Eval
+    type = eval(type_name.gsub(/\./) { '::' })
+    # rubocop:enable Security/Eval
+    list.map { |bin| type.decode(bin) }
   end
-  
+
   # チャンクリストをパックする
   def pack_chunk_list(header, list)
     s = StringIO.new
-    
-    s.write ['C',header.size,header].pack('aCa*')
+
+    s.write ['C', header.size, header].pack('aCa*')
 
     list.each do |x|
       s.write [x.size, x].pack('La*')
     end
-    
+
     s.string
   end
 
   # チャンクリストをアンパックする
   def unpack_chunk_list(s)
     s = StringIO.new(s) if s.is_a? String
-    
+
     magic, header_size = s.read(2).unpack('aC')
     raise "not a chunk list" if magic != 'C'
     header = s.read(header_size)
@@ -142,7 +136,7 @@ module PbConvert
       size = s.read(4).unpack('L')[0]
       list << s.read(size)
     end
-    
+
     [header, list]
   end
 
@@ -158,27 +152,23 @@ module PbConvert
   def conv_master(dest, src, sheet, item_type)
     logger.info "マスターコンバート中 #{File.basename(src)} => #{File.basename(dest)}"
     items = conv_sheet(src, sheet, item_type)
-    if items.size > 0
+    unless items.empty?
       bin = pack_pb_list(items)
-      IO.binwrite(dest,bin)
+      IO.binwrite(dest, bin)
     end
+    nil
   end
 
   def conv_message(_class, data)
     m = _class.new
-    _class.to_s =~ /::/
-    m_str = $'
 
-    data.each do |k,v|
+    data.each do |k, v|
       begin
         k, v = conv_field_name(_class, k, v)
         k = k.to_s
-        
+
         desc = _class.descriptor.lookup(k)
-        if desc and v
-          conv_field(m, desc, k, v)
-        end
-        
+        conv_field(m, desc, k, v) if desc and v
       rescue
         logger.warn "コンバートできません #{_class}.#{k} = #{v}"
         logger.warn data
@@ -191,7 +181,7 @@ module PbConvert
   def conv_field(m, desc, k, v)
     if desc.map_entry?
       f = m.__send__(k)
-      v.each do |k2,v2|
+      v.each do |k2, v2|
         k2 = conv_type(desc.subtype.lookup('key'), k2)
         v2 = conv_type(desc.subtype.lookup('value'), v2)
         f[k2] = v2
@@ -200,7 +190,7 @@ module PbConvert
       f = m.__send__(k)
       v.each { |v2| f << conv_type(desc, v2) }
     else
-      desc.set m, conv_type(desc,v)
+      desc.set m, conv_type(desc, v)
     end
   end
 
@@ -224,13 +214,13 @@ module PbConvert
   end
 
   def conv_field_name(_class, k, v)
-    [k,v]
+    [k, v]
   end
 
   # pbのデータの概要をレポートする
   def report_chunk_lists(files)
     puts '-' * 80
-    puts( '%-36s %-20s %4s %8s %8s        %6s' % ['filename', 'sheet', 'ext', 'size', 'gz-size', 'items'] )
+    puts('%-36s %-20s %4s %8s %8s        %6s' % ['filename', 'sheet', 'ext', 'size', 'gz-size', 'items'])
     puts '-' * 80
     total_size = 0
     total_gz_size = 0
@@ -244,8 +234,8 @@ module PbConvert
       rescue
         list = []
       end
-      fname = File.basename(f).gsub(/.pbx?$/,'').split(/-/)
-      puts( '%-36s %-20s %-4s %8d %8d (%3d%%) %6d' % [fname[0], fname[1], File.extname(f), size, gz_size, comp, list.size] )
+      fname = File.basename(f).gsub(/.pbx?$/, '').split(/-/)
+      puts('%-36s %-20s %-4s %8d %8d (%3d%%) %6d' % [fname[0], fname[1], File.extname(f), size, gz_size, comp, list.size])
       total_size += size
       total_gz_size += gz_size
     end
@@ -254,5 +244,5 @@ module PbConvert
     puts "圧縮後サイズ      : #{total_gz_size}"
     puts "圧縮率            : #{100 * total_gz_size / total_size}%"
   end
-
 end
+# rubocop:enable Metrics/ModuleLength

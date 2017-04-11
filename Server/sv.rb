@@ -2,7 +2,7 @@
 
 require 'sinatra'
 
-set :public_folder, __dir__ +  '/public'
+set :public_folder, __dir__ + '/public'
 
 get '/' do
   'Hello!'

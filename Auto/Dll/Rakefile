@@ -1,4 +1,5 @@
 # coding: utf-8
+
 require 'find'
 
 UNITY = '/Applications/Unity5.4.1p3/Unity.app'
@@ -10,7 +11,7 @@ DLL_OUT_DIR = '.'
 task :default => :dll
 
 def make_dll(dir, out, defines, with_unity = false)
-  cs_files = Find.find(dir).select{|f| File.extname(f) == '.cs' }
+  cs_files = Find.find(dir).select { |f| File.extname(f) == '.cs' }
   if with_unity
     unity_dlls = ["-r:#{UNITY}/Contents/PlaybackEngines/MacStandaloneSupport/Managed/UnityEngine.dll"]
   else
@@ -20,17 +21,16 @@ def make_dll(dir, out, defines, with_unity = false)
      *unity_dlls,
      "-target:library",
      "-out:#{out}",
-     *defines.map{|x| "-define:#{x}" },
+     *defines.map { |x| "-define:#{x}" },
      *cs_files
 end
 
 desc 'DLLを作成する'
 task :dll do
   Dir.glob("#{DLL_DIR}/*").each do |dir|
-    if File.directory? dir
-      dll_name = File.basename(dir)
-      make_dll(dir, DLL_OUT_DIR+'/'+dll_name+'NoUnity.dll', ["SLUA_STANDALONE"], with_unity: false)
-      make_dll(dir, DLL_OUT_DIR+'/'+dll_name+'.dll', ["UNITY", "UNITY5", "SLUA_STANDALONE"], with_unity: false)
-    end
+    next unless File.directory? dir
+    dll_name = File.basename(dir)
+    make_dll(dir, DLL_OUT_DIR + '/' + dll_name + 'NoUnity.dll', ["SLUA_STANDALONE"], with_unity: false)
+    make_dll(dir, DLL_OUT_DIR + '/' + dll_name + '.dll', %w[UNITY UNITY5 SLUA_STANDALONE], with_unity: false)
   end
 end

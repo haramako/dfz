@@ -326,10 +326,10 @@ namespace Game
 
 		public void InitLua(string src)
 		{
-			luaSvr = new LuaSvr ();
-			luaSvr.init (null, () => {});
-			L = luaSvr.luaState;
-			L.doString (src);
+			//luaSvr = new LuaSvr ();
+			//luaSvr.init (null, () => {});
+			//L = luaSvr.luaState;
+			//L.doString (src);
 		}
 
 		public void Init(Map map)

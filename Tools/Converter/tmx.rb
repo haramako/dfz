@@ -1,4 +1,5 @@
 # coding: utf-8
+
 require 'rexml/document'
 require 'pp'
 require 'pb_convert'
@@ -11,23 +12,23 @@ class REXML::Element
 end
 
 class Tmx
-  class Obj < Struct.new(:x, :y, :name, :char, :speed); end
-  
+  Obj = Struct.new(:x, :y, :name, :char, :speed)
+
   attr_reader :width, :height, :layers, :tiles
-  
+
   def initialize(tmx)
     @doc = REXML::Document.new(IO.read(tmx))
     map = @doc.elements['map']
     @width = map.a['width'].to_i
     @height = map.a['height'].to_i
-    
+
     @layers = []
     map.each_element('layer') do |l|
-      @layers << l.elements['data'].text.split(/,/).map{|s| s.to_i}.each_slice(@width).to_a.reverse
+      @layers << l.elements['data'].text.split(/,/).map(&:to_i).each_slice(@width).to_a.reverse
     end
-    
+
     make_tile
-    
+
     @objects = []
     map.each_element('objectgroup') do |group|
       group.each_element('object') do |obj|
@@ -49,7 +50,6 @@ class Tmx
         @objects << Obj.new(x, y, name, char || 0, speed || 100)
       end
     end
-    
   end
 
   def make_tile
@@ -58,7 +58,7 @@ class Tmx
 
   def dump_pb
     characters = @objects.map do |obj|
-      p obj.to_h
+      # p obj.to_h
       Master::StageCharacter.new(obj.to_h)
     end
     pb = Master::Stage.new(id: 0, width: @width, height: @height,
@@ -66,6 +66,4 @@ class Tmx
                            characters: characters)
     PbConvert.pack_pb_list([pb])
   end
-
 end
-
