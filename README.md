@@ -14,6 +14,14 @@
 .protoファイルなどを変更した場合は、ビルドをする前に、下記コマンドで必要な変換を行う
 
     $ rake prebuild
+	
+## ビルドに必要なもののインストール
+
+    $ brew install ruby protobuf qt5            # qt5は protoc-gen-doc に必要
+
+## 初回のセットアップ
+
+    $ ruby setup.rb
 
 ## その他のタスク
 

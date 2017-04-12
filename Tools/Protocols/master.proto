@@ -14,16 +14,22 @@ message PbxHeader {
 // キャラクター
 //===========================================
 
+/**
+ * スキルの対象範囲の種類
+ */
 enum ScopeType {
-	Self = 0;
-	Straight = 1;
-	Around = 2;
+	Self = 0; /// 自分
+	Straight = 1; /// ストレート
+	Around = 2; /// 周囲Nマス
 }
 
+/**
+ * スキルの対象の条件
+ */
 enum ScopeTargetType {
-	Both = 0;
-	Ours = 1;
-	Others = 2;
+	Both = 0; /// 両方
+	Others = 1; /// 相手だけ
+	Ours = 2; /// 味方だけ
 }
 
 message SpecialScope {

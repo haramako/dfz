@@ -8,8 +8,8 @@ require 'pathname'
 $LOAD_PATH << __dir__
 require 'tmx'
 begin
-  require 'master'
-  require 'game'
+  require 'autogen/master_pb'
+  require 'augogen/game_pb'
 rescue LoadError
   nil
 end
@@ -60,7 +60,7 @@ end
 def logger
   unless $_logger
     $_logger = Logger.new(STDOUT)
-    $_logger.level = Logger::ERROR
+    $_logger.level = Logger::INFO
   end
   $_logger
 end
@@ -96,6 +96,19 @@ task :proto do
        "--proto_path=#{PROTO_DIR}",
        proto.to_s
   end
+
+  begin
+    mkdir_p PROJECT_ROOT + 'Doc/html'
+    chdir PROTO_DIR do
+      sh 'protoc',
+         "--plugin=../Bin/protoc-gen-doc",
+         "--doc_out=html,Proto.html:../../Doc/Html",
+         "--proto_path=.",
+         'master.proto', 'game.proto', 'game_log.proto'
+    end
+  rescue
+    puts "WARN: cannot find protoc and protoc-doc-gen, please install 'protoc', 'protoc-doc-gen'"
+  end
 end
 
 OUT_MAPS = pathmap_task(FileList[DATA_DIR + '*.tmx'], OUTPUT.to_s + '/%n-Stage.pb') do |t|
@@ -111,10 +124,14 @@ OUT_EXLS = pathmap_task(FileList[DATA_DIR + 'Master/**/*.xls'], OUTPUT.to_s + '/
   logger.info "Converting #{t.source}"
   IO.write(t.name, t.source)
 
-  # model_name = 'CharacterTemplate'
-  # model_sheet = 'CharacterTemplate'
-  # model_class = Master.const_get(model_name.classify)
-  # PbConvert.conv_master(s.name, s.source, model_sheet, model_class)
+  book = PbConvert.excel_cache(t.source)
+  book.worksheets.each do |sheet|
+    model_class = Master.const_get(sheet.name)
+    next unless model_class
+    logger.info "sheet = #{sheet.name}"
+    t.name.gsub('.touch', '_' + sheet.name + '.pb')
+    PbConvert.conv_master(t.name, t.source, sheet.name, model_class)
+  end
 end
 
 desc 'マスターファイルの変換'
@@ -122,33 +139,28 @@ task :master => OUT_EXLS
 
 desc 'アップロード'
 task :upload do
+  require 'net/http'
+
   sh "#{CFSCTL} upload -t tb-dev -b client.bucket Output"
   client_hash = IO.read('client.bucket.hash')
 
   host = 'http://133.242.235.150:7000'
   tag = 'tb-dev'
-  require 'net/http'
   res = Net::HTTP.post_form(URI.parse("#{host}/tags/#{tag}"),
                             'val' => client_hash)
   raise "upload failed! #{res}" unless res.is_a? Net::HTTPSuccess
+end
 
-  #
-  #   if ENV['SITE_URL']
-  #     begin
-  #       site = ENV['SITE_URL']
-  #       param = {cfs_hash_client: client_hash, cfs_hash_server: server_hash}
-  #       res = Net::HTTP.post_form( URI.parse(site) + '/update_cfs', param)
-  #       logger.info "upload to '#{site}', hash=#{client_hash}, sv_hash=#{server_hash}"
-  #       if res.body.include?("error")
-  #         logger.error "response: #{res.body}"
-  #       else
-  #         logger.info "response: #{res.body}"
-  #       end
-  #     rescue Errno::ECONNREFUSED
-  #       logger.error "サーバに接続できません。URL='#{site}'"
-  #     end
-  #   else
-  #     logger.warn 'environment variable "SITE_URL" is not specified! server setting is not updated.'
-  #     logger.warn 'example, $ SITE_URL=http://localhost:3000/ rake upload'
-  #   end
+desc 'rspecテストを行う'
+task :spec do
+  chdir __dir__ do
+    sh 'rspec', '-I', '.', 'spec'
+  end
+end
+
+desc 'racc'
+task :racc do
+  chdir __dir__ do
+    sh 'racc', 'short_json.y'
+  end
 end

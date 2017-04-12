@@ -3,9 +3,18 @@ inherit_from: .rubocop_todo.yml
 # 50音順にならべること
 
 AllCops:
+  UseCache: true
   DisplayCopNames: true
+  Include:
+    - '**/Rakefile'
   Exclude:
-    - 'lib/tasks/onetime/**/*'
+    - '**/*.tab.rb' # Raccの出力ファイル
+
+# Rakefile のファイル名は例外
+Style/FileName:
+  Exclude:
+    - '**/Rakefile'
+    - '**/Gemfile'
 
 # get/set で始まるメソッド名を禁止しない
 Style/AccessorMethodName:

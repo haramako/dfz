@@ -36,10 +36,10 @@ end
 
 desc '*.rbファイルの整形チェックをする'
 task :rubocop do
-  sh 'rubocop'
+  sh 'rubocop', 'Tools', 'Rakefile'
 end
 
 desc '*.rbファイルを整形する'
 task :format_ruby do
-  sh 'rubocop', '-a'
+  sh 'rubocop', '-a', 'Tools', 'Rakefile'
 end

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'spreadsheet'
+require 'json'
 
 module Excel
   # エクセルデータをHashの配列に変換する.
@@ -67,7 +68,11 @@ module Excel
           when :symbol
             v = col && ('' + col.to_s).strip.to_sym
           when :json
-            v = col && JSON.parse(col.to_s, symbolize_names: true)
+            if col
+              str = col.to_s.gsub(/“|”/) { '"' } # LibraOfficeで、ダブルクォートが変換されてしまう問題の対応
+              puts str
+              v = col && JSON.parse(str, symbolize_names: true)
+            end
           when :bool
             v = col.to_s.casecmp('TRUE').zero?
           when :option

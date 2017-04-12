@@ -21,8 +21,8 @@ namespace Master {
 
   public enum ScopeTargetType {
     Both = 0,
-    Ours = 1,
-    Others = 2,
+    Others = 1,
+    Ours = 2,
   }
 
   #endregion
