@@ -58,7 +58,7 @@ public class G
 		SkillEffects = LoadPbFiles<SkillEffect>(SkillEffect.CreateInstance, "SkillEffect").ToDictionary(i => i.Id);
 	}
 
-	public static Stage FindSkillBySymbol(string sym)
+	public static Stage FindStageBySymbol(string sym)
 	{
 		return Stages.Values.FirstOrDefault (s => s.Symbol == sym);
 	}
