@@ -20,22 +20,36 @@ namespace Game
 	{
 		public Master.SpecialTemplate T;
 
-		public Master.SpecialScope Scope { get; private set; }
-
 		public virtual void Execute (Field f, SpecialParam p)
 		{
 		}
 
 		static public Special Create(Master.SpecialTemplate t)
 		{
-			var type = Type.GetType (t.Type);
+			var type = Type.GetType ("Game.Specials." + t.Type, true, true);
 			var instance = (Special)Activator.CreateInstance (type);
 			instance.T = t;
 			return instance;
 		}
 
-	}
+		public GameLog.DamageInfo CalcDamage(Character executer, Character target)
+		{
+			var di = new GameLog.DamageInfo();
 
+			var damage = 0;
+
+
+			Logger.Info ("攻撃力: {0}, 防御力: {1}", executer.Attack, target.Defense);
+
+			damage += executer.Attack * T.Pow / 100 - target.Defense / 2;
+
+			damage += T.Amount;
+
+			di.Amount = damage;
+
+			return di;
+		}
+	}
 }
 
 namespace Game.Specials
@@ -45,7 +59,7 @@ namespace Game.Specials
 		public override void Execute(Field f, SpecialParam p)
 		{
 			f.ShowMessage ("AttackTo", p.FromCharacter.Name, p.Target.Name);
-			f.AddDamage (p.Target, new GameLog.DamageInfo () { Amount = 10 });
+			f.AddDamage (p.Target, CalcDamage (p.FromCharacter, p.Target));
 		}
 	}
 }

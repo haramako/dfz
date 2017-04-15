@@ -18,6 +18,9 @@ public class G
 	//public static Dictionary<int,FangTemplate> FangTemplateDict { get; private set; }
 
 	public static Dictionary<int, Stage> Stages = new Dictionary<int, Stage> ();
+	public static Dictionary<int, Skill> Skills = new Dictionary<int, Skill> ();
+
+	public static Dictionary<int, TestGame> TestGames = new Dictionary<int, TestGame> ();
 
 	public static void Initialize(Cfs.Cfs cfs)
 	{
@@ -49,8 +52,13 @@ public class G
 	public static void LoadMaster()
 	{
 		Stages = LoadPbFiles<Stage>(Stage.CreateInstance, "Stage").ToDictionary(i => i.Id);
-		//FangTemplateDict = PbFile.ReadPbList<FangTemplate,FangTemplate.Builder> (FangTemplate.DefaultInstance, Cfs.GetStream("master-fang_template.pb")).ToDictionary(i=>i.Id);
-		//FangTemplates = Cfs.GetBytes ();
+		Skills = LoadPbFiles<Skill>(Skill.CreateInstance, "Skill").ToDictionary(i => i.Id);
+		TestGames = LoadPbFiles<TestGame>(TestGame.CreateInstance, "TestGame").ToDictionary(i => i.Id);
+	}
+
+	public static Skill FindSkillBySymbol(string sym)
+	{
+		return Skills.Values.FirstOrDefault (s => s.Symbol == sym);
 	}
 
 	public static void Clear()

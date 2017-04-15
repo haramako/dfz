@@ -305,7 +305,7 @@ namespace Master {
 
     public global::Master.ScopeType Type = global::Master.ScopeType.Self;
 
-    public global::Master.ScopeTargetType TargetType = global::Master.ScopeTargetType.Both;
+    public global::Master.ScopeTargetType Target = global::Master.ScopeTargetType.Both;
 
     public int Range;
 
@@ -317,8 +317,8 @@ namespace Master {
       if (Type != global::Master.ScopeType.Self) {
         output.WriteEnum(1, (int) Type, Type);
       }
-      if (TargetType != global::Master.ScopeTargetType.Both) {
-        output.WriteEnum(2, (int) TargetType, TargetType);
+      if (Target != global::Master.ScopeTargetType.Both) {
+        output.WriteEnum(2, (int) Target, Target);
       }
       if (Range != 0) {
         output.WriteInt32(3, Range);
@@ -336,8 +336,8 @@ namespace Master {
       if (Type != global::Master.ScopeType.Self) {
         size += pb::CodedOutputStream.ComputeEnumSize(1, (int) Type);
       }
-      if (TargetType != global::Master.ScopeTargetType.Both) {
-        size += pb::CodedOutputStream.ComputeEnumSize(2, (int) TargetType);
+      if (Target != global::Master.ScopeTargetType.Both) {
+        size += pb::CodedOutputStream.ComputeEnumSize(2, (int) Target);
       }
       if (Range != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(3, Range);
@@ -371,7 +371,7 @@ namespace Master {
             break;
           }
           case 16: {
-            input.ReadEnum(ref this.TargetType);
+            input.ReadEnum(ref this.Target);
             break;
           }
           case 24: {
@@ -398,9 +398,9 @@ namespace Master {
       get { return defaultInstance; }
     }
 
-    public global::Master.SpecialScope Scope;
-
     public string Type = "";
+
+    public global::Master.SpecialScope Scope;
 
     public int Pow;
 
@@ -419,11 +419,11 @@ namespace Master {
 
     public override void WriteTo(pb::CodedOutputStream output) {
       CalcSerializedSize();
-      if( Scope != null ){
-        output.WriteMessage(1, Scope);
-      }
       if (Type != "") {
-        output.WriteString(2, Type);
+        output.WriteString(1, Type);
+      }
+      if( Scope != null ){
+        output.WriteMessage(2, Scope);
       }
       if (Pow != 0) {
         output.WriteInt32(3, Pow);
@@ -453,11 +453,11 @@ namespace Master {
 
     private int CalcSerializedSize() {
       int size = 0;
-      if( Scope != null ){
-        size += pb::CodedOutputStream.ComputeMessageSize(1, Scope);
-      }
       if (Type != "") {
-        size += pb::CodedOutputStream.ComputeStringSize(2, Type);
+        size += pb::CodedOutputStream.ComputeStringSize(1, Type);
+      }
+      if( Scope != null ){
+        size += pb::CodedOutputStream.ComputeMessageSize(2, Scope);
       }
       if (Pow != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(3, Pow);
@@ -502,13 +502,13 @@ namespace Master {
             break;
           }
           case 10: {
-            global::Master.SpecialScope builder = global::Master.SpecialScope.CreateEmpty();
-            input.ReadMessage(builder);
-            Scope = builder;
+            input.ReadString(ref this.Type);
             break;
           }
           case 18: {
-            input.ReadString(ref this.Type);
+            global::Master.SpecialScope builder = global::Master.SpecialScope.CreateEmpty();
+            input.ReadMessage(builder);
+            Scope = builder;
             break;
           }
           case 24: {
@@ -558,20 +558,30 @@ namespace Master {
       get { return defaultInstance; }
     }
 
-    public int Type;
+    public int Id;
 
-    public int Power;
+    public string Symbol = "";
+
+    public string Name = "";
+
+    public List<global::Master.SpecialTemplate> Special;
 
     #region Lite runtime methods
     #endregion
 
     public override void WriteTo(pb::CodedOutputStream output) {
       CalcSerializedSize();
-      if (Type != 0) {
-        output.WriteInt32(1, Type);
+      if (Id != 0) {
+        output.WriteInt32(1, Id);
       }
-      if (Power != 0) {
-        output.WriteInt32(2, Power);
+      if (Symbol != "") {
+        output.WriteString(2, Symbol);
+      }
+      if (Name != "") {
+        output.WriteString(3, Name);
+      }
+      if (Special != null && Special.Count > 0) {
+        output.WriteMessageArray(4, Special);
       }
     }
 
@@ -583,11 +593,19 @@ namespace Master {
 
     private int CalcSerializedSize() {
       int size = 0;
-      if (Type != 0) {
-        size += pb::CodedOutputStream.ComputeInt32Size(1, Type);
+      if (Id != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, Id);
       }
-      if (Power != 0) {
-        size += pb::CodedOutputStream.ComputeInt32Size(2, Power);
+      if (Symbol != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(2, Symbol);
+      }
+      if (Name != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(3, Name);
+      }
+      if( Special != null ) {
+        foreach (global::Master.SpecialTemplate element in Special) {
+          size += pb::CodedOutputStream.ComputeMessageSize(4, element);
+        }
       }
       return size;
     }
@@ -614,11 +632,19 @@ namespace Master {
             break;
           }
           case 8: {
-            input.ReadInt32(ref this.Type);
+            input.ReadInt32(ref this.Id);
             break;
           }
-          case 16: {
-            input.ReadInt32(ref this.Power);
+          case 18: {
+            input.ReadString(ref this.Symbol);
+            break;
+          }
+          case 26: {
+            input.ReadString(ref this.Name);
+            break;
+          }
+          case 34: {
+            input.ReadMessageArray(tag, this.Special, global::Master.SpecialTemplate.CreateEmpty);
             break;
           }
         }
@@ -628,6 +654,9 @@ namespace Master {
     public override void Init() {
     }
     public override void Finish() {
+    if( Special == null ){
+      Special = new List<global::Master.SpecialTemplate>();
+    }
     }
   }
 
@@ -821,6 +850,149 @@ namespace Master {
           }
           case 48: {
             input.ReadInt32(ref this.Defense);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class TestGame : pb.Message {
+    public TestGame() { }
+    public static TestGame CreateInstance() { var obj = new TestGame(); obj.Finish(); return obj; }
+    public static TestGame CreateEmpty() { return new TestGame(); }
+    private static readonly TestGame defaultInstance = new TestGame();
+    public static TestGame DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int Id;
+
+    public string Symbol = "";
+
+    public string Name = "";
+
+    public int DungeonId;
+
+    public int StageId;
+
+    public int Floor;
+
+    public int Seed;
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (Id != 0) {
+        output.WriteInt32(1, Id);
+      }
+      if (Symbol != "") {
+        output.WriteString(2, Symbol);
+      }
+      if (Name != "") {
+        output.WriteString(3, Name);
+      }
+      if (DungeonId != 0) {
+        output.WriteInt32(4, DungeonId);
+      }
+      if (Seed != 0) {
+        output.WriteInt32(5, Seed);
+      }
+      if (StageId != 0) {
+        output.WriteInt32(6, StageId);
+      }
+      if (Floor != 0) {
+        output.WriteInt32(7, Floor);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (Id != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, Id);
+      }
+      if (Symbol != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(2, Symbol);
+      }
+      if (Name != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(3, Name);
+      }
+      if (DungeonId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(4, DungeonId);
+      }
+      if (StageId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(6, StageId);
+      }
+      if (Floor != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(7, Floor);
+      }
+      if (Seed != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(5, Seed);
+      }
+      return size;
+    }
+    public static TestGame ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static TestGame ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static TestGame ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.Id);
+            break;
+          }
+          case 18: {
+            input.ReadString(ref this.Symbol);
+            break;
+          }
+          case 26: {
+            input.ReadString(ref this.Name);
+            break;
+          }
+          case 32: {
+            input.ReadInt32(ref this.DungeonId);
+            break;
+          }
+          case 40: {
+            input.ReadInt32(ref this.Seed);
+            break;
+          }
+          case 48: {
+            input.ReadInt32(ref this.StageId);
+            break;
+          }
+          case 56: {
+            input.ReadInt32(ref this.Floor);
             break;
           }
         }

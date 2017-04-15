@@ -75,7 +75,7 @@ namespace Game {
 			var req = new GameLog.SkillRequest {
 				CharacterId = c.Id,
 				Dir = (int)dir,
-				SkillId = "attack",
+				SkillId = G.FindSkillBySymbol("attack").Id,
 			};
 			return field.Request (req);
 		}
@@ -97,7 +97,7 @@ namespace Game {
 				"0000000");// 0
 
 			field = new Field();
-			field.NoUnity = true;
+			field.NoUnity = false;
 			field.RequestTimeoutMillis = 1000;
 			field.Init(map);
 		}
@@ -110,10 +110,10 @@ namespace Game {
 
 		[TestCase]
 		public void TestShutdown(){
-			//var p = AddChara(1, 1, "P1", type: CharacterType.Player);
+			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
 			field.StartThread ();
 			field.Request (new GameLog.AckResponseRequest ());
-			System.Threading.Thread.Sleep (10);
+			System.Threading.Thread.Sleep (1);
 			field.Shutdown ();
 		}
 

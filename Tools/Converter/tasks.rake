@@ -79,7 +79,7 @@ end
 task :default => [:map, :master]
 
 task :clean do
-  rm_rf OUTPUT
+  rm_rf [OUTPUT, TEMP]
 end
 
 desc 'protoファイルからプロトコルを作成する'
@@ -112,7 +112,7 @@ task :proto do
 end
 
 OUT_MAPS = pathmap_task(FileList[DATA_DIR + '*.tmx'], OUTPUT.to_s + '/%n-Stage.pb') do |t|
-  logger.info "Converting #{t.source}"
+  logger.info "マスターコンバート中 #{t.source}"
   map = Tmx.new(t.source)
   IO.binwrite(t.name, map.dump_pb)
 end
@@ -129,8 +129,8 @@ OUT_EXLS = pathmap_task(FileList[DATA_DIR + 'Master/**/*.xls'], OUTPUT.to_s + '/
     model_class = Master.const_get(sheet.name)
     next unless model_class
     logger.info "sheet = #{sheet.name}"
-    t.name.gsub('.touch', '_' + sheet.name + '.pb')
-    PbConvert.conv_master(t.name, t.source, sheet.name, model_class)
+    pb_name = t.name.gsub('.touch', '_' + sheet.name + '.pb')
+    PbConvert.conv_master(pb_name, t.source, sheet.name, model_class)
   end
 end
 
@@ -151,6 +151,32 @@ task :upload do
   raise "upload failed! #{res}" unless res.is_a? Net::HTTPSuccess
 end
 
+desc '.pbファイルのYAML化'
+task :to_yaml do
+  require 'yaml'
+  mkdir_p TEMP + 'ChunkDump'
+  FileList[OUTPUT.to_s + '/*.pb'].each do |f|
+    logger.info "YAMLへコンバート中 #{File.basename(f)}"
+    yml = PbConvert.parse_pb(IO.binread(f)).map do |item|
+      if item.is_a? Array
+        if item[1].is_a? String
+          data = item
+        else
+          data = JSON.parse(item[1].to_json)
+        end
+      else
+        data = JSON.parse(item.to_json)
+      end
+      YAML.dump(data)
+    end.join("\n")
+    IO.binwrite(TEMP + 'ChunkDump' + "#{File.basename(f)}.yml", yml)
+  end
+end
+
+#===================================================
+# その他、こまごまとしたタスク
+#===================================================
+
 desc 'rspecテストを行う'
 task :spec do
   chdir __dir__ do
@@ -161,6 +187,6 @@ end
 desc 'racc'
 task :racc do
   chdir __dir__ do
-    sh 'racc', 'short_json.y'
+    sh 'racc', '-O', 'racc.output', 'short_json.y'
   end
 end

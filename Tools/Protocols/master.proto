@@ -34,14 +34,14 @@ enum ScopeTargetType {
 
 message SpecialScope {
 	ScopeType type = 1;
-	ScopeTargetType target_type = 2;
+	ScopeTargetType target = 2;
 	int32 range = 3;
 }
 
 
 message SpecialTemplate {
-	SpecialScope scope = 1;
-	string type = 2;
+	string type = 1;
+	SpecialScope scope = 2;
 	int32 pow = 3;
 	int32 turn = 4;
 	int32 amount = 5;
@@ -51,8 +51,10 @@ message SpecialTemplate {
 }
 
 message Skill {
-	int32 type = 1;
-	int32 power = 2;
+	int32 id = 1;
+	string symbol = 2;
+	string name = 3;
+	repeated SpecialTemplate special = 4;
 }
 
 message Ability {
@@ -66,6 +68,19 @@ message CharacterTemplate {
 	int32 hp = 4;
 	int32 attack = 5;
 	int32 defense = 6;
+}
+
+/**
+ * テストのゲーム設定
+ */
+message TestGame {
+	int32 id = 1;
+	string symbol = 2;
+	string name = 3;
+	int32 dungeon_id = 4; /// ダンジョンID(0ならステージを使用)
+	int32 stage_id = 6; /// ステージID
+	int32 floor = 7; // 開始するフロア
+	int32 seed = 5; /// ランダムのシード(0ならシードもランダム)
 }
 
 //===========================================

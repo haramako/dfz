@@ -96,7 +96,7 @@ namespace Game
 			gameThread = new Thread(Process);
 			gameThread.Start();
 
-			sendQueue.Dequeue (); // スレッドが開始するまでまつ
+			sendQueue.Dequeue (RequestTimeoutMillis); // スレッドが開始するまでまつ
 		}
 
 		public void Shutdown()
@@ -105,7 +105,15 @@ namespace Game
 			{
 				recvQueue.Enqueue (new GameLog.ShutdownRequest());
 
-				sendQueue.Dequeue (); // 反応があるまで待つ
+				try
+				{
+					sendQueue.Dequeue (RequestTimeoutMillis); // 反応があるまで待つ
+				}
+				catch( Exception )
+				{
+					gameThread.Abort ();
+					throw;
+				}
 			}
 			if (ShutdownError != null)
 			{
@@ -355,13 +363,15 @@ namespace Game
 				c.Id = i++;
 				c.Name = sc.Name;
 				c.AtlasId = sc.Char;
-				c.Hp = 20;
+				c.Hp = 50;
+				c.Attack = 30;
+				c.Defense = 20;
 				c.Speed = sc.Speed;
 				c.Type = CharacterType.Enemy;
 				if (sc.Name == "P1")
 				{
 					SetPlayerCharacter (c);
-					c.Hp = 100;
+					c.Hp = 200;
 					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
 				}
 				else if (sc.Name.StartsWith ("E"))
@@ -662,9 +672,9 @@ end
 		{
 			c.Dir = dir;
 			SendAndWait (new GameLog.AnimateCharacter { CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = GameLog.Animation.Attack });
-			var scope = new SpecialScope (ScopeType.Straight, ScopeTargetType.Others, 1);
-			var special = new Specials.Attack () { };
-			UseSkill (c, dir, scope, special);
+			var skill = G.FindSkillBySymbol ("attack");
+			var special = Special.Create (skill.Special[0]);
+			UseSkill (c, dir, special.T.Scope, special);
 		}
 
 		public void ExecuteSpecial(Special special, SpecialParam p)

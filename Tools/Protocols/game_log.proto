@@ -85,7 +85,7 @@ message StayRequest {
 message SkillRequest {
 	int32 character_id = 1; // キャラクタID
 	int32 dir = 2; // 方向
-	string skill_id = 3; // スキルID
+	int32 skill_id = 3; // スキルID
 }
 
 message WalkRequest {

@@ -103,3 +103,6 @@ Metrics/LineLength:
 Metrics/MethodLength:
   Max: 80
 
+# モジュールの長さ制限
+Metrics/ModuleLength:
+  Max: 1000

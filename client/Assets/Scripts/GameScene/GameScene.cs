@@ -63,7 +63,7 @@ public class GameScene : MonoBehaviour
 		ActionButtons.SetActive (false);
 
 		Field = new Field();
-		Field.NoLog = true;
+		Field.NoLog = false;
 		Field.InitRandom (stage);
 
 		initField ();
@@ -194,7 +194,7 @@ public class GameScene : MonoBehaviour
 										{
 											CharacterId = Field.Player.Id,
 											Dir = (int)Field.Player.Dir,
-											SkillId = "attack",
+											SkillId = G.FindSkillBySymbol("attack").Id,
 										});
 									}
 									break;
@@ -204,7 +204,7 @@ public class GameScene : MonoBehaviour
 										{
 											CharacterId = Field.Player.Id,
 											Dir = (int)Field.Player.Dir,
-											SkillId = "skill",
+											SkillId = G.FindSkillBySymbol("skill").Id,
 										});
 									}
 									break;
@@ -227,6 +227,7 @@ public class GameScene : MonoBehaviour
 		{
 			throw new System.ArgumentNullException ("Request must not be null");
 		}
+		mode = Mode.None;
 		Field.RequestAsync (request);
 		System.Threading.Thread.Sleep(0); // ちょっとだけまつ
 		messageLoop ();
@@ -295,7 +296,7 @@ public class GameScene : MonoBehaviour
 		if (Field.Player.Position == pos)
 		{
 			mode = Mode.None;
-			Send (new GameLog.SkillRequest () { CharacterId = Field.Player.Id, Dir = (int)Field.Player.Dir, SkillId = "attack" });
+			Send (new GameLog.SkillRequest () { CharacterId = Field.Player.Id, Dir = (int)Field.Player.Dir, SkillId = G.FindSkillBySymbol("attack").Id });
 			return;
 		}
 
@@ -306,7 +307,7 @@ public class GameScene : MonoBehaviour
 			{
 				var dir = (pos - Field.Player.Position).ToDir ();
 				mode = Mode.None;
-				Send (new GameLog.SkillRequest () { CharacterId = Field.Player.Id, Dir = (int)dir, SkillId = "attack" });
+				Send (new GameLog.SkillRequest () { CharacterId = Field.Player.Id, Dir = (int)dir, SkillId = G.FindSkillBySymbol("attack").Id });
 				return;
 			}
 		}

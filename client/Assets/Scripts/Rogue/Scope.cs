@@ -34,7 +34,7 @@ namespace Master
 		public SpecialScope(ScopeType t = ScopeType.Straight, ScopeTargetType tt = ScopeTargetType.Others, int range = 1)
 		{
 			Type = t;
-			TargetType = tt;
+			Target = tt;
 			Range = range;
 		}
 

@@ -2,6 +2,7 @@
 
 require 'spreadsheet'
 require 'json'
+require 'short_json'
 
 module Excel
   # エクセルデータをHashの配列に変換する.
@@ -20,6 +21,7 @@ module Excel
   # '$TYPE' で始まる行は、
   # '#'で始まる行は、コメントとして無視される
   #
+  # rubocop:disable Metrics/MethodLength
   def self.read_from_file(path, book, sheet_name_or_index = 0)
     sheet = book.worksheet sheet_name_or_index
     raise "sheet '#{sheet_name_or_index}' not found" unless sheet
@@ -70,8 +72,20 @@ module Excel
           when :json
             if col
               str = col.to_s.gsub(/“|”/) { '"' } # LibraOfficeで、ダブルクォートが変換されてしまう問題の対応
-              puts str
-              v = col && JSON.parse(str, symbolize_names: true)
+              begin
+                v = JSON.parse(str, symbolize_names: true)
+              rescue
+                v = ShortJson.parse(str)
+              end
+            end
+          when :"json[]"
+            if col
+              str = col.to_s.gsub(/“|”/) { '"' } # LibraOfficeで、ダブルクォートが変換されてしまう問題の対応
+              begin
+                v = JSON.parse(str, symbolize_names: true)
+              rescue
+                v = ShortJson.parse(str, true)
+              end
             end
           when :bool
             v = col.to_s.casecmp('TRUE').zero?
@@ -98,6 +112,7 @@ module Excel
     end
     data
   end
+  # rubocop:enable Metrics/MethodLength
 
   # エクセルデータをJSONの配列に変換する.
   #

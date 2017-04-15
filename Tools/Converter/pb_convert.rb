@@ -25,8 +25,6 @@ class String
     x
   end
 end
-
-# rubocop:disable Metrics/ModuleLength
 module PbConvert
   module_function
 
@@ -150,7 +148,6 @@ module PbConvert
 
   # マスターデータを.pbファイルにコンバートする
   def conv_master(dest, src, sheet, item_type)
-    logger.info "マスターコンバート中 #{File.basename(src)} => #{File.basename(dest)}"
     items = conv_sheet(src, sheet, item_type)
     unless items.empty?
       bin = pack_pb_list(items)
@@ -168,7 +165,11 @@ module PbConvert
         k = k.to_s
 
         desc = _class.descriptor.lookup(k)
-        conv_field(m, desc, k, v) if desc and v
+        if desc
+          conv_field(m, desc, k, v)
+        else
+          logger.warn "#{_class.name} に #{k} が存在しません"
+        end
       rescue
         logger.warn "コンバートできません #{_class}.#{k} = #{v}"
         logger.warn data
@@ -197,7 +198,7 @@ module PbConvert
   def conv_type(desc, v)
     case desc.type
     when :enum
-      v.to_sym
+      v.classify.to_sym
     when :bool
       v
     when :string

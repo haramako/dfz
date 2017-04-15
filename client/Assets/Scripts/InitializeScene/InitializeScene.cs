@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System;
 using RSG;
 
 public class InitializeScene : MonoBehaviour
@@ -44,8 +45,19 @@ public class InitializeScene : MonoBehaviour
 		G.Initialize (cfs);
 		G.LoadMaster ();
 
-		SceneManager.LoadScene ("GameScene");
 
+		var url = UrlSchemeReceiver.GetUrlScheme ();
+		Router.Route route;
+		try
+		{
+			route = Router.Instance.Resolve (url);
+		}
+		catch(Exception _)
+		{
+			route = Router.Instance.Resolve ("/game");
+		}
+
+		SceneManager.LoadScene (route.Scene);
 	}
 
 	// Update is called once per frame

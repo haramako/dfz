@@ -1097,7 +1097,7 @@ namespace GameLog {
 
     public int Dir;
 
-    public string SkillId = "";
+    public int SkillId;
 
     #region Lite runtime methods
     #endregion
@@ -1110,8 +1110,8 @@ namespace GameLog {
       if (Dir != 0) {
         output.WriteInt32(2, Dir);
       }
-      if (SkillId != "") {
-        output.WriteString(3, SkillId);
+      if (SkillId != 0) {
+        output.WriteInt32(3, SkillId);
       }
     }
 
@@ -1129,8 +1129,8 @@ namespace GameLog {
       if (Dir != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(2, Dir);
       }
-      if (SkillId != "") {
-        size += pb::CodedOutputStream.ComputeStringSize(3, SkillId);
+      if (SkillId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(3, SkillId);
       }
       return size;
     }
@@ -1164,8 +1164,8 @@ namespace GameLog {
             input.ReadInt32(ref this.Dir);
             break;
           }
-          case 26: {
-            input.ReadString(ref this.SkillId);
+          case 24: {
+            input.ReadInt32(ref this.SkillId);
             break;
           }
         }

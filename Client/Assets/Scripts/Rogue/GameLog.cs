@@ -205,9 +205,9 @@ namespace GameLog
 			var c = f.FindCharacter (CharacterId);
 			c.Dir = (Direction)Dir;
 			f.SendAndWait (new AnimateCharacter { CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = Animation.Attack });
-			var scope = new SpecialScope (ScopeType.Straight, ScopeTargetType.Others, 1);
-			var special = new Game.Specials.Attack () { };
-			f.UseSkill (c, (Direction)Dir, scope, special);
+			var skill = G.Skills [SkillId];
+			var special = Special.Create(skill.Special[0]);
+			f.UseSkill (c, (Direction)Dir, special.T.Scope, special);
 		}
 	}
 }
