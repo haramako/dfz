@@ -646,8 +646,10 @@ end
 			Send( makeWalkCommand (c, pos));
 		}
 
-		public void UseSkill(Character c, Direction dir, Skill skill){
-			foreach( var code in skill.Codes){
+		public void UseSkill(Character c, Direction dir, Skill skill)
+		{
+			foreach( var code in skill.Codes)
+			{
 				UseSkillCode (c, dir, code);
 			}
 		}
@@ -685,13 +687,15 @@ end
 			}
 		}
 
-		public void ShowSkillEffect(SpecialScope scope, ScopeResult sr, SkillEffect effect){
-			SendAndWait (new GameLog.ShowSkillEffect {
+		public void ShowSkillEffect(SpecialScope scope, ScopeResult sr, SkillEffect effect)
+		{
+			SendAndWait (new GameLog.ShowSkillEffect
+			{
 				Scope = scope,
 				CharacterId = sr.Param.From.Id,
 				Dir = (int)sr.Param.From.Dir,
-				Path = sr.Path.Select(p=>((GameLog.Point)p)).ToList(),
-				Targets = sr.Targets.Select(p=>((GameLog.Point)p)).ToList(),
+				Path = sr.Path.Select(p => ((GameLog.Point)p)).ToList(),
+				Targets = sr.Targets.Select(p => ((GameLog.Point)p)).ToList(),
 				Effect = effect,
 			});
 		}

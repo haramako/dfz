@@ -9,6 +9,7 @@ AllCops:
     - '**/Rakefile'
   Exclude:
     - '**/*.tab.rb' # Raccの出力ファイル
+    - '**/*_pb.rb' # protocの出力ファイル
 
 # Rakefile のファイル名は例外
 Style/FileName:

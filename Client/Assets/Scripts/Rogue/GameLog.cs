@@ -176,28 +176,32 @@ namespace GameLog
 
 		IEnumerator process(GameScene scene)
 		{
-			foreach (var code in Effect.Codes) {
+			foreach (var code in Effect.Codes)
+			{
 				Debug.Log (code.Type + " " + code.Effect);
-				switch (code.Type) {
-				case "char":
-					{
-						var cr = scene.GetCharacterRenderer (CharacterId);
-						cr.transform.localRotation = ((Direction)Dir).ToWorldQuaternion ();
-						cr.Animate (code.Effect);
-						yield return new WaitForSeconds (code.Wait);
-					}
-					break;
-				case "wave":
-					foreach (var pos in Path) {
-						yield return ResourceCache.Create<GameObject> (code.Effect).Then (obj => {
-							obj.transform.position = scene.PointToVector (pos);
-							return 0;
-						}).AsCoroutine ();
-						yield return new WaitForSeconds (code.Wait);
-					}
-					break;
-				default:
-					throw new System.Exception ("invalid ShowSKillEffect.Type " + code.Type);
+				switch (code.Type)
+				{
+					case "char":
+						{
+							var cr = scene.GetCharacterRenderer (CharacterId);
+							cr.transform.localRotation = ((Direction)Dir).ToWorldQuaternion ();
+							cr.Animate (code.Effect);
+							yield return new WaitForSeconds (code.Wait);
+						}
+						break;
+					case "wave":
+						foreach (var pos in Path)
+						{
+							yield return ResourceCache.Create<GameObject> (code.Effect).Then (obj =>
+							{
+								obj.transform.position = scene.PointToVector (pos);
+								return 0;
+							}).AsCoroutine ();
+							yield return new WaitForSeconds (code.Wait);
+						}
+						break;
+					default:
+						throw new System.Exception ("invalid ShowSKillEffect.Type " + code.Type);
 				}
 			}
 		}

@@ -229,7 +229,7 @@ namespace Cfs
 
 		public byte[] GetBytes(string filename)
 		{
-			Configure.Log ("CfsLog", "open file " + filename);
+			//Configure.Log ("CfsLog", "open file " + filename);
 			var file = bucket.Files [filename];
 			var buf = new byte[file.OrigSize];
 			using (var stream = decode (File.OpenRead (LocalPathFromFile (filename)), bucket.Files [filename].Attr))
@@ -241,7 +241,7 @@ namespace Cfs
 
 		public Stream GetStream(string filename)
 		{
-			Configure.Log ("CfsLog", "open file " + filename);
+			//Configure.Log ("CfsLog", "open file " + filename);
 			return decode(File.OpenRead(LocalPathFromFile (filename)), bucket.Files[filename].Attr);
 		}
 

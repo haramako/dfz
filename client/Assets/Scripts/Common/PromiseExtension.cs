@@ -128,11 +128,11 @@ namespace RSG
 
 		/// <summary>
 		/// PromiseをIEnumerator(コルーチン)に変換する.
-		/// 
+		///
 		/// 使用例:
 		///     ...コルーチン内で...
 		///     yield return SomeSlowPromise().AsCoroutine(); // Promiseが終わるまで待つ
-		///     
+		///
 		///     // 返り値を取得する場合は別途保存する
 		///     int result = 0;
 		///     yield return OtherSlowPromise().Then(v=>{ result = v; }).AsCoroutine();
