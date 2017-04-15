@@ -109,10 +109,9 @@ namespace Game
 				{
 					sendQueue.Dequeue (RequestTimeoutMillis); // 反応があるまで待つ
 				}
-				catch( Exception )
+				catch( Exception ex)
 				{
 					gameThread.Abort ();
-					throw;
 				}
 			}
 			if (ShutdownError != null)

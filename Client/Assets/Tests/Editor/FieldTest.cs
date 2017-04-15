@@ -110,10 +110,10 @@ namespace Game {
 
 		[TestCase]
 		public void TestShutdown(){
-			var p = AddChara(1, 1, "P1", type: CharacterType.Player);
+			AddChara(1, 1, "P1", type: CharacterType.Player);
 			field.StartThread ();
 			field.Request (new GameLog.AckResponseRequest ());
-			System.Threading.Thread.Sleep (1);
+			System.Threading.Thread.Sleep (100);
 			field.Shutdown ();
 		}
 
