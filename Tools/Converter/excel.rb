@@ -86,6 +86,8 @@ module Excel
               rescue
                 v = ShortJson.parse(str, true)
               end
+            else
+              v = []
             end
           when :bool
             v = col.to_s.casecmp('TRUE').zero?

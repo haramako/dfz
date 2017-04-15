@@ -6,6 +6,42 @@
 * テスト用のデータをどうするか考える
 
 
+# スキルシステムでやりたいこと
+
+- エフェクト
+ - 物が直線で飛ぶ
+ - Wave
+ - 物が放物線で飛ぶ
+ - ランダムにあたる
+ - サイクロン
+ - 子供エフェクト
+ 
+- 子供スキル（爆弾をなげて、爆発とか）
+
+- 条件で発動
+ - 死んだ奴に当たらない
+  if(cond: 'samurai', straight(
+
+- ダメージなどをまとめる
+ - ふきとばしなどは特別扱い
+ 
+    (straight(1), [attack(pow: 100), poison(turn: 3)])
+    (self(), wait(10))
+    (straight(1), [attack(pow: 100), poison(turn: 3)])
+	
+   - Deferred な処理を別に作る
+   
+- 記述方式をわかりやすく
+
+    (straight(1), [attack(pow: 100), poison(turn: 3)])
+
+    straight(1)
+      attack(pow: 100)
+      poison(turn: 3)])
+
+- 思考ルーチンに組み込みやすく
+ - straight(N), straight(1), self() は特別扱い
+
 # ターン処理
 
 - ターン開始

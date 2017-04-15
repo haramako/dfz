@@ -2,10 +2,12 @@ syntax = "proto3";
 
 /**
  * ゲームの進行メッセージ
+ *
+ * ゲームのマスターデータがなくても、GameLogのメッセージだけでゲームが再現できるようになっていなくてはならない。
  */
 package GameLog;
 
-//import "master.proto";
+import "master.proto";
 //import "game.proto";
 
 message Point {
@@ -107,4 +109,18 @@ message WalkRequest {
 message Message {
 	string message_id = 1; // メッセージID
 	repeated string param = 2; // パラメータ
+}
+
+/**
+ * スキルエフェクトを表示する
+ */
+message ShowSkillEffect {
+	Master.SpecialScope scope = 1;
+	Master.SkillEffect effect = 2;
+	
+	int32 character_id = 4;
+	int32 dir = 8;
+	Point from_point = 5;
+	repeated Point path = 6;
+	repeated Point targets = 7;
 }

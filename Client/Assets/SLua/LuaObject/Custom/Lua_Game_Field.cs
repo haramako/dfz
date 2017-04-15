@@ -391,11 +391,45 @@ public class Lua_Game_Field : LuaObject {
 			checkType(l,2,out a1);
 			Game.Direction a2;
 			checkEnum(l,3,out a2);
-			Master.SpecialScope a3;
+			Master.Skill a3;
 			checkType(l,4,out a3);
-			Game.Special a4;
-			checkType(l,5,out a4);
-			self.UseSkill(a1,a2,a3,a4);
+			self.UseSkill(a1,a2,a3);
+			pushValue(l,true);
+			return 1;
+		}
+		catch(Exception e) {
+			return error(l,e);
+		}
+	}
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static public int UseSkillCode(IntPtr l) {
+		try {
+			Game.Field self=(Game.Field)checkSelf(l);
+			Game.Character a1;
+			checkType(l,2,out a1);
+			Game.Direction a2;
+			checkEnum(l,3,out a2);
+			Master.SkillCode a3;
+			checkType(l,4,out a3);
+			self.UseSkillCode(a1,a2,a3);
+			pushValue(l,true);
+			return 1;
+		}
+		catch(Exception e) {
+			return error(l,e);
+		}
+	}
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static public int ShowSkillEffect(IntPtr l) {
+		try {
+			Game.Field self=(Game.Field)checkSelf(l);
+			Master.SpecialScope a1;
+			checkType(l,2,out a1);
+			Game.ScopeResult a2;
+			checkType(l,3,out a2);
+			Master.SkillEffect a3;
+			checkType(l,4,out a3);
+			self.ShowSkillEffect(a1,a2,a3);
 			pushValue(l,true);
 			return 1;
 		}
@@ -705,6 +739,8 @@ public class Lua_Game_Field : LuaObject {
 		addMember(l,DoTurnEnd);
 		addMember(l,WalkCharacter);
 		addMember(l,UseSkill);
+		addMember(l,UseSkillCode);
+		addMember(l,ShowSkillEffect);
 		addMember(l,AttackCharacter);
 		addMember(l,ExecuteSpecial);
 		addMember(l,AddDamage);

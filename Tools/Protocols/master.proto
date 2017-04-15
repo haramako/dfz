@@ -2,6 +2,8 @@ syntax = "proto3";
 
 /**
  * マスターデータ定義
+ *
+ * ここで定義されたデータは、マスターデータに入る、もしくは、他のプロトコルから参照されるものである。
  */
 package Master;
 
@@ -12,6 +14,23 @@ message PbxHeader {
 
 //===========================================
 // キャラクター
+//===========================================
+
+message Ability {
+	int32 type = 1;
+}
+
+message CharacterTemplate {
+	int32 id = 1;
+	string name = 2;
+	int32 image = 3;
+	int32 hp = 4;
+	int32 attack = 5;
+	int32 defense = 6;
+}
+
+//===========================================
+// スキル
 //===========================================
 
 /**
@@ -27,21 +46,28 @@ enum ScopeType {
  * スキルの対象の条件
  */
 enum ScopeTargetType {
-	Both = 0; /// 両方
-	Others = 1; /// 相手だけ
+	Others = 0; /// 相手だけ
+	Both = 1; /// 両方
 	Ours = 2; /// 味方だけ
 }
 
+/**
+ * スキルの影響範囲
+ */ 
 message SpecialScope {
-	ScopeType type = 1;
-	ScopeTargetType target = 2;
-	int32 range = 3;
+	ScopeType type = 1; /// スコープの種類
+	int32 range = 2; /// 範囲
+	ScopeTargetType target = 3; /// 対象の種類
 }
 
 
+/**
+ * 特殊効果
+ *
+ * Templateとついているのは、実際のゲーム内では、この情報を元にSpecialが作られるため
+ */
 message SpecialTemplate {
 	string type = 1;
-	SpecialScope scope = 2;
 	int32 pow = 3;
 	int32 turn = 4;
 	int32 amount = 5;
@@ -50,37 +76,39 @@ message SpecialTemplate {
 	int32 prob = 8;
 }
 
+enum SkillEffectType {
+	Wave = 0;
+	Throw = 1;
+}
+
+/**
+ * スキルのエフェクト
+ */
+message SkillEffect {
+	int32 id = 1;
+	string symbol = 2;
+	string name = 3;
+	repeated SkillEffectCode codes = 4;
+}
+
+message SkillEffectCode {
+	string type = 1;
+	string effect = 2;
+	float wait = 3;
+	float delay = 4;
+}
+
+message SkillCode {
+	SpecialScope scope = 1;
+	string effect = 2;
+	repeated SpecialTemplate specials = 3;
+}
+
 message Skill {
 	int32 id = 1;
 	string symbol = 2;
 	string name = 3;
-	repeated SpecialTemplate special = 4;
-}
-
-message Ability {
-	int32 type = 1;
-}
-
-message CharacterTemplate {
-	int32 id = 1;
-	string name = 2;
-	int32 image = 3;
-	int32 hp = 4;
-	int32 attack = 5;
-	int32 defense = 6;
-}
-
-/**
- * テストのゲーム設定
- */
-message TestGame {
-	int32 id = 1;
-	string symbol = 2;
-	string name = 3;
-	int32 dungeon_id = 4; /// ダンジョンID(0ならステージを使用)
-	int32 stage_id = 6; /// ステージID
-	int32 floor = 7; // 開始するフロア
-	int32 seed = 5; /// ランダムのシード(0ならシードもランダム)
+	repeated SkillCode codes = 4;
 }
 
 //===========================================
@@ -107,4 +135,19 @@ message Stage {
 	repeated StageCharacter characters = 7;
 }
 
+//===========================================
+// テストデータ
+//===========================================
 
+/**
+ * テストのゲーム設定
+ */
+message TestGame {
+	int32 id = 1;
+	string symbol = 2;
+	string name = 3;
+	int32 dungeon_id = 4; /// ダンジョンID(0ならステージを使用)
+	int32 stage_id = 6; /// ステージID
+	int32 floor = 7; // 開始するフロア
+	int32 seed = 5; /// ランダムのシード(0ならシードもランダム)
+}

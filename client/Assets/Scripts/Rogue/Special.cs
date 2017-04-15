@@ -62,4 +62,12 @@ namespace Game.Specials
 			f.AddDamage (p.Target, CalcDamage (p.FromCharacter, p.Target));
 		}
 	}
+
+	public class Effect : Special
+	{
+		public override void Execute(Field f, SpecialParam p)
+		{
+			f.AddDamage (p.Target, CalcDamage (p.FromCharacter, p.Target));
+		}
+	}
 }

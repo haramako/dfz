@@ -69,9 +69,9 @@ namespace Game {
 
     public global::Master.Skill AttackSkill;
 
-    public List<global::Master.Skill> Skills;
+    public List<global::Master.Skill> Skills = new List<global::Master.Skill>();
 
-    public List<global::Master.Ability> Abilities;
+    public List<global::Master.Ability> Abilities = new List<global::Master.Ability>();
 
     #region Lite runtime methods
     #endregion

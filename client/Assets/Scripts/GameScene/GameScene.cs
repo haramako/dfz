@@ -398,6 +398,10 @@ public class GameScene : MonoBehaviour
 		}
 	}
 
+	public CharacterContainer GetCharacterRenderer(int cid){
+		return GetCharacterRenderer (Field.FindCharacter(cid));
+	}
+
 	public CharacterContainer GetCharacterRenderer(Character ch)
 	{
 		CharacterContainer cc;

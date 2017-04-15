@@ -22,7 +22,7 @@ module ShortJson
 
       if @scanner.eos?
         r = nil
-      elsif @scanner.scan(/\(|\)|:|,/)
+      elsif @scanner.scan(/\(|\)|:|,|\[|\]/)
         # 記号
         sym = @scanner[0]
         case sym
@@ -34,6 +34,9 @@ module ShortJson
           @after_comma = true if @paren_level == 0
         end
         r = [sym, sym]
+      elsif @scanner.scan(/-?\d\.\d+/)
+        # 浮動小数
+        r = [:NUMBER, @scanner[0].to_f]
       elsif @scanner.scan(/-?\d+/)
         # 10進数
         r = [:NUMBER, @scanner[0].to_i]
@@ -48,7 +51,8 @@ module ShortJson
       r
     end
 
-    def make_args(obj, vals)
+    def make_args(vals)
+      obj = {}
       i = 0
       vals.each do |k, v|
         if k
@@ -58,6 +62,7 @@ module ShortJson
           i += 1
         end
       end
+      obj
     end
 
     def parse(is_array = false)

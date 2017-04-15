@@ -156,6 +156,23 @@ module PbConvert
     nil
   end
 
+  def self.field_of_index_cache
+    @field_of_index_cache = {} unless @field_of_index_cache
+    @field_of_index_cache
+  end
+
+  def field_of_index(_class, index)
+    list = PbConvert.field_of_index_cache[_class]
+    unless list
+      list = []
+      _class.descriptor.each do |desc|
+        list[desc.number] = desc
+      end
+      PbConvert.field_of_index_cache[_class] = list
+    end
+    list[index]
+  end
+
   def conv_message(_class, data)
     m = _class.new
 
@@ -163,6 +180,16 @@ module PbConvert
       begin
         k, v = conv_field_name(_class, k, v)
         k = k.to_s
+
+        # 数字のインデックスが来た場合は、名前に変換する
+        if k =~ /^\d+$/
+          desc = field_of_index(_class, k.to_i + 1)
+          unless desc
+            logger.warn "#{_class.name} に #{k} が存在しません"
+            break
+          end
+          k = desc.name
+        end
 
         desc = _class.descriptor.lookup(k)
         if desc

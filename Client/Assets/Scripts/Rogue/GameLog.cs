@@ -133,8 +133,9 @@ namespace GameLog
 	{
 		public IPromise Process(GameScene scene)
 		{
-			return ResourceCache.Create<GameObject> (EffectSymbol).Then (obj => {
-				obj.transform.position = new Vector3(X+0.5f,0.5f,Y+0.5f);
+			return ResourceCache.Create<GameObject> (EffectSymbol).Then (obj =>
+			{
+				obj.transform.position = new Vector3(X + 0.5f, 0.5f, Y + 0.5f);
 				obj.transform.rotation = ((Direction)Dir).ToWorldQuaternion();
 				return PromiseEx.Delay(0.2f);
 			});
@@ -163,6 +164,42 @@ namespace GameLog
 			scene.ShowMessage (this);
 			Debug.Log ("Message: " + MessageId + " " + string.Join (", ", Param.ToArray ()));
 			return Promise.Resolved ();
+		}
+	}
+
+	public partial class ShowSkillEffect : ICommand
+	{
+		public IPromise Process(GameScene scene)
+		{
+			return scene.StartCoroutine (process(scene)).AsPromise();
+		}
+
+		IEnumerator process(GameScene scene)
+		{
+			foreach (var code in Effect.Codes) {
+				Debug.Log (code.Type + " " + code.Effect);
+				switch (code.Type) {
+				case "char":
+					{
+						var cr = scene.GetCharacterRenderer (CharacterId);
+						cr.transform.localRotation = ((Direction)Dir).ToWorldQuaternion ();
+						cr.Animate (code.Effect);
+						yield return new WaitForSeconds (code.Wait);
+					}
+					break;
+				case "wave":
+					foreach (var pos in Path) {
+						yield return ResourceCache.Create<GameObject> (code.Effect).Then (obj => {
+							obj.transform.position = scene.PointToVector (pos);
+							return 0;
+						}).AsCoroutine ();
+						yield return new WaitForSeconds (code.Wait);
+					}
+					break;
+				default:
+					throw new System.Exception ("invalid ShowSKillEffect.Type " + code.Type);
+				}
+			}
 		}
 	}
 
@@ -216,10 +253,9 @@ namespace GameLog
 		{
 			var c = f.FindCharacter (CharacterId);
 			c.Dir = (Direction)Dir;
-			f.SendAndWait (new AnimateCharacter { CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = Animation.Attack });
+			//f.SendAndWait (new AnimateCharacter { CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = Animation.Attack });
 			var skill = G.Skills [SkillId];
-			var special = Special.Create(skill.Special[0]);
-			f.UseSkill (c, (Direction)Dir, special.T.Scope, special);
+			f.UseSkill (c, (Direction)Dir, skill);
 		}
 	}
 }

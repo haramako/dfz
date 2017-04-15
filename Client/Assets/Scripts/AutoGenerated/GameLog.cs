@@ -317,7 +317,7 @@ namespace GameLog {
       get { return defaultInstance; }
     }
 
-    public List<global::GameLog.Walk> Items;
+    public List<global::GameLog.Walk> Items = new List<global::GameLog.Walk>();
 
     #region Lite runtime methods
     #endregion
@@ -1297,7 +1297,7 @@ namespace GameLog {
 
     public int CharacterId;
 
-    public List<global::GameLog.Point> Path;
+    public List<global::GameLog.Point> Path = new List<global::GameLog.Point>();
 
     #region Lite runtime methods
     #endregion
@@ -1460,6 +1460,174 @@ namespace GameLog {
     public override void Finish() {
     if( Param == null ){
       Param = new List<string>();
+    }
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class ShowSkillEffect : pb.Message {
+    public ShowSkillEffect() { }
+    public static ShowSkillEffect CreateInstance() { var obj = new ShowSkillEffect(); obj.Finish(); return obj; }
+    public static ShowSkillEffect CreateEmpty() { return new ShowSkillEffect(); }
+    private static readonly ShowSkillEffect defaultInstance = new ShowSkillEffect();
+    public static ShowSkillEffect DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public global::Master.SpecialScope Scope;
+
+    public global::Master.SkillEffect Effect;
+
+    public int CharacterId;
+
+    public int Dir;
+
+    public global::GameLog.Point FromPoint;
+
+    public List<global::GameLog.Point> Path = new List<global::GameLog.Point>();
+
+    public List<global::GameLog.Point> Targets = new List<global::GameLog.Point>();
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if( Scope != null ){
+        output.WriteMessage(1, Scope);
+      }
+      if( Effect != null ){
+        output.WriteMessage(2, Effect);
+      }
+      if (CharacterId != 0) {
+        output.WriteInt32(4, CharacterId);
+      }
+      if( FromPoint != null ){
+        output.WriteMessage(5, FromPoint);
+      }
+      if (Path != null && Path.Count > 0) {
+        output.WriteMessageArray(6, Path);
+      }
+      if (Targets != null && Targets.Count > 0) {
+        output.WriteMessageArray(7, Targets);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(8, Dir);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if( Scope != null ){
+        size += pb::CodedOutputStream.ComputeMessageSize(1, Scope);
+      }
+      if( Effect != null ){
+        size += pb::CodedOutputStream.ComputeMessageSize(2, Effect);
+      }
+      if (CharacterId != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(4, CharacterId);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(8, Dir);
+      }
+      if( FromPoint != null ){
+        size += pb::CodedOutputStream.ComputeMessageSize(5, FromPoint);
+      }
+      if( Path != null ) {
+        foreach (global::GameLog.Point element in Path) {
+          size += pb::CodedOutputStream.ComputeMessageSize(6, element);
+        }
+      }
+      if( Targets != null ) {
+        foreach (global::GameLog.Point element in Targets) {
+          size += pb::CodedOutputStream.ComputeMessageSize(7, element);
+        }
+      }
+      return size;
+    }
+    public static ShowSkillEffect ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static ShowSkillEffect ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static ShowSkillEffect ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 10: {
+            global::Master.SpecialScope builder = global::Master.SpecialScope.CreateEmpty();
+            input.ReadMessage(builder);
+            Scope = builder;
+            break;
+          }
+          case 18: {
+            global::Master.SkillEffect builder = global::Master.SkillEffect.CreateEmpty();
+            input.ReadMessage(builder);
+            Effect = builder;
+            break;
+          }
+          case 32: {
+            input.ReadInt32(ref this.CharacterId);
+            break;
+          }
+          case 42: {
+            global::GameLog.Point builder = global::GameLog.Point.CreateEmpty();
+            input.ReadMessage(builder);
+            FromPoint = builder;
+            break;
+          }
+          case 50: {
+            input.ReadMessageArray(tag, this.Path, global::GameLog.Point.CreateEmpty);
+            break;
+          }
+          case 58: {
+            input.ReadMessageArray(tag, this.Targets, global::GameLog.Point.CreateEmpty);
+            break;
+          }
+          case 64: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    if( Scope == null ){
+      Scope = global::Master.SpecialScope.CreateInstance();
+    }
+    if( Effect == null ){
+      Effect = global::Master.SkillEffect.CreateInstance();
+    }
+    if( FromPoint == null ){
+      FromPoint = global::GameLog.Point.CreateInstance();
+    }
+    if( Path == null ){
+      Path = new List<global::GameLog.Point>();
+    }
+    if( Targets == null ){
+      Targets = new List<global::GameLog.Point>();
     }
     }
   }

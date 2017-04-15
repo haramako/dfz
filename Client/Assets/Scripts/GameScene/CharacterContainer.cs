@@ -23,6 +23,7 @@ public class CharacterContainer : MonoBehaviour
 
 	public void Animate(string anim)
 	{
+		Debug.Log ("Animate " + this.name + " " + anim);
 		GetComponent<Animation>().Play (anim);
 		animating = true;
 	}
@@ -35,6 +36,7 @@ public class CharacterContainer : MonoBehaviour
 			{
 				GetComponent<Animation>().Play ("EnemyStay01");
 				animating = false;
+				Debug.Log ("stop animation");
 			}
 		}
 	}

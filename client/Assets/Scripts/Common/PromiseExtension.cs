@@ -71,7 +71,7 @@ namespace RSG
 
 		/// <summary>
 		/// 対象のYieldInstruction(コルーチン)をPromise<object>に変換する.
-		/// 
+		///
 		/// 使用例:
 		///    var wait = new WaitForSeconds(3.0f);
 		///    wait.AsPromise().Done(_=>{ Debug.Log("finish!"); });
@@ -85,7 +85,8 @@ namespace RSG
 
 		static IEnumerator asPromiseCoroutineWWW(Promise<WWW> promise, WWW www)
 		{
-			while (www.isDone) {
+			while (www.isDone)
+			{
 				yield return null;
 			}
 			promise.Resolve(www);
@@ -93,22 +94,29 @@ namespace RSG
 
 		/// <summary>
 		/// 対象のYieldInstruction(コルーチン)をPromise<object>に変換する.
-		/// 
+		///
 		/// 使用例:
 		///    var wait = new WaitForSeconds(3.0f);
 		///    wait.AsPromise().Done(_=>{ Debug.Log("finish!"); });
 		/// </summary>
-		public static Promise<object> AsPromise(this YieldInstruction coro)
+		public static IPromise AsPromise(this YieldInstruction coro)
 		{
-			var promise = new Promise<object>();
+			var promise = new Promise();
 			Worker.Instance.StartCoroutine(asPromiseCoroutine(promise, coro));
 			return promise;
 		}
 
-		static IEnumerator asPromiseCoroutine(Promise<object> promise, YieldInstruction coro)
+		static IEnumerator asPromiseCoroutine(Promise promise, YieldInstruction coro)
 		{
 			yield return coro;
-			promise.Resolve(null);
+			promise.Resolve ();
+		}
+
+		public static IPromise Resolved()
+		{
+			var promise = new Promise();
+			promise.Resolve();
+			return promise;
 		}
 
 		public static IPromise<T> Resolved<T>(T val)
@@ -117,5 +125,27 @@ namespace RSG
 			promise.Resolve(val);
 			return promise;
 		}
+
+		/// <summary>
+		/// PromiseをIEnumerator(コルーチン)に変換する.
+		/// 
+		/// 使用例:
+		///     ...コルーチン内で...
+		///     yield return SomeSlowPromise().AsCoroutine(); // Promiseが終わるまで待つ
+		///     
+		///     // 返り値を取得する場合は別途保存する
+		///     int result = 0;
+		///     yield return OtherSlowPromise().Then(v=>{ result = v; }).AsCoroutine();
+		/// </summary>
+		public static IEnumerator AsCoroutine<T>(this IPromise<T> promise)
+		{
+			bool finished = false;
+			promise.Done((_) => { finished = true; });
+			while (!finished)
+			{
+				yield return null;
+			}
+		}
+
 	}
 }

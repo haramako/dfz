@@ -19,6 +19,7 @@ public class G
 
 	public static Dictionary<int, Stage> Stages = new Dictionary<int, Stage> ();
 	public static Dictionary<int, Skill> Skills = new Dictionary<int, Skill> ();
+	public static Dictionary<int, SkillEffect> SkillEffects = new Dictionary<int, SkillEffect> ();
 
 	public static Dictionary<int, TestGame> TestGames = new Dictionary<int, TestGame> ();
 
@@ -54,11 +55,17 @@ public class G
 		Stages = LoadPbFiles<Stage>(Stage.CreateInstance, "Stage").ToDictionary(i => i.Id);
 		Skills = LoadPbFiles<Skill>(Skill.CreateInstance, "Skill").ToDictionary(i => i.Id);
 		TestGames = LoadPbFiles<TestGame>(TestGame.CreateInstance, "TestGame").ToDictionary(i => i.Id);
+		SkillEffects = LoadPbFiles<SkillEffect>(SkillEffect.CreateInstance, "SkillEffect").ToDictionary(i => i.Id);
 	}
 
 	public static Skill FindSkillBySymbol(string sym)
 	{
 		return Skills.Values.FirstOrDefault (s => s.Symbol == sym);
+	}
+
+	public static SkillEffect FindSkillEffectBySymbol(string sym)
+	{
+		return SkillEffects.Values.FirstOrDefault (s => s.Symbol == sym);
 	}
 
 	public static void Clear()

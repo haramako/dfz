@@ -10,60 +10,67 @@ module ShortJson
 ##### State transition tables begin ###
 
 racc_action_table = [
-     5,    12,     5,     7,     6,     7,     6,     5,   -13,     5,
-     7,     6,    19,     6,     5,    20,     5,    19,     6,     7,
-     6,    21,     8,     9,    10,    22,    23 ]
+     6,    20,     7,    27,    23,     9,     8,     6,    24,     7,
+    10,    11,    18,     8,     6,    12,     7,    25,   -16,     9,
+     8,     6,    26,     7,   nil,   nil,     9,     8,     6,   nil,
+     7,   nil,   nil,    18,     8,     6,   nil,     7,   nil,   nil,
+    18,     8,     6,   nil,     7,   nil,   nil,     9,     8 ]
 
 racc_action_check = [
-    23,     8,     5,    23,    23,     5,     5,     9,    19,    10,
-     9,     9,    10,    10,    22,    11,     0,    22,    22,     0,
-     0,    14,     1,     3,     4,    16,    17 ]
+    25,    10,    25,    22,    13,    25,    25,     6,    15,     6,
+     1,     4,     6,     6,     7,     5,     7,    16,    18,     7,
+     7,    11,    19,    11,   nil,   nil,    11,    11,    12,   nil,
+    12,   nil,   nil,    12,    12,    24,   nil,    24,   nil,   nil,
+    24,    24,     0,   nil,     0,   nil,   nil,     0,     0 ]
 
 racc_action_pointer = [
-    11,    22,   nil,    21,    21,    -3,   nil,   nil,     1,     2,
-     4,     9,   nil,   nil,    17,   nil,    23,    19,   nil,     1,
-   nil,   nil,     9,    -5,   nil,   nil ]
+    39,    10,   nil,   nil,     9,    12,     4,    11,   nil,   nil,
+     1,    18,    25,     0,   nil,     6,    10,   nil,    11,    16,
+   nil,   nil,    -1,   nil,    32,    -3,   nil,   nil,   nil,   nil ]
 
 racc_action_default = [
-   -16,   -16,    -1,    -3,    -5,   -16,   -14,   -15,   -16,   -16,
-    -7,   -16,    26,    -2,   -16,    -8,   -10,   -16,   -12,   -15,
-    -6,    -4,   -16,   -16,    -9,   -11 ]
+    -3,   -19,    -1,    -2,    -5,    -7,   -11,    -3,   -17,   -18,
+   -19,   -19,   -11,   -19,   -10,   -13,   -19,   -15,   -18,   -19,
+    30,    -4,   -19,    -8,   -19,   -19,    -9,    -6,   -12,   -14 ]
 
 racc_goto_table = [
-    18,     2,    15,     1,    14,   nil,    11,   nil,   nil,   nil,
-    13,   nil,    18,    25,    24 ]
+    17,     2,     1,    13,    21,    28,    17,   nil,    19,    22,
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,    17,    29 ]
 
 racc_goto_check = [
-     3,     2,     6,     1,     5,   nil,     2,   nil,   nil,   nil,
-     2,   nil,     3,     3,     6 ]
+     4,     2,     1,     6,     3,     7,     4,   nil,     2,     6,
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,     4,     4 ]
 
 racc_goto_pointer = [
-   nil,     3,     1,   -10,   nil,    -6,    -8,   nil,   nil ]
+   nil,     2,     1,    -7,    -6,   nil,    -3,   -19,   nil,   nil ]
 
 racc_goto_default = [
-   nil,   nil,   nil,     3,     4,   nil,   nil,    16,    17 ]
+   nil,   nil,   nil,     3,     4,     5,   nil,    14,    15,    16 ]
 
 racc_reduce_table = [
   0, 0, :racc_error,
   1, 11, :_reduce_none,
-  3, 12, :_reduce_2,
-  1, 12, :_reduce_3,
-  4, 13, :_reduce_4,
-  1, 13, :_reduce_none,
-  3, 13, :_reduce_none,
-  0, 15, :_reduce_7,
-  1, 15, :_reduce_none,
-  3, 16, :_reduce_9,
-  1, 16, :_reduce_10,
-  3, 17, :_reduce_11,
-  1, 17, :_reduce_12,
-  1, 18, :_reduce_none,
+  1, 12, :_reduce_none,
+  0, 12, :_reduce_3,
+  3, 13, :_reduce_4,
+  1, 13, :_reduce_5,
+  4, 14, :_reduce_6,
   1, 14, :_reduce_none,
-  1, 14, :_reduce_none ]
+  3, 14, :_reduce_8,
+  3, 14, :_reduce_9,
+  1, 16, :_reduce_none,
+  0, 16, :_reduce_11,
+  3, 17, :_reduce_12,
+  1, 17, :_reduce_13,
+  3, 18, :_reduce_14,
+  1, 18, :_reduce_15,
+  1, 19, :_reduce_none,
+  1, 15, :_reduce_none,
+  1, 15, :_reduce_none ]
 
-racc_reduce_n = 16
+racc_reduce_n = 19
 
-racc_shift_n = 26
+racc_shift_n = 30
 
 racc_token_table = {
   false => 0,
@@ -110,6 +117,7 @@ Racc_token_to_s_table = [
   "NUMBER",
   "$start",
   "program",
+  "value_list_p",
   "value_list",
   "value",
   "literal",
@@ -126,73 +134,94 @@ Racc_debug_parser = false
 
 # reduce 1 omitted
 
-module_eval(<<'.,.,', 'short_json.y', 6)
-  def _reduce_2(val, _values, result)
-     result = val[2].unshift(val[0]) 
-    result
-  end
-.,.,
+# reduce 2 omitted
 
 module_eval(<<'.,.,', 'short_json.y', 7)
   def _reduce_3(val, _values, result)
-     result = [val[0]] 
+     result = [] 
     result
   end
 .,.,
 
 module_eval(<<'.,.,', 'short_json.y', 9)
   def _reduce_4(val, _values, result)
-     result = {type: val[0]}; make_args(result, val[2]) 
+     result = val[2].unshift(val[0]) 
     result
   end
 .,.,
 
-# reduce 5 omitted
-
-# reduce 6 omitted
-
-module_eval(<<'.,.,', 'short_json.y', 13)
-  def _reduce_7(val, _values, result)
-     result = [] 
-    result
-  end
-.,.,
-
-# reduce 8 omitted
-
-module_eval(<<'.,.,', 'short_json.y', 18)
-  def _reduce_9(val, _values, result)
-     result = [val[0]]+val[2] 
-    result
-  end
-.,.,
-
-module_eval(<<'.,.,', 'short_json.y', 19)
-  def _reduce_10(val, _values, result)
+module_eval(<<'.,.,', 'short_json.y', 10)
+  def _reduce_5(val, _values, result)
      result = [val[0]] 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'short_json.y', 21)
+module_eval(<<'.,.,', 'short_json.y', 12)
+  def _reduce_6(val, _values, result)
+     result = make_args([[nil,val[0]]]+val[2]) 
+    result
+  end
+.,.,
+
+# reduce 7 omitted
+
+module_eval(<<'.,.,', 'short_json.y', 14)
+  def _reduce_8(val, _values, result)
+     result = make_args(val[1]) 
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'short_json.y', 15)
+  def _reduce_9(val, _values, result)
+     result = val[1] 
+    result
+  end
+.,.,
+
+# reduce 10 omitted
+
+module_eval(<<'.,.,', 'short_json.y', 18)
   def _reduce_11(val, _values, result)
+     result = [] 
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'short_json.y', 24)
+  def _reduce_12(val, _values, result)
+     result = [val[0]]+val[2] 
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'short_json.y', 25)
+  def _reduce_13(val, _values, result)
+     result = [val[0]] 
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'short_json.y', 27)
+  def _reduce_14(val, _values, result)
      result = [val[0], val[2]] 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'short_json.y', 22)
-  def _reduce_12(val, _values, result)
+module_eval(<<'.,.,', 'short_json.y', 28)
+  def _reduce_15(val, _values, result)
      result = [nil, val[0]] 
     result
   end
 .,.,
 
-# reduce 13 omitted
+# reduce 16 omitted
 
-# reduce 14 omitted
+# reduce 17 omitted
 
-# reduce 15 omitted
+# reduce 18 omitted
 
 def _reduce_none(val, _values, result)
   val[0]

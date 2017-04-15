@@ -646,34 +646,65 @@ end
 			Send( makeWalkCommand (c, pos));
 		}
 
-		public void UseSkill(Character c, Direction dir, SpecialScope scope, Special special)
+		public void UseSkill(Character c, Direction dir, Skill skill){
+			foreach( var code in skill.Codes){
+				UseSkillCode (c, dir, code);
+			}
+		}
+
+		public void UseSkillCode(Character c, Direction dir, SkillCode code)
 		{
 			ShowMessage ("UseSkill", c.Name);
-			var result = scope.GetRange (new ScopeParam () { From = c, FromPoint = c.Position, Dir = dir, Map = Map });
+			c.Dir = dir;
+			var result = code.Scope.GetRange (new ScopeParam () { From = c, FromPoint = c.Position, Dir = dir, Map = Map });
+
+			var effect = G.FindSkillEffectBySymbol (code.Effect);
+			ShowSkillEffect (code.Scope, result, effect);
+
 			foreach (var p in result.Targets)
 			{
 				log (p);
 				var target = Map [p].Character;
 				if (target != null)
 				{
-					ExecuteSpecial (special, new SpecialParam
+					foreach (var special in code.SpecialList)
 					{
-						FromCharacter = c,
-						FromPoint = c.Position,
-						Target = target,
-						Pos = target.Position
-					});
+						if (target.IsDead)
+						{
+							break;
+						}
+						ExecuteSpecial (special, new SpecialParam
+						{
+							FromCharacter = c,
+							FromPoint = c.Position,
+							Target = target,
+							Pos = target.Position
+						});
+					}
 				}
 			}
+		}
+
+		public void ShowSkillEffect(SpecialScope scope, ScopeResult sr, SkillEffect effect){
+			SendAndWait (new GameLog.ShowSkillEffect {
+				Scope = scope,
+				CharacterId = sr.Param.From.Id,
+				Dir = (int)sr.Param.From.Dir,
+				Path = sr.Path.Select(p=>((GameLog.Point)p)).ToList(),
+				Targets = sr.Targets.Select(p=>((GameLog.Point)p)).ToList(),
+				Effect = effect,
+			});
 		}
 
 		public void AttackCharacter(Character c, Direction dir)
 		{
 			c.Dir = dir;
-			SendAndWait (new GameLog.AnimateCharacter { CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = GameLog.Animation.Attack });
+			//SendAndWait (new GameLog.AnimateCharacter { CharacterId = c.Id, Dir = (int)c.Dir, X = c.Position.X, Y = c.Position.Y, Animation = GameLog.Animation.Attack });
 			var skill = G.FindSkillBySymbol ("attack");
-			var special = Special.Create (skill.Special[0]);
-			UseSkill (c, dir, special.T.Scope, special);
+			foreach (var code in skill.Codes)
+			{
+				UseSkill (c, dir, skill);
+			}
 		}
 
 		public void ExecuteSpecial(Special special, SpecialParam p)
@@ -684,7 +715,7 @@ end
 		public void AddDamage(Character c, GameLog.DamageInfo damage)
 		{
 			ShowMessage ("DamageCharacter", c.Name, damage.Amount);
-			Send (new GameLog.ShowEffect{ X = c.X, Y = c.Y, Dir = (int)c.Dir, EffectSymbol = "EfDamage01" });
+			Send (new GameLog.ShowEffect { X = c.X, Y = c.Y, Dir = (int)c.Dir, EffectSymbol = "EfDamage01" });
 			c.Hp -= damage.Amount;
 			if (c.Hp <= 0)
 			{
