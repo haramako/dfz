@@ -1329,6 +1329,8 @@ namespace Master {
 
     public int Id;
 
+    public string Symbol = "";
+
     public int Width;
 
     public int Height;
@@ -1367,6 +1369,9 @@ namespace Master {
       if (Characters != null && Characters.Count > 0) {
         output.WriteMessageArray(7, Characters);
       }
+      if (Symbol != "") {
+        output.WriteString(8, Symbol);
+      }
     }
 
     public override int SerializedSize {
@@ -1379,6 +1384,9 @@ namespace Master {
       int size = 0;
       if (Id != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(1, Id);
+      }
+      if (Symbol != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(8, Symbol);
       }
       if (Width != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(2, Width);
@@ -1460,6 +1468,10 @@ namespace Master {
             input.ReadMessageArray(tag, this.Characters, global::Master.StageCharacter.CreateEmpty);
             break;
           }
+          case 66: {
+            input.ReadString(ref this.Symbol);
+            break;
+          }
         }
       }
     }
@@ -1500,6 +1512,10 @@ namespace Master {
 
     public int Seed;
 
+    public string TmxName = "";
+
+    public List<int> EnemyIds = new List<int>();
+
     #region Lite runtime methods
     #endregion
 
@@ -1525,6 +1541,12 @@ namespace Master {
       }
       if (Floor != 0) {
         output.WriteInt32(7, Floor);
+      }
+      if (TmxName != "") {
+        output.WriteString(8, TmxName);
+      }
+      if (EnemyIds.Count > 0) {
+        output.WritePackedInt32Array(9, EnemyIds);
       }
     }
 
@@ -1556,6 +1578,19 @@ namespace Master {
       }
       if (Seed != 0) {
         size += pb::CodedOutputStream.ComputeInt32Size(5, Seed);
+      }
+      if (TmxName != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(8, TmxName);
+      }
+      {
+        int dataSize = 0;
+        foreach (int element in EnemyIds) {
+          dataSize += pb::CodedOutputStream.ComputeInt32SizeNoTag(element);
+        }
+        size += dataSize;
+        if (EnemyIds.Count != 0) {
+          size += 1 + pb::CodedOutputStream.ComputeInt32SizeNoTag(dataSize);
+        }
       }
       return size;
     }
@@ -1609,6 +1644,15 @@ namespace Master {
             input.ReadInt32(ref this.Floor);
             break;
           }
+          case 66: {
+            input.ReadString(ref this.TmxName);
+            break;
+          }
+          case 74:
+          case 72: {
+            input.ReadInt32Array(tag, this.EnemyIds);
+            break;
+          }
         }
       }
     }
@@ -1616,6 +1660,9 @@ namespace Master {
     public override void Init() {
     }
     public override void Finish() {
+    if( EnemyIds == null ){
+      EnemyIds = new List<int>();
+    }
     }
   }
 

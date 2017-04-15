@@ -127,6 +127,7 @@ message StageCharacter {
 
 message Stage {
 	int32 id = 1;
+	string symbol = 8;
 	int32 width = 2;
 	int32 height = 3;
 	string name = 4;
@@ -150,4 +151,7 @@ message TestGame {
 	int32 stage_id = 6; /// ステージID
 	int32 floor = 7; // 開始するフロア
 	int32 seed = 5; /// ランダムのシード(0ならシードもランダム)
+
+	string tmx_name = 8;
+	repeated int32 enemy_ids = 9;
 }
