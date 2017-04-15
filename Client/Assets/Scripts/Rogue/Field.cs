@@ -684,6 +684,7 @@ end
 		public void AddDamage(Character c, GameLog.DamageInfo damage)
 		{
 			ShowMessage ("DamageCharacter", c.Name, damage.Amount);
+			Send (new GameLog.ShowEffect{ X = c.X, Y = c.Y, Dir = (int)c.Dir, EffectSymbol = "EfDamage01" });
 			c.Hp -= damage.Amount;
 			if (c.Hp <= 0)
 			{

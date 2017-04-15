@@ -64,6 +64,16 @@ message AnimateCharacter {
 	Animation animation = 5; // アニメーションの種類
 }
 
+/**
+ * エフェクトを表示する
+ */
+message ShowEffect {
+	float x = 1;
+	float y = 2;
+	int32 dir = 3;
+	string effect_symbol = 4;
+}
+
 message KillCharacter {
 	int32 character_id = 1; // キャラクタID
 	int32 x = 2; // キャラクタの座標X

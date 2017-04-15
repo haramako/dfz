@@ -753,6 +753,113 @@ namespace GameLog {
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class ShowEffect : pb.Message {
+    public ShowEffect() { }
+    public static ShowEffect CreateInstance() { var obj = new ShowEffect(); obj.Finish(); return obj; }
+    public static ShowEffect CreateEmpty() { return new ShowEffect(); }
+    private static readonly ShowEffect defaultInstance = new ShowEffect();
+    public static ShowEffect DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public float X;
+
+    public float Y;
+
+    public int Dir;
+
+    public string EffectSymbol = "";
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (X != 0F) {
+        output.WriteFloat(1, X);
+      }
+      if (Y != 0F) {
+        output.WriteFloat(2, Y);
+      }
+      if (Dir != 0) {
+        output.WriteInt32(3, Dir);
+      }
+      if (EffectSymbol != "") {
+        output.WriteString(4, EffectSymbol);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (X != 0F) {
+        size += pb::CodedOutputStream.ComputeFloatSize(1, X);
+      }
+      if (Y != 0F) {
+        size += pb::CodedOutputStream.ComputeFloatSize(2, Y);
+      }
+      if (Dir != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(3, Dir);
+      }
+      if (EffectSymbol != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(4, EffectSymbol);
+      }
+      return size;
+    }
+    public static ShowEffect ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static ShowEffect ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static ShowEffect ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 13: {
+            input.ReadFloat(ref this.X);
+            break;
+          }
+          case 21: {
+            input.ReadFloat(ref this.Y);
+            break;
+          }
+          case 24: {
+            input.ReadInt32(ref this.Dir);
+            break;
+          }
+          case 34: {
+            input.ReadString(ref this.EffectSymbol);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class KillCharacter : pb.Message {
     public KillCharacter() { }
     public static KillCharacter CreateInstance() { var obj = new KillCharacter(); obj.Finish(); return obj; }

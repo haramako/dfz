@@ -129,6 +129,18 @@ namespace GameLog
 		}
 	}
 
+	public partial class ShowEffect : ICommand
+	{
+		public IPromise Process(GameScene scene)
+		{
+			return ResourceCache.Create<GameObject> (EffectSymbol).Then (obj => {
+				obj.transform.position = new Vector3(X+0.5f,0.5f,Y+0.5f);
+				obj.transform.rotation = ((Direction)Dir).ToWorldQuaternion();
+				return PromiseEx.Delay(0.2f);
+			});
+		}
+	}
+
 	public partial class KillCharacter : ICommand
 	{
 		public IPromise Process(GameScene scene)
