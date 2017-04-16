@@ -20,12 +20,12 @@ public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T
 	public static bool HasInstance { get { return Instance != null; } }
 
 	protected virtual void Awake() {
-		if (Instance == this) {
+		if (Instance != null && Instance != this ) {
 			DestroyImmediate (gameObject);
 			return;
 		}
 		Instance = (T)this;
-		if (transform.parent != null) {
+		if (transform.parent == null) {
 			DontDestroyOnLoad (gameObject);
 		}
 	}

@@ -68,13 +68,4 @@ public class InitializeScene : MonoBehaviour
 		SceneManager.LoadScene (route.Scene);
 	}
 
-	public void OnButton1Click()
-	{
-		var d = new Promise<string> ();
-		d.Then (x =>
-		{
-			Debug.Log (x);
-		});
-		d.Resolve ("hoge");
-	}
 }

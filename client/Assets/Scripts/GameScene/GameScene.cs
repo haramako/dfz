@@ -56,10 +56,6 @@ public class GameScene : Router.BaseScene
 
 	public override void OnStartScene(Router.SceneParam param)
 	{
-		var dungeonSymbol = param.Query.GetStringParam ("dungeon", "Test001");
-
-		var stage = G.FindDungeonStageBySymbol (dungeonSymbol);
-
 		mode = Mode.None;
 		FocusToPoint = CameraTarget.transform.localPosition;
 		CameraDistanceTo = -20f;
@@ -67,7 +63,23 @@ public class GameScene : Router.BaseScene
 
 		Field = new Field();
 		Field.NoLog = false;
-		new FieldLoader ().LoadStage (Field, stage);
+
+		var test = param.Query.GetStringParam ("test");
+		if (test != "")
+		{
+			var testGame = G.FindTestGameBySymbol (test);
+			if (testGame == null)
+			{
+				throw new Exception ("TestGame '" + test + "' が見つかりません");
+			}
+			new FieldLoader ().LoadTestGame (Field, testGame);
+		}
+		else
+		{
+			var dungeonSymbol = param.Query.GetStringParam ("dungeon", "Test001");
+			var stage = G.FindDungeonStageBySymbol (dungeonSymbol);
+			new FieldLoader ().LoadStage (Field, stage);
+		}
 
 		initField ();
 

@@ -60,6 +60,11 @@ public class G
 		SkillEffects = LoadPbFiles<SkillEffect>(SkillEffect.CreateInstance, "SkillEffect").ToDictionary(i => i.Id);
 	}
 
+	public static TestGame FindTestGameBySymbol(string sym)
+	{
+		return TestGames.Values.FirstOrDefault (s => s.Symbol == sym);
+	}
+
 	public static DungeonStage FindDungeonStageBySymbol(string sym)
 	{
 		return DungeonStages.Values.FirstOrDefault (s => s.Symbol == sym);

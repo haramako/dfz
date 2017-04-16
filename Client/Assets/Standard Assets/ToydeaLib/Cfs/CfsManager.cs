@@ -7,7 +7,7 @@ using System.Linq;
 using System.IO;
 using Cfs;
 
-public class CfsManager : MonoBehaviour
+public class CfsManager : MonoSingleton<CfsManager>
 {
 public enum CfsState
 {
@@ -18,22 +18,10 @@ public enum CfsState
 	Ready,
 }
 
-public static CfsManager Instance;
 public static ILogger Logger = Debug.logger;
 
 public CfsState State { get; private set; }
 public Cfs.Cfs Cfs { get; private set; }
-
-public void Awake()
-	{
-		if (Instance != null)
-		{
-			Destroy (this);
-			return;
-		}
-
-		Instance = this;
-	}
 
 	public void Init(Cfs.Cfs cfs)
 	{
