@@ -3,31 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+
 public class StartupWindow : EditorWindow
 {
 
-	public class Setting : ScriptableObject
-	{
-		public bool Enable;
-		public string Url = "";
-	}
 
-	Setting setting_;
+	StartupWindowSetting setting_;
 
 	void OnEnable()
 	{
-		setting_ = AssetDatabase.LoadAssetAtPath<Setting> ("Assets/StartupWindow.asset");
+		setting_ = AssetDatabase.LoadAssetAtPath<StartupWindowSetting> ("Assets/StartupWindow.asset");
 		if (setting_ == null)
 		{
-			Debug.Log ("create!");
-			setting_ = ScriptableObject.CreateInstance<Setting> ();
+			setting_ = ScriptableObject.CreateInstance<StartupWindowSetting> ();
 			AssetDatabase.CreateAsset (setting_, "Assets/StartupWindow.asset");
 		}
 	}
 
 	void OnGUI()
 	{
-		Setting s = setting_;
+		StartupWindowSetting s = setting_;
 
 		GUILayout.BeginVertical ();
 
@@ -37,10 +32,12 @@ public class StartupWindow : EditorWindow
 		if (s.Enable)
 		{
 			UrlSchemeReceiver.SetUrlInEditor (s.Url);
+			EditorUtility.SetDirty (s);
 		}
 		else
 		{
 			UrlSchemeReceiver.SetUrlInEditor ("");
+			EditorUtility.SetDirty (s);
 		}
 
 		GUILayout.EndVertical ();
