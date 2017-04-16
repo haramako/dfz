@@ -86,6 +86,8 @@ public class GameScene : Router.BaseScene
 		Field.StartThread ();
 		Send (new GameLog.AckResponseRequest ());
 
+		UpdateViewport ();
+		RedrawAll ();
 	}
 
 	public void OnSpeedupDown()
@@ -172,12 +174,12 @@ public class GameScene : Router.BaseScene
 			return;
 		}
 
-		updateSpot ();
 
 		Application.targetFrameRate = 60;
 
 		messageLoop ();
 		updateWalking ();
+		updateSpot ();
 
 		var curPos = CameraTarget.transform.localPosition;
 		curPos = Vector3.Lerp(FocusToPoint, curPos, Mathf.Pow(0.05f, Time.deltaTime));
@@ -205,7 +207,7 @@ public class GameScene : Router.BaseScene
 
 	}
 
-	void messageLoop()
+		void messageLoop()
 	{
 		while (true)
 		{
@@ -477,11 +479,10 @@ public class GameScene : Router.BaseScene
 	public void UpdateCharacter(Character c)
 	{
 		var cc = GetCharacterRenderer(c);
-		//var pos = new Vector3(c.Position.X + 0.5f, 0, c.Position.Y + 0.5f);
-		//cc.transform.localPosition = pos;
+		cc.transform.localPosition = PointToVector (c.Position);;
 		cc.Text.text = c.Name + "\nHP:" + c.Hp;
 	}
-
+	
 	public void UpdateViewport()
 	{
 		Field.UpdateViewport ();
@@ -518,7 +519,7 @@ public class GameScene : Router.BaseScene
 			}
 		}
 	}
-
+	
 	//===================================================================
 	// アクションボタン
 	//===================================================================

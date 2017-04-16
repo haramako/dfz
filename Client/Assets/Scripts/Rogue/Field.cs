@@ -344,51 +344,6 @@ namespace Game
 			Map = map;
 		}
 
-		public void Init(Stage stage_)
-		{
-			stage = stage_;
-			Map = new Map (stage.Width, stage.Height);
-			for (int x = 0; x < stage.Width; x++)
-			{
-				for (int y = 0; y < stage.Height; y++)
-				{
-					Map [x, y].Val = stage.Tiles [x + y * stage.Width];
-				}
-			}
-
-			int i = 0;
-			foreach (var sc in stage.Characters)
-			{
-				if (!(sc.Name.StartsWith ("E") || sc.Name.StartsWith ("P")))
-				{
-					continue;
-				}
-				var c = Character.CreateInstance();
-				c.Id = i++;
-				c.Hp = 20;
-				c.Name = sc.Name;
-				c.AtlasId = sc.Char;
-				c.Speed = sc.Speed;
-				c.Type = CharacterType.Enemy;
-				if (sc.Name == "P1")
-				{
-					SetPlayerCharacter (c);
-					c.Hp = 100;
-					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
-				}
-				else if (sc.Name.StartsWith ("E"))
-				{
-					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
-				}
-				else
-				{
-					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
-				}
-				Map.AddCharacter(c, new Point(sc.X,	sc.Y));
-			}
-
-		}
-
 		//========================================================
 		// ターンの処理
 		//========================================================
@@ -529,14 +484,6 @@ end
 			{
 				if (!c.IsPlayer)
 				{
-					/*
-					var move = Thinking.ThinkLua (c, L.getFunction ("test"));
-					if (move.Type == ActionResultType.Move) {
-						if (Map.FloorIsWalkableNow (move.To)) {
-							commands.Add (makeWalkCommand (c, move.To));
-							c.Moved = true;
-						}
-					}*/
 					var move = Thinking.ThinkMove (c);
 					if (move.IsMove)
 					{

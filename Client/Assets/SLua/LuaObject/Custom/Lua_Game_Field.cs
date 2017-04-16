@@ -261,7 +261,7 @@ public class Lua_Game_Field : LuaObject {
 				Game.Field self=(Game.Field)checkSelf(l);
 				Master.Stage a1;
 				checkType(l,2,out a1);
-				self.Init(a1);
+				//self.Init(a1);
 				pushValue(l,true);
 				return 1;
 			}
