@@ -11,11 +11,8 @@ public class UrlSchemeReceiver
 	static UrlSchemeReceiver()
 	{
 		#if UNITY_EDITOR
-		if (PlayerPrefs.GetInt("StartupWindow.Enable") == 1)
-		{
-			savedScheme = PlayerPrefs.GetString("StartupWindow.Url", null);
-			if (savedScheme == "") savedScheme = null; // ""はnull扱い
-		}
+		savedScheme = PlayerPrefs.GetString("StartupWindow.Url", null);
+		if (savedScheme == "") savedScheme = null; // ""はnull扱い
 		#elif UNITY_ANDROID
 		savedScheme = PlayerPrefs.GetString("BootScheme", null);
 		PlayerPrefs.DeleteKey("BootScheme");
@@ -76,5 +73,12 @@ public class UrlSchemeReceiver
 		consumed = false;
 		savedScheme = val;
 	}
+
+	#if UNITY_EDITOR
+	public static void SetUrlInEditor(string url)
+	{
+		PlayerPrefs.SetString ("StartupWindow.Url", url);
+	}
+	#endif
 
 }

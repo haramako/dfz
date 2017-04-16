@@ -47,23 +47,25 @@ public class InitializeScene : MonoBehaviour
 
 
 		var url = UrlSchemeReceiver.GetUrlScheme ();
+		var uri = new Uri (new Uri ("dfz://"), url);
 		Router.Route route;
 		try
 		{
-			route = Router.Instance.Resolve (url);
+			route = Router.Instance.Resolve (uri.AbsolutePath);
 		}
-		catch(Exception _)
+		catch(Exception)
 		{
 			route = Router.Instance.Resolve ("/game");
 		}
 
+		Debug.Log ("URL" + url + " " + route.Scene);
+
+		Router.LoadedCallback = new Action<Router.BaseScene>((scene) =>
+		{
+			scene.OnStartScene (new Router.SceneParam { Url = uri, Query = new Router.QueryParam (uri.Query) });
+		});
+
 		SceneManager.LoadScene (route.Scene);
-	}
-
-	// Update is called once per frame
-	void Update ()
-	{
-
 	}
 
 	public void OnButton1Click()

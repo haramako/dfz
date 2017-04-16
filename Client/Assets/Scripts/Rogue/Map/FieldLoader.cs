@@ -121,9 +121,7 @@ namespace Game
 					{
 						f_.SetPlayerCharacter (c);
 						c.Hp = 200;
-						Logger.Warn ("ADDPLAYER");
 					}
-					Logger.Warn ("ADDPLAYERs" + i);
 					var pos = FindRandom ();
 					map_.AddCharacter (c, pos);
 				}

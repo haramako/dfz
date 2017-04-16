@@ -10,7 +10,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using System.Linq;
 
-public class GameScene : MonoBehaviour
+public class GameScene : Router.BaseScene
 {
 
 	public enum CameraMode
@@ -21,6 +21,7 @@ public class GameScene : MonoBehaviour
 
 	public enum Mode
 	{
+		Initialzing,
 		None,
 		QMove,
 		Walking,
@@ -53,9 +54,11 @@ public class GameScene : MonoBehaviour
 
 	public Mode mode;
 
-	void Start()
+	public override void OnStartScene(Router.SceneParam param)
 	{
-		var stage = G.FindDungeonStageBySymbol ("Test001");
+		var dungeonSymbol = param.Query.GetStringParam ("dungeon", "Test001");
+
+		var stage = G.FindDungeonStageBySymbol (dungeonSymbol);
 
 		mode = Mode.None;
 		FocusToPoint = CameraTarget.transform.localPosition;
@@ -119,6 +122,11 @@ public class GameScene : MonoBehaviour
 
 	void Update()
 	{
+		if (mode == Mode.Initialzing)
+		{
+			return;
+		}
+
 		Application.targetFrameRate = 60;
 
 		messageLoop ();
