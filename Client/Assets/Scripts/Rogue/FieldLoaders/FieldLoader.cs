@@ -78,6 +78,36 @@ namespace Game
 				}
 				throw new Exception ("cannot find position");
 			}
+
+			/// <summary>
+			/// ルーム番号を自動的に降る
+			/// </summary>
+			public void SetupRoomId()
+			{
+				int roomId = 1; // 次に使うルーム番号
+				var pathFinder = new PathFinder(map_.Width, map_.Height);
+				for( var y = 0; y < map_.Height; y++)
+				{
+					for( var x = 0; x < map_.Width; x++)
+					{
+						var cell = map_.GetCell (x, y);
+						if (cell.Val == 2 && cell.RoomId == 0)
+						{
+							// 部屋が続いているマスを取得する
+							var path = pathFinder.FindFill (
+										   new Point (x, y),
+										   true,
+										   (p1, p2) => (map_.GetCell (p2).Val == 2) ? 1 : PathFinder.CantMove);
+							foreach (var p in path)
+							{
+								map_.GetCell (p).RoomId = roomId;
+							}
+							UnityEngine.Debug.Log ("FindRoom " + x + " " + y + " " + path.Count);
+							roomId++;
+						}
+					}
+				}
+			}
 		}
 
 	}

@@ -25,23 +25,25 @@ namespace Game.FieldLoaders
 					int t2 = 0;
 					switch(t)
 					{
-					case 1:
-						t2 = 2;
-						break;
-					case 2:
-						t2 = 0;
-						break;
-					case 3:
-						t2 = 1;
-						break;
-					default:
-						t2 = t;
-						break;
+						case 1:
+							t2 = 2;
+							break;
+						case 2:
+							t2 = 0;
+							break;
+						case 3:
+							t2 = 1;
+							break;
+						default:
+							t2 = t;
+							break;
 					}
 					map_ [x, y].Val = t2;
 				}
 			}
 			f_.Init (map_);
+
+			SetupRoomId ();
 
 			for( int i = 1; i < 10; i++)
 			{

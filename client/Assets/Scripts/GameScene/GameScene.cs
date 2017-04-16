@@ -132,12 +132,47 @@ public class GameScene : Router.BaseScene
 		cameraMode = CameraMode.Normal;
 	}
 
+	public Texture2D spotTex_;
+	byte[] spotBuf_;
+	void updateSpot(){
+		var size = 64;
+
+		if (spotTex_ == null) {
+			spotTex_ = new Texture2D (size, size, TextureFormat.Alpha8, false, true);
+			spotTex_.wrapMode = TextureWrapMode.Clamp;
+			spotBuf_ = new byte[size * size];
+		}
+
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				var cell = Field.Map.GetCell (x, y);
+				byte c = 0;
+				if (cell.Viewport) {
+					c = 255;
+				} else if (cell.Open) {
+					c = 70;
+				} else {
+					c = 0;
+				}
+				spotBuf_ [y * size + x] = c;
+			}
+		}
+		spotTex_.LoadRawTextureData (spotBuf_);
+		spotTex_.Apply ();
+
+		Shader.SetGlobalTexture ("_SpotTex", spotTex_);
+		var mat = Matrix4x4.TRS (Vector3.zero, Quaternion.identity, Vector3.one * (1f / size));
+		Shader.SetGlobalMatrix ("_SpotTransform", mat);
+	}
+
 	void Update()
 	{
 		if (mode == Mode.Initialzing)
 		{
 			return;
 		}
+
+		updateSpot ();
 
 		Application.targetFrameRate = 60;
 
