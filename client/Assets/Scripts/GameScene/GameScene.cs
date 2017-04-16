@@ -55,7 +55,7 @@ public class GameScene : MonoBehaviour
 
 	void Start()
 	{
-		var stage = G.Stages [0];
+		var stage = G.FindDungeonStageBySymbol ("Test001");
 
 		mode = Mode.None;
 		FocusToPoint = CameraTarget.transform.localPosition;
@@ -64,7 +64,7 @@ public class GameScene : MonoBehaviour
 
 		Field = new Field();
 		Field.NoLog = false;
-		Field.InitRandom (stage);
+		new FieldLoader ().LoadStage (Field, stage);
 
 		initField ();
 

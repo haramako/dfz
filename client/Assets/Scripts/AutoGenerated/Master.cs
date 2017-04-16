@@ -30,6 +30,11 @@ namespace Master {
     Throw = 1,
   }
 
+  public enum StageType {
+    Random = 0,
+    Fixed = 1,
+  }
+
   #endregion
 
   #region Messages
@@ -1305,6 +1310,113 @@ namespace Master {
           }
           case 56: {
             input.ReadInt32(ref this.Speed);
+            break;
+          }
+        }
+      }
+    }
+
+    public override void Init() {
+    }
+    public override void Finish() {
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class DungeonStage : pb.Message {
+    public DungeonStage() { }
+    public static DungeonStage CreateInstance() { var obj = new DungeonStage(); obj.Finish(); return obj; }
+    public static DungeonStage CreateEmpty() { return new DungeonStage(); }
+    private static readonly DungeonStage defaultInstance = new DungeonStage();
+    public static DungeonStage DefaultInstance {
+      get { return defaultInstance; }
+    }
+
+    public int Id;
+
+    public string Symbol = "";
+
+    public global::Master.StageType Type = global::Master.StageType.Random;
+
+    public string StageName = "";
+
+    #region Lite runtime methods
+    #endregion
+
+    public override void WriteTo(pb::CodedOutputStream output) {
+      CalcSerializedSize();
+      if (Id != 0) {
+        output.WriteInt32(1, Id);
+      }
+      if (Symbol != "") {
+        output.WriteString(2, Symbol);
+      }
+      if (StageName != "") {
+        output.WriteString(3, StageName);
+      }
+      if (Type != global::Master.StageType.Random) {
+        output.WriteEnum(4, (int) Type, Type);
+      }
+    }
+
+    public override int SerializedSize {
+      get {
+        return CalcSerializedSize();
+      }
+    }
+
+    private int CalcSerializedSize() {
+      int size = 0;
+      if (Id != 0) {
+        size += pb::CodedOutputStream.ComputeInt32Size(1, Id);
+      }
+      if (Symbol != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(2, Symbol);
+      }
+      if (Type != global::Master.StageType.Random) {
+        size += pb::CodedOutputStream.ComputeEnumSize(4, (int) Type);
+      }
+      if (StageName != "") {
+        size += pb::CodedOutputStream.ComputeStringSize(3, StageName);
+      }
+      return size;
+    }
+    public static DungeonStage ParseFrom(byte[] data) {
+      var mes = CreateInstance(); mes.MergeFrom(data); return mes;
+    }
+    public static DungeonStage ParseFrom(global::System.IO.Stream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public static DungeonStage ParseFrom(pb::CodedInputStream input) {
+      var mes = CreateInstance(); mes.MergeFrom(input); return mes;
+    }
+    public override void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while (input.ReadTag(out tag)) {
+        switch (tag) {
+          case 0: {
+            throw pb::InvalidProtocolBufferException.InvalidTag();
+          }
+          default: {
+            if (pb::WireFormat.IsEndGroupTag(tag)) {
+              return;
+            }
+            break;
+          }
+          case 8: {
+            input.ReadInt32(ref this.Id);
+            break;
+          }
+          case 18: {
+            input.ReadString(ref this.Symbol);
+            break;
+          }
+          case 26: {
+            input.ReadString(ref this.StageName);
+            break;
+          }
+          case 32: {
+            input.ReadEnum(ref this.Type);
             break;
           }
         }

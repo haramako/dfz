@@ -125,6 +125,21 @@ message StageCharacter {
 	int32 level = 5;
 }
 
+enum StageType {
+	Random = 0; /// ランダムマップ
+	Fixed = 1; /// 固定マップ
+}
+
+/**
+ * ダンジョンの１フロアに相当するもの
+ */
+message DungeonStage {
+	int32 id = 1;
+	string symbol = 2;
+	StageType type = 4;
+	string stage_name = 3;
+}
+
 message Stage {
 	int32 id = 1;
 	string symbol = 8;

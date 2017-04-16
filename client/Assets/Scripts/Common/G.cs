@@ -18,6 +18,7 @@ public class G
 	//public static Dictionary<int,FangTemplate> FangTemplateDict { get; private set; }
 
 	public static Dictionary<int, Stage> Stages = new Dictionary<int, Stage> ();
+	public static Dictionary<int, DungeonStage> DungeonStages = new Dictionary<int, DungeonStage> ();
 	public static Dictionary<int, Skill> Skills = new Dictionary<int, Skill> ();
 	public static Dictionary<int, SkillEffect> SkillEffects = new Dictionary<int, SkillEffect> ();
 
@@ -32,7 +33,7 @@ public class G
 	{
 		List<T> list = new List<T>();
 		byte[] buf = new byte[1024 * 1024];
-		var postfix = type + ".pb";
+		var postfix = "_" + type + ".pb";
 		foreach( var file in Cfs.bucket.Files.Values.Where(f => f.Filename.EndsWith(postfix) ))
 		{
 			int size;
@@ -53,9 +54,15 @@ public class G
 	public static void LoadMaster()
 	{
 		Stages = LoadPbFiles<Stage>(Stage.CreateInstance, "Stage").ToDictionary(i => i.Id);
+		DungeonStages = LoadPbFiles<DungeonStage>(DungeonStage.CreateInstance, "DungeonStage").ToDictionary(i => i.Id);
 		Skills = LoadPbFiles<Skill>(Skill.CreateInstance, "Skill").ToDictionary(i => i.Id);
 		TestGames = LoadPbFiles<TestGame>(TestGame.CreateInstance, "TestGame").ToDictionary(i => i.Id);
 		SkillEffects = LoadPbFiles<SkillEffect>(SkillEffect.CreateInstance, "SkillEffect").ToDictionary(i => i.Id);
+	}
+
+	public static DungeonStage FindDungeonStageBySymbol(string sym)
+	{
+		return DungeonStages.Values.FirstOrDefault (s => s.Symbol == sym);
 	}
 
 	public static Stage FindStageBySymbol(string sym)

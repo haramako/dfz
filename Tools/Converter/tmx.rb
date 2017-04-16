@@ -14,9 +14,10 @@ end
 class Tmx
   Obj = Struct.new(:x, :y, :name, :char, :speed)
 
-  attr_reader :width, :height, :layers, :tiles
+  attr_reader :filename, :width, :height, :layers, :tiles
 
   def initialize(tmx)
+    @filename = tmx
     @doc = REXML::Document.new(IO.read(tmx))
     map = @doc.elements['map']
     @width = map.a['width'].to_i
@@ -61,9 +62,16 @@ class Tmx
       # p obj.to_h
       Master::StageCharacter.new(obj.to_h)
     end
-    pb = Master::Stage.new(id: 0, width: @width, height: @height,
-                           tiles: @tiles.flatten,
-                           characters: characters)
+    require 'digest/md5'
+    id = Digest::MD5.hexdigest(@filename)[0, 8].to_i(16)
+    pb = Master::Stage.new(
+      id: id,
+      symbol: File.basename(@filename, '.tmx'),
+      width: @width,
+      height: @height,
+      tiles: @tiles.flatten,
+      characters: characters
+    )
     PbConvert.pack_pb_list([pb])
   end
 end

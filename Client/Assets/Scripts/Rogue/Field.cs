@@ -344,47 +344,6 @@ namespace Game
 			Map = map;
 		}
 
-		public void InitRandom(Stage stage_)
-		{
-			Map = new Map (64, 64);
-			var gen = new MapGenerator.Simple ();
-			gen.Generate (Map, new RandomXS(13456));
-
-			stage = stage_;
-			int i = 0;
-			foreach (var sc in stage.Characters)
-			{
-				if (!(sc.Name.StartsWith ("E") || sc.Name.StartsWith ("P")))
-				{
-					continue;
-				}
-				var c = Character.CreateInstance();
-				c.Id = i++;
-				c.Name = sc.Name;
-				c.AtlasId = sc.Char;
-				c.Hp = 50;
-				c.Attack = 30;
-				c.Defense = 20;
-				c.Speed = sc.Speed;
-				c.Type = CharacterType.Enemy;
-				if (sc.Name == "P1")
-				{
-					SetPlayerCharacter (c);
-					c.Hp = 200;
-					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
-				}
-				else if (sc.Name.StartsWith ("E"))
-				{
-					c.Speed = 10 + int.Parse(sc.Name.Substring(1));
-				}
-				else
-				{
-					c.Speed = 5 + int.Parse (sc.Name.Substring (1));
-				}
-				Map.AddCharacter(c, new Point(sc.X,	sc.Y));
-			}
-		}
-
 		public void Init(Stage stage_)
 		{
 			stage = stage_;

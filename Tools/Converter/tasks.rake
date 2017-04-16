@@ -87,7 +87,7 @@ end
 desc 'protoファイルからプロトコルを作成する'
 task :proto do
   mkdir_p __dir__ + "/autogen"
-  
+
   sh PROTOC,
      "--ruby_out=#{PROJECT_ROOT}/Tools/Converter/autogen",
      "--proto_path=#{PROTO_DIR}",
@@ -113,7 +113,7 @@ task :proto do
   end
 end
 
-OUT_MAPS = pathmap_task(FileList[DATA_DIR.to_s + '/**/*.tmx'], OUTPUT.to_s + '/%n-Stage.pb') do |t|
+OUT_MAPS = pathmap_task(FileList[DATA_DIR.to_s + '/**/*.tmx'], OUTPUT.to_s + '/%n_Stage.pb') do |t|
   logger.info "マスターコンバート中 #{t.source}"
   map = Tmx.new(t.source)
   IO.binwrite(t.name, map.dump_pb)

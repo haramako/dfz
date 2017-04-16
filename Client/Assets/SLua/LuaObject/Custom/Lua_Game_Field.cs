@@ -282,20 +282,6 @@ public class Lua_Game_Field : LuaObject {
 		}
 	}
 	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static public int InitRandom(IntPtr l) {
-		try {
-			Game.Field self=(Game.Field)checkSelf(l);
-			Master.Stage a1;
-			checkType(l,2,out a1);
-			self.InitRandom(a1);
-			pushValue(l,true);
-			return 1;
-		}
-		catch(Exception e) {
-			return error(l,e);
-		}
-	}
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
 	static public int Process(IntPtr l) {
 		try {
 			Game.Field self=(Game.Field)checkSelf(l);
@@ -730,7 +716,6 @@ public class Lua_Game_Field : LuaObject {
 		addMember(l,Display);
 		addMember(l,InitLua);
 		addMember(l,Init);
-		addMember(l,InitRandom);
 		addMember(l,Process);
 		addMember(l,DoTurnStart);
 		addMember(l,DoThink);
