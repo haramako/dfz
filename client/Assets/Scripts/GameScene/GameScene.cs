@@ -8,23 +8,27 @@ using RSG;
 using Game;
 using UnityEngine.UI;
 using DG.Tweening;
-using System.Linq;
 
+/// ゲームシーン
 public class GameScene : Router.BaseScene
 {
 
+	/// カメラのモード
 	public enum CameraMode
 	{
 		None,
+		/// 通常カメラ
 		Normal,
 	}
 
 	public enum Mode
 	{
+		/// 初期化中
 		Initialzing,
-		None,
-		QMove,
-		Walking,
+		/// ゲームの進行中（つまり、入力をうけつけない）
+		Doing,
+		/// 入力待ち
+		Waiting,
 	}
 
 	public GameObject CameraTarget;
@@ -56,7 +60,7 @@ public class GameScene : Router.BaseScene
 
 	public override void OnStartScene(Router.SceneParam param)
 	{
-		mode = Mode.None;
+		mode = Mode.Doing;
 		FocusToPoint = CameraTarget.transform.localPosition;
 		CameraDistanceTo = -20f;
 		ActionButtons.SetActive (false);
@@ -136,24 +140,33 @@ public class GameScene : Router.BaseScene
 
 	public Texture2D spotTex_;
 	byte[] spotBuf_;
-	void updateSpot(){
+	void updateSpot()
+	{
 		var size = 64;
 
-		if (spotTex_ == null) {
+		if (spotTex_ == null)
+		{
 			spotTex_ = new Texture2D (size, size, TextureFormat.Alpha8, false, true);
 			spotTex_.wrapMode = TextureWrapMode.Clamp;
 			spotBuf_ = new byte[size * size];
 		}
 
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++)
+		{
+			for (int x = 0; x < size; x++)
+			{
 				var cell = Field.Map.GetCell (x, y);
 				byte c = 0;
-				if (cell.Viewport) {
+				if (cell.Viewport)
+				{
 					c = 255;
-				} else if (cell.Open) {
+				}
+				else if (cell.Open)
+				{
 					c = 70;
-				} else {
+				}
+				else
+				{
 					c = 0;
 				}
 				spotBuf_ [y * size + x] = c;
@@ -207,7 +220,7 @@ public class GameScene : Router.BaseScene
 
 	}
 
-		void messageLoop()
+	void messageLoop()
 	{
 		while (true)
 		{
@@ -233,7 +246,7 @@ public class GameScene : Router.BaseScene
 						Send (new GameLog.AckResponseRequest ());
 						break;
 					case WaitingType.Action:
-						mode = Mode.QMove;
+						mode = Mode.Waiting;
 						OpenAction (act =>
 						{
 							switch(act)
@@ -284,7 +297,7 @@ public class GameScene : Router.BaseScene
 		{
 			throw new System.ArgumentNullException ("Request must not be null");
 		}
-		mode = Mode.None;
+		mode = Mode.Doing;
 		Field.RequestAsync (request);
 		System.Threading.Thread.Sleep(0); // ちょっとだけまつ
 		messageLoop ();
@@ -297,7 +310,7 @@ public class GameScene : Router.BaseScene
 		{
 			Path = path.Select (p => new GameLog.Point (p)).ToList ()
 		};
-		mode = Mode.None;
+		mode = Mode.Doing;
 		Send (req);
 	}
 
@@ -336,7 +349,7 @@ public class GameScene : Router.BaseScene
 		{
 			switch (mode)
 			{
-				case Mode.QMove:
+				case Mode.Waiting:
 					OnFieldClick (hit);
 					break;
 				default:
@@ -352,7 +365,7 @@ public class GameScene : Router.BaseScene
 		// 攻撃
 		if (Field.Player.Position == pos)
 		{
-			mode = Mode.None;
+			mode = Mode.Doing;
 			Send (new GameLog.SkillRequest () { CharacterId = Field.Player.Id, Dir = (int)Field.Player.Dir, SkillId = G.FindSkillBySymbol("attack").Id });
 			return;
 		}
@@ -363,7 +376,7 @@ public class GameScene : Router.BaseScene
 			if (target != Field.Player && (Field.Player.Position - pos).GridLength() == 1)
 			{
 				var dir = (pos - Field.Player.Position).ToDir ();
-				mode = Mode.None;
+				mode = Mode.Doing;
 				Send (new GameLog.SkillRequest () { CharacterId = Field.Player.Id, Dir = (int)dir, SkillId = G.FindSkillBySymbol("attack").Id });
 				return;
 			}
@@ -380,7 +393,7 @@ public class GameScene : Router.BaseScene
 			{
 				Path = path.Select (p => new GameLog.Point (p)).ToList ()
 			};
-			mode = Mode.None;
+			mode = Mode.Doing;
 			Send (req);
 		}
 	}
@@ -482,7 +495,7 @@ public class GameScene : Router.BaseScene
 		cc.transform.localPosition = PointToVector (c.Position);;
 		cc.Text.text = c.Name + "\nHP:" + c.Hp;
 	}
-	
+
 	public void UpdateViewport()
 	{
 		Field.UpdateViewport ();
@@ -519,7 +532,7 @@ public class GameScene : Router.BaseScene
 			}
 		}
 	}
-	
+
 	//===================================================================
 	// アクションボタン
 	//===================================================================

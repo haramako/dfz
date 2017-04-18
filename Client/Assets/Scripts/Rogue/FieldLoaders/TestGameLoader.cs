@@ -50,7 +50,7 @@ namespace Game.FieldLoaders
 				var c = Character.CreateInstance();
 				c.Id = i;
 				c.Name = "E" + i;
-				c.AtlasId = 168;
+				c.AtlasId = 593;
 				c.Hp = 50;
 				c.Attack = 30;
 				c.Defense = 20;
