@@ -1,0 +1,22 @@
+  /Users/makoto/dfz:
+  total used in directory 288 available 4291840048
+  drwxr-xr-x  19 makoto  staff     646 Apr 21 04:31 .
+  drwxr-xr-x+ 91 makoto  staff    3094 Apr 21 04:29 ..
+  -rw-r--r--@  1 makoto  staff    6148 Apr 19 22:09 .DS_Store
+  -rw-r--r--   1 makoto  staff     955 Apr  9 19:52 .astyle
+  drwxr-xr-x  15 makoto  staff     510 Apr 21 04:29 .git
+  -rw-r--r--   1 makoto  staff     341 Apr 21 04:29 .gitignore
+  -rw-r--r--   1 makoto  staff    2184 Apr 16 03:24 .rubocop.yml
+  -rw-r--r--   1 makoto  staff     715 Apr 11 23:50 .rubocop_todo.yml
+  drwxr-xr-x   6 makoto  staff     204 Dec  8 08:57 Auto
+  drwxr-xr-x  19 makoto  staff     646 Apr 19 13:59 Client
+  drwxr-xr-x  12 makoto  staff     408 Apr 17 00:23 Data
+  drwxr-xr-x   2 makoto  staff      68 Apr 21 04:31 Doc
+  drwxr-xr-x   2 makoto  staff      68 Apr 21 04:31 Html
+  -rw-r--r--   1 makoto  staff  105219 Apr 21 04:31 Doxyfile
+  drwxr-xr-x  23 makoto  staff     782 Apr 21 04:29 Jekyll
+  -rw-r--r--   1 makoto  staff     730 Apr 12 00:30 README.md
+  -rw-r--r--   1 makoto  staff     855 Apr 12 02:58 Rakefile
+  drwxr-xr-x   5 makoto  staff     170 Nov 23 22:12 Server
+  drwxr-xr-x   7 makoto  staff     238 Apr 12 00:02 Tools
+  -rw-r--r--   1 makoto  staff    4387 Apr 17 01:31 memo.md
