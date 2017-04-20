@@ -224,6 +224,8 @@ public class ScreenLocker : MonoSingleton<ScreenLocker>
 
 	void Update()
 	{
+        eventSystem_ = GameObject.FindObjectOfType<EventSystem>();
+
 		if (UnityEngine.Input.GetKeyDown(KeyCode.Escape))
 		{
 			if (IsLocked())

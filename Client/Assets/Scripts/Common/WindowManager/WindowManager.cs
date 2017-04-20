@@ -23,11 +23,18 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 		IEnumerator AfterActivate();
 	}
 
-	IWindowManagerListener Listener;
+    public GameObject Listener;
+	public IWindowManagerListener listener_;
 	public GameObject WindowRoot;
 
 	List<FrameOption> frameHistory_ = new List<FrameOption>();
 	GameObject currentWindow_;
+
+    protected override void Awake()
+    {
+        listener_ = Listener.GetComponent<IWindowManagerListener>();
+        base.Awake();
+    }
 
 	/// <summary>
 	/// 新規画面に移行
@@ -84,7 +91,7 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 		// フェードアウト
 		if (!(post.NoFade || post.NoFadeout))
 		{
-			yield return Listener.Fadeout();
+			yield return listener_.Fadeout();
 		}
 
 		ScreenLocker.UnlockAll();
@@ -114,7 +121,7 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 			frameHistory_.RemoveAt(frameHistory_.Count - 1);
 		}
 
-		Listener.BeforeChange ();
+		listener_.BeforeChange ();
 
 		// SaveStateを行う
 		if (currentWindow_ != null)
@@ -132,7 +139,7 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 			GameObject obj = null;
 
 			yield return ResourceCache
-						 .Create<GameObject>("Menu/" + path2.Last())
+						 .Create<GameObject>("" + path2.Last())
 						 .Then(o =>
 			{
 				obj = o;
@@ -146,13 +153,13 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 			{
 				newFrame.OnStartFrame(after);
 
-				yield return Listener.BeforeLoadFrame();
+				yield return listener_.BeforeLoadFrame();
 
 				yield return newFrame.OnLoadFrame(after);
 
 				newFrame.OnChangeState(after);
 
-				yield return Listener.AfterLoadFrame();
+				yield return listener_.AfterLoadFrame();
 
 				newFrame.OnActivateFrame();
 			}
@@ -161,33 +168,28 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 		}
 		else
 		{
-			yield return Listener.BeforeLoadFrame();
+			yield return listener_.BeforeLoadFrame();
 
 			// PushState() の場合
 			var afterFrame = currentWindow_.GetComponent<FrameBase>();
 			afterFrame.OnChangeState(after);
 
-			yield return Listener.AfterLoadFrame();
+			yield return listener_.AfterLoadFrame();
 		}
 
 		// フェードイン
 		if (!post.NoFade)
 		{
-			yield return Listener.Fadeout();
+			yield return listener_.Fadeout();
 		}
 
 		ScreenLocker.Unlock();
 
 		yield return currentWindow_.GetComponent<FrameBase>().AfterActivate(post);
 
-		yield return Listener.AfterActivate();
+		yield return listener_.AfterActivate();
 
 		//Debug.Log("Finish GrondMain.changeFrame()");
-	}
-
-	public void GoTo(string path)
-	{
-		GoTo(path);
 	}
 
 	/// <summary>
@@ -237,7 +239,7 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 
 	public static void GoTo(string path, FrameOption option = null)
 	{
-		var uri = new Uri(new Uri("ddp:///"), path);
+		var uri = new Uri(new Uri("dfz:///"), path);
 		var query = ParseQuery(uri.Query);
 		if (option == null)
 		{
@@ -245,6 +247,7 @@ public partial class WindowManager : MonoSingleton<WindowManager>
 		}
 		option.Uri = uri;
 		option.UriParam = query;
+        Debug.Log(WindowManager.Instance);
 		Instance.DoGoTo(option);
 		#if UNITY_EDITOR
 		// 現在のURLをStartupWindow用に保存する

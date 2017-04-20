@@ -11,12 +11,7 @@ using System;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>{
-
-    /// <summary>
-    /// シーン切り替え時にも残るかどうか
-    /// </summary>
-    public bool Imortal = true;
-
+    
 	/// <summary>
 	/// インスタンスを返す。
 	/// </summary>
@@ -30,7 +25,8 @@ public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T
 			return;
 		}
 		Instance = (T)this;
-        if( Imortal && transform.parent == null) {
+        if( transform.parent == null) {
+            Debug.Log("IMPORTA!" + this);
 			DontDestroyOnLoad (gameObject);
 		}
 	}
